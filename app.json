@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Fantasy Predictor",
+    "slug": "FantasyPredictor",
+    "version": "2023-2024_2",
+    "orientation": "portrait",
+    "icon": "./assets/appIcon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#00002d"
+    },
+    "updates": { "fallbackToCacheTimeout": 0 },
+    "assetBundlePatterns": [
+      "assets/Activity/*",
+      "assets/Arrows/*",
+      "assets/fonts/*",
+      "assets/Goalkeepers/*",
+      "assets/NavigationImages/*",
+      "assets/OutfieldPlayers/*",
+      "assets/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" }
+    },
+    "android": {
+      "adaptiveIcon": { "foregroundImage": "./assets/appIcon.png", "backgroundColor": "#00002d" },
+      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
+      "package": "com.gamehub.fantasypredictor",
+      "permissions": [],
+      "versionCode": 6
+    },
+    "web": { "favicon": "./assets/appIcon.png" }
+  },
+  "version": "6.0.0"
+}
