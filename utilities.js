@@ -5,12 +5,6 @@ export const deviceWidth = Dimensions.get('window').width;
 export const deviceHeight = Dimensions.get('window').height;
 export const defaultAdHeight = 55;
 
-const product = array => {
-  let prod = 1;
-  array.map(point => (prod *= point > 0 ? point : 1));
-  return prod;
-};
-
 const baseWidth = 376.47059527510464;
 const baseHeight = 705.0980524006648;
 const scaleWidth = deviceWidth / baseWidth;
@@ -51,31 +45,36 @@ export const findArrow = index => {
 };
 
 export const findAverageOfOpponentIndex = (opponent, ratings) => {
-  let opponentList = opponent.split(',');
-  let opponentIndexList = [];
-  opponentList.map(item =>
+  let opponentIndexList = [],
+    opponentList = opponent.split(',');
+
+  opponentList.forEach(item =>
     opponentIndexList.push(ratings.teamIndex[item.substring(0, item.indexOf('('))])
   );
   return (sum(opponentIndexList) / opponentIndexList.length).toFixed(1);
 };
 
-export const predict = (playerInfo, StandardRatings, nextOpponent) => {
-  let points = playerInfo.points.slice(-3);
-  let team = playerInfo.team;
-  let index = playerInfo.index;
-  // let teamRating = StandardRatings.teamIndex[playerInfo.team];
-  let opponent = nextOpponent[team];
-  if (!playerInfo.available || opponent === 'No Opponent') return 0;
-  let opponentIndex = findAverageOfOpponentIndex(opponent, StandardRatings);
-  let predictedPoint = Math.pow(product(points), 1 / points.length);
-  predictedPoint -= opponentIndex * 1.5;
-  predictedPoint += index / 2;
-  predictedPoint = Math.floor(predictedPoint);
-
-  return predictedPoint >= 0 ? predictedPoint : 2;
-};
-
 export const sum = numberList => numberList.reduce((x, y) => x + y);
+
+export const predict = (playerInfo, StandardRatings, nextOpponent) => {
+  const team = playerInfo.team,
+    playerIndex = playerInfo.index,
+    teamIndex = StandardRatings.teamIndex[playerInfo.team],
+    points = playerInfo.points.slice(-3).filter(pt => pt >= 0);
+
+  const opponent = nextOpponent[team],
+    pointsAverage = sum(points) / points.length;
+
+  if (!playerInfo.available || opponent === 'No Opponent') return 0;
+
+  const opponentIndex = findAverageOfOpponentIndex(opponent, StandardRatings);
+
+  const predictedPoint = pointsAverage - 0.5 * opponentIndex + teamIndex + 0.1 * playerIndex;
+
+  if (predictedPoint < 0) return 0;
+
+  return Math.ceil(predictedPoint);
+};
 
 export const descendingPointsOrder = (a, b) => sum(a.points.slice(-3)) < sum(b.points.slice(-3));
 
@@ -152,9 +151,6 @@ export const findInfo = (playerKey, StandardRatings, playerData) => {
 export const findAbbreviation = (teamName, TeamAbbreviations) =>
   teamName !== 'All Teams' ? TeamAbbreviations[teamName] : 'null';
 
-// export const isRelegated = (playerTeam, relegatedTeams) =>
-//   relegatedTeams.some(team => team === playerTeam);
-
 export const findData = (playerKey, playerData) =>
   playerData.find(player => player.key === playerKey);
 
@@ -164,12 +160,12 @@ export const findOpponentAbbreviation = (team, nextOpponent, TeamAbbreviations) 
   let tempTeams = opponent.split(',');
   let tempTeamsLength = tempTeams.length;
   let opponentAbbreviation = '';
-  tempTeams.map(
-    team =>
+  tempTeams.forEach(
+    (team, index) =>
       (opponentAbbreviation += `${
         TeamAbbreviations[team.substring(0, team.indexOf('('))]
       }${team.substring(team.indexOf('('))}${
-        team !== tempTeams[tempTeamsLength - 1] ? ',' : ''
+        index !== tempTeamsLength - 1 ? ',' : ''
       }`.toUpperCase())
   );
   return opponentAbbreviation;
@@ -182,7 +178,7 @@ export const getRndInteger = (min, max) => {
 
 export const sumOfPoints = playerInfo => {
   let sum = 0;
-  playerInfo.map(item => (sum += item.playerContent));
+  playerInfo.forEach(item => (sum += item.playerContent));
   return sum;
 };
 
@@ -191,7 +187,7 @@ export const averageOfPoints = playerInfo =>
 
 export const highestPoint = playerInfo => {
   let points = [];
-  playerInfo.map(item => points.push(item.playerContent));
+  playerInfo.forEach(item => points.push(item.playerContent));
   return Math.max(...points);
 };
 
@@ -206,9 +202,9 @@ export const numbersInString = string => {
   for (let i = 0; i < string.length; i++) newString += isNaN(string[i]) ? sepChar : string[i];
 
   // convert strings to numbers
-  newString = newString.split(sepChar).map(num => parseInt(num));
+  const newNumArray = newString.split(sepChar).map(num => parseInt(num));
 
-  return newString;
+  return newNumArray;
 };
 
 export const shuffle = array => {
