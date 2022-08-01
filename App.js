@@ -45,7 +45,7 @@ export default function App() {
     buttons: [],
     onCloseAlert: null,
   });
-  const appVersion = '2023-2024_2';
+  const appVersion = '2023-2024_3';
   const [queryComplete, setQueryComplete] = useState(false);
   const [teams, setTeams] = useState([]);
   const [update, setUpdate] = useState([]);

@@ -1,6 +1,13 @@
 {
   "logs": [
     {
+      "version": "2023-2024_3",
+      "info": [
+        ["add", "Improved point prediction algorithm"],
+        ["add", "Minor bug fixes"]
+      ]
+    },
+    {
       "version": "2023-2024_2",
       "info": [
         ["add", "Added new players"],
