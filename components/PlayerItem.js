@@ -8,34 +8,38 @@ const textWidth = Math.round(0.3875 * deviceWidth);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 550);
 
-function PlayerItem(props) {
-  const activeOpacity = props.activeOpacity ? props.activeOpacity : 0.6;
-  const enabled = props.enabled;
-  const playerName = props.playerName;
-  const team = props.team;
-
+function PlayerItem({
+  team,
+  command,
+  enabled,
+  shirtImage,
+  playerName,
+  playerIndex,
+  extraStyles,
+  activeOpacity,
+}) {
   return (
     <TouchableOpacity
       style={{
         ...styles.mainView,
-        ...props.extraStyles,
+        ...extraStyles,
         backgroundColor: enabled ? colors.white : colors.grey,
       }}
       activeOpacity={enabled ? activeOpacity : 1}
-      onPress={enabled ? props.command : null}
+      onPress={enabled ? command : null}
     >
       <View style={styles.imageView}>
         <Image
           source={
-            typeof props.shirtImage == 'string'
-              ? { uri: props.shirtImage, headers: { Accept: '*/*' } }
-              : props.shirtImage
+            typeof shirtImage == 'string'
+              ? { uri: shirtImage, headers: { Accept: '*/*' } }
+              : shirtImage
           }
           style={styles.imageStyle}
         />
       </View>
       <View style={styles.arrowView}>
-        <Image source={findArrow(props.playerIndex)} style={styles.arrowStyles} />
+        <Image source={findArrow(playerIndex)} style={styles.arrowStyles} />
       </View>
       <Text
         allowFontScaling={false}
@@ -47,7 +51,7 @@ function PlayerItem(props) {
               ? findFontSize(11) / (0.085 * playerName.length)
               : findFontSize(11),
         }}
-        onPress={enabled ? props.command : null}
+        onPress={enabled ? command : null}
       >
         {playerName}
       </Text>
@@ -60,7 +64,7 @@ function PlayerItem(props) {
               ? findFontSize(11) / (0.085 * team.length)
               : findFontSize(11),
         }}
-        onPress={enabled ? props.command : null}
+        onPress={enabled ? command : null}
       >
         {team}
       </Text>

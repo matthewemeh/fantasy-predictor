@@ -6,10 +6,15 @@ import { colors } from '../constants';
 
 var selectedItem = '';
 
-function PickerBox(props) {
-  let list = props.list;
-  let enabled = props.enabled;
-  let selectedValue = props.selectedValue;
+function PickerBox({
+  list,
+  enabled,
+  extraStyles,
+  selectedValue,
+  onPickerClose,
+  extraListStyles,
+  extraTextItemStyles,
+}) {
   selectedItem = selectedValue;
   const [opened, setOpened] = useState(false);
 
@@ -20,14 +25,14 @@ function PickerBox(props) {
   function onChange(item) {
     setOpened(false);
     selectedItem = item;
-    props.onPickerClose();
+    onPickerClose();
   }
 
   return (
     <TouchableOpacity
       activeOpacity={enabled ? 0.9 : 1}
       onPress={openPicker}
-      style={{ ...styles.mainView, ...props.extraStyles }}
+      style={{ ...styles.mainView, ...extraStyles }}
     >
       <Text
         numberOfLines={1}
@@ -45,7 +50,7 @@ function PickerBox(props) {
           onPress={() => setOpened(false)}
           style={styles.modalViewContainer}
         >
-          <View style={{ ...styles.listViewStyle, ...props.extraListStyles }}>
+          <View style={{ ...styles.listViewStyle, ...extraListStyles }}>
             <ScrollView alwaysBounceVertical={false}>
               {list.map(item => (
                 <TouchableOpacity
@@ -60,7 +65,7 @@ function PickerBox(props) {
                   <Text
                     numberOfLines={1}
                     allowFontScaling={false}
-                    style={{ ...styles.textItemStyle, ...props.extraTextItemStyles }}
+                    style={{ ...styles.textItemStyle, ...extraTextItemStyles }}
                   >
                     {item}
                   </Text>

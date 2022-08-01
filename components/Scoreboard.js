@@ -3,9 +3,7 @@ import { View, StyleSheet, Text } from 'react-native';
 import { findFontSize } from '../utilities';
 import { colors } from '../constants';
 
-function Scoreboard(props) {
-  const score1 = props.score1;
-  const score2 = props.score2;
+function Scoreboard({ score1, score2 }) {
   return (
     <View style={styles.mainView}>
       <Text allowFontScaling={false} style={styles.textStyle}>

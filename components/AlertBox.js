@@ -5,13 +5,10 @@ import { deviceHeight, findFontSize } from '../utilities';
 import { colors } from '../constants';
 import Button from '../components/Button';
 
-function AlertBox(props) {
-  const title = props.title;
-  const message = props.message;
-  const buttons = props.buttons;
+function AlertBox({ title, message, buttons, visible, onRequestClose }) {
   return (
-    <Modal visible={props.visible} transparent={true} onRequestClose={props.onRequestClose}>
-      <TouchableOpacity style={styles.mainView} onPress={props.onRequestClose} activeOpacity={1}>
+    <Modal visible={visible} transparent={true} onRequestClose={onRequestClose}>
+      <TouchableOpacity style={styles.mainView} onPress={onRequestClose} activeOpacity={1}>
         <View style={styles.containerView}>
           <Text allowFontScaling={false} style={styles.titleView}>
             {title}

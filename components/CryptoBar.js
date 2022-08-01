@@ -4,18 +4,18 @@ import { findFontSize } from '../utilities';
 import { Icon } from 'react-native-elements';
 import { colors } from '../constants';
 
-function CryptoBar(props) {
+function CryptoBar({ address, name }) {
   function onPressCommand() {
-    Clipboard.setString(props.address);
-    ToastAndroid.show(`${props.name} address copied`, 2000);
+    Clipboard.setString(address);
+    ToastAndroid.show(`${name} address copied`, 2000);
   }
   return (
     <View style={styles.mainView}>
       <Text allowFontScaling={false} style={styles.nameTextStyle} numberOfLines={1}>
-        {props.name}
+        {name}
       </Text>
       <Text allowFontScaling={false} style={styles.addressTextStyle} numberOfLines={1}>
-        {props.address}
+        {address}
       </Text>
       <TouchableOpacity style={styles.iconView} activeOpacity={0.6} onPress={onPressCommand}>
         <Icon

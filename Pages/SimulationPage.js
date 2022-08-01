@@ -35,18 +35,22 @@ import {
   defaultAdHeight,
 } from '../utilities';
 
-function SimulationPage(props) {
+function SimulationPage({
+  teams,
+  playerKit,
+  goalieKit,
+  playerData,
+  fieldImage,
+  nextOpponent,
+  StandardRatings,
+  TeamAbbreviations,
+}) {
   async function initializeId() {
     await setTestDeviceIDAsync('EMULATOR');
   }
   useEffect(initializeId, []);
 
-  const teams = props.teams;
   const [clicks, setClicks] = useState(1);
-  const playerData = props.playerData;
-  const fieldImage = props.fieldImage;
-  const TeamAbbreviations = props.TeamAbbreviations;
-  const StandardRatings = props.StandardRatings;
   const [chosenTeam1, setChosenTeam1] = useState('All Teams');
   const [chosenTeam2, setChosenTeam2] = useState('All Teams');
   const [team1, setTeam1] = useState([]);
@@ -62,9 +66,6 @@ function SimulationPage(props) {
     onCloseAlert: null,
   });
 
-  const playerKit = props.playerKit;
-  const goalieKit = props.goalieKit;
-  const nextOpponent = props.nextOpponent;
   const [chosenFormation, setChosenFormation] = useState('4-4-2');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentKey, setCurrentKey] = useState('');
@@ -405,7 +406,9 @@ function SimulationPage(props) {
 
   function findPlayerKeys() {
     let tempData = [];
-    playerInfo.map(player => tempData.push(playerData.find(item => item.key === player.playerKey)));
+    playerInfo.forEach(player =>
+      tempData.push(playerData.find(item => item.key === player.playerKey))
+    );
     return tempData;
   }
 
@@ -685,7 +688,7 @@ function SimulationPage(props) {
         <PickerBox
           selectedValue={chosenTeam1}
           extraStyles={{ width: '45%' }}
-          enabled={true}
+          enabled={playerData.length > 0}
           list={teams.sort()}
           extraListStyles={{ top: '1.5%', left: '5%', width: '40.3%', marginBottom: '35%' }}
           onPickerClose={() => setChosenTeam1(getSelectedItem())}
@@ -696,7 +699,7 @@ function SimulationPage(props) {
         <PickerBox
           selectedValue={chosenTeam2}
           extraStyles={{ width: '45%' }}
-          enabled={true}
+          enabled={playerData.length > 0}
           list={teams.sort()}
           extraListStyles={{ top: '1.5%', left: '54.6%', width: '40.5%', marginBottom: '35%' }}
           onPickerClose={() => setChosenTeam2(getSelectedItem())}

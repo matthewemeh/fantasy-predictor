@@ -5,13 +5,13 @@ import { colors } from '../constants';
 import logs from '../log.json';
 import LogDisplay from '../components/LogDisplay';
 
-function LogPage(props) {
+function LogPage({ visible, onRequestClose }) {
   return (
     <Modal
-      visible={props.visible}
+      visible={visible}
       transparent={true}
       animationType={'slide'}
-      onRequestClose={props.onRequestClose}
+      onRequestClose={onRequestClose}
     >
       <View style={styles.containerView}>
         <View style={styles.mainView}>

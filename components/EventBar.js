@@ -3,8 +3,7 @@ import { View, StyleSheet, Text, Image } from 'react-native';
 import { deviceWidth, findFontSize, activity, deviceHeight } from '../utilities';
 import { colors } from '../constants';
 
-function EventBar(props) {
-  let event = props.event;
+function EventBar({ event, extraStyles, extraTextStyles }) {
   const textHeight = Math.round(0.7 * 0.085 * 0.5 * deviceHeight);
   const textWidth = Math.round(0.4 * 0.7 * deviceWidth);
   const area = textHeight * textWidth;
@@ -20,7 +19,7 @@ function EventBar(props) {
     if (eventType === 'goal' && goalScorer !== '') {
       return (
         <View style={styles.mainView}>
-          <View style={{ ...styles.activityView, ...props.extraStyles }}>
+          <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
               <Image style={styles.imageStyle} source={activity.goal} />
             </View>
@@ -28,7 +27,7 @@ function EventBar(props) {
               allowFontScaling={false}
               style={{
                 ...styles.textStyle,
-                ...props.extraTextStyles,
+                ...extraTextStyles,
                 fontSize:
                   goalScorer && goalScorer.length >= maxTextLength
                     ? findFontSize(12) / (0.085 * goalScorer.length)
@@ -39,7 +38,7 @@ function EventBar(props) {
             </Text>
           </View>
 
-          <View style={{ ...styles.activityView, ...props.extraStyles }}>
+          <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
               <Image style={styles.imageStyle} source={activity.assist} />
             </View>
@@ -47,7 +46,7 @@ function EventBar(props) {
               allowFontScaling={false}
               style={{
                 ...styles.textStyle,
-                ...props.extraTextStyles,
+                ...extraTextStyles,
                 fontSize:
                   assistProvider && assistProvider.length >= maxTextLength
                     ? findFontSize(12) / (0.085 * assistProvider.length)
@@ -62,7 +61,7 @@ function EventBar(props) {
     } else if (eventType === 'onTarget' && onTarget !== '') {
       return (
         <View style={styles.mainView}>
-          <View style={{ ...styles.activityView, ...props.extraStyles }}>
+          <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
               <Image style={styles.imageStyle} source={activity.onTarget} />
             </View>
@@ -70,7 +69,7 @@ function EventBar(props) {
               allowFontScaling={false}
               style={{
                 ...styles.textStyle,
-                ...props.extraTextStyles,
+                ...extraTextStyles,
                 fontSize:
                   onTarget && onTarget.length >= maxTextLength
                     ? findFontSize(12) / (0.085 * onTarget.length)
@@ -85,7 +84,7 @@ function EventBar(props) {
     } else if (saver !== '') {
       return (
         <View style={styles.mainView}>
-          <View style={{ ...styles.activityView, ...props.extraStyles }}>
+          <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
               <Image style={styles.imageStyle} source={activity.save} />
             </View>
@@ -93,7 +92,7 @@ function EventBar(props) {
               allowFontScaling={false}
               style={{
                 ...styles.textStyle,
-                ...props.extraTextStyles,
+                ...extraTextStyles,
                 fontSize:
                   saver && saver.length >= maxTextLength
                     ? findFontSize(12) / (0.085 * saver.length)

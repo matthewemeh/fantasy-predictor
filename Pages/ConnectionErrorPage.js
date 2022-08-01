@@ -4,9 +4,9 @@ import { findFontSize } from '../utilities';
 import { colors } from '../constants';
 import Button from '../components/Button';
 
-function ConnectionErrorPage(props) {
+function ConnectionErrorPage({ visible, command }) {
   return (
-    <Modal visible={props.visible} transparent={true} animationType={'slide'}>
+    <Modal visible={visible} transparent={true} animationType={'slide'}>
       <View style={styles.mainView}>
         <View style={styles.errorBarView}>
           <Text allowFontScaling={false} style={styles.textStyle}>
@@ -14,7 +14,7 @@ function ConnectionErrorPage(props) {
           </Text>
           <Button
             enabled={true}
-            command={props.command}
+            command={command}
             buttonColor={colors.primary}
             buttonTextColor={colors.secondary}
             buttonText={'Retry'}

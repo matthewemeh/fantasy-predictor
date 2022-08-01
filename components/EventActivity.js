@@ -4,8 +4,7 @@ import { colors } from '../constants';
 import { deviceHeight, findFontSize } from '../utilities';
 import EventBar from './EventBar';
 
-function EventActivity(props) {
-  let event = props.event;
+function EventActivity({ event }) {
   let teamEvent1 = {
     eventType: event.eventType,
     goalScorer: event.goalScorer1,

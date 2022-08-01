@@ -15,18 +15,20 @@ import {
   findFontSize,
 } from '../utilities';
 
-function SimulationBoard(props) {
+function SimulationBoard({
+  team1,
+  team2,
+  visible,
+  teamName1,
+  teamName2,
+  playerData,
+  onRequestClose,
+  StandardRatings,
+  TeamAbbreviations,
+}) {
   const [events, setEvents] = useState([]);
   const [score1, setScore1] = useState(0);
   const [score2, setScore2] = useState(0);
-  let team1 = props.team1;
-  let team2 = props.team2;
-  let visible = props.visible;
-  let teamName1 = props.teamName1;
-  let teamName2 = props.teamName2;
-  const playerData = props.playerData;
-  const TeamAbbreviations = props.TeamAbbreviations;
-  const StandardRatings = props.StandardRatings;
   const [goals1, setGoals1] = useState([]);
   const [assists1, setAssists1] = useState([]);
   const [saves1, setSaves1] = useState([]);
@@ -216,7 +218,7 @@ function SimulationBoard(props) {
   function closeCommand() {
     reset();
     // additional command from outside this file
-    props.onRequestClose();
+    onRequestClose();
   }
 
   function refresh() {

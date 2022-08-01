@@ -4,15 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import { colors } from '../constants';
 import NumberDisplay from './NumberDisplay';
 
-function NumberTab(props) {
-  let title1 = props.title1;
-  let number1 = props.number1;
-
-  let title2 = props.title2;
-  let number2 = props.number2;
-
-  let title3 = props.title3;
-  let number3 = props.number3;
+function NumberTab({ title1, title2, title3, number1, number2, number3 }) {
   return (
     <View style={styles.mainView}>
       <NumberDisplay title={title1} number={number1} />

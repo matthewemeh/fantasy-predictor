@@ -3,10 +3,10 @@ import { StyleSheet, Text } from 'react-native';
 import { findFontSize } from '../utilities';
 import { colors } from '../constants';
 
-function Timer(props) {
-  let timeInSeconds = props.timeInSeconds;
+function Timer({ timeInSeconds }) {
   let minutes = parseInt(timeInSeconds / 60);
   let seconds = timeInSeconds - minutes * 60;
+
   return (
     <Text allowFontScaling={false} style={styles.textStyle}>{`${
       minutes < 10 ? '0' : ''

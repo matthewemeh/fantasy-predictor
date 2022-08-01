@@ -28,18 +28,19 @@ function findChancesOfStarting(data) {
   if (!data.available) return '0';
   let points = data.points;
   let recentPoints = points.slice(-5);
-  recentPoints.map(point => (starts += point !== 0 ? 1 : 0));
+  recentPoints.forEach(point => (starts += point !== 0 ? 1 : 0));
   return `${Math.round((starts * 100) / recentPoints.length)}`;
 }
 
-function ComparismPage(props) {
-  const playerData = props.playerData;
-  const playerKit = props.playerKit;
-  const teams = props.teams;
-  const goalieKit = props.goalieKit;
-  const nextOpponent = props.nextOpponent;
-  const TeamAbbreviations = props.TeamAbbreviations;
-  const StandardRatings = props.StandardRatings;
+function ComparismPage({
+  teams,
+  goalieKit,
+  playerKit,
+  playerData,
+  nextOpponent,
+  StandardRatings,
+  TeamAbbreviations,
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chosenTeam, setChosenTeam] = useState('All Teams');
   const [chosenPosition, setChosenPosition] = useState('All Positions');

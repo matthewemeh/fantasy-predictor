@@ -3,26 +3,26 @@ import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
 import { colors } from '../constants';
 import { findImage, findFontSize } from '../utilities';
 
-function NavigationButton(props) {
+function NavigationButton({ extraStyles, command, activeOpacity, active, type, title }) {
   return (
     <TouchableOpacity
-      style={{ ...styles.mainView, ...props.extraStyles }}
-      onPress={props.command}
-      activeOpacity={props.activeOpacity ? props.activeOpacity : 1}
+      style={{ ...styles.mainView, ...extraStyles }}
+      onPress={command}
+      activeOpacity={activeOpacity ? activeOpacity : 1}
     >
       <View style={styles.buttonView}>
         <View style={styles.imageView}>
-          <Image style={styles.image} source={findImage(props.active, props.type)} />
+          <Image style={styles.image} source={findImage(active, type)} />
         </View>
         <View style={styles.activeTextView}>
           <Text
             allowFontScaling={false}
             style={{
               ...styles.activeTextStyle,
-              color: props.active ? colors.secondary : colors.gray,
+              color: active ? colors.secondary : colors.gray,
             }}
           >
-            {props.title}
+            {title}
           </Text>
         </View>
       </View>

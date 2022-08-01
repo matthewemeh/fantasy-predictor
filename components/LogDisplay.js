@@ -3,12 +3,11 @@ import { View, StyleSheet, Text } from 'react-native';
 import { deviceHeight, findFontSize } from '../utilities';
 import { colors } from '../constants';
 
-function LogDisplay(props) {
-  let info = props.info;
+function LogDisplay({ info, version }) {
   return (
     <View style={{ ...styles.mainView, height: deviceHeight * 0.05 * (info.length + 1) }}>
       <Text allowFontScaling={false} style={styles.versionTextStyle}>
-        {props.version}
+        {version}
       </Text>
       {info.map(item => (
         <View style={styles.logView} key={item[1]}>

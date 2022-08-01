@@ -4,26 +4,33 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { findFontSize } from '../utilities';
 import { colors } from '../constants';
 
-function Button(props) {
-  let isEnabled = props.enabled;
-  let activeOpacity = props.activeOpacity;
+function Button({
+  enabled,
+  command,
+  buttonText,
+  buttonColor,
+  extraStyles,
+  activeOpacity,
+  extraTextStyles,
+  buttonTextColor,
+}) {
   return (
     <TouchableOpacity
-      style={{ ...styles.mainView, ...props.extraStyles }}
-      onPress={isEnabled ? props.command : null}
-      activeOpacity={isEnabled ? (activeOpacity ? activeOpacity : 0.9) : 1}
+      style={{ ...styles.mainView, ...extraStyles }}
+      onPress={enabled ? command : null}
+      activeOpacity={enabled ? (activeOpacity ? activeOpacity : 0.9) : 1}
     >
       <Text
         allowFontScaling={false}
         style={{
           ...styles.buttonTextStyle,
           fontFamily: 'PoppinsBold',
-          backgroundColor: isEnabled ? props.buttonColor : colors.grey,
-          color: isEnabled ? props.buttonTextColor : colors.white,
-          ...props.extraTextStyles,
+          backgroundColor: enabled ? buttonColor : colors.grey,
+          color: enabled ? buttonTextColor : colors.white,
+          ...extraTextStyles,
         }}
       >
-        {props.buttonText}
+        {buttonText}
       </Text>
     </TouchableOpacity>
   );

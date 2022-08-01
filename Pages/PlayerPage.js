@@ -30,22 +30,24 @@ import {
   defaultAdHeight,
 } from '../utilities';
 
-function PlayerPage(props) {
+function PlayerPage({
+  type,
+  teams,
+  playerKit,
+  goalieKit,
+  currentGW,
+  selections,
+  playerData,
+  fieldImage,
+  nextOpponent,
+  StandardRatings,
+  TeamAbbreviations,
+}) {
   async function initializeId() {
     await setTestDeviceIDAsync('EMULATOR');
   }
   useEffect(initializeId, []);
 
-  const type = props.type;
-  const teams = props.teams;
-  const playerKit = props.playerKit;
-  const goalieKit = props.goalieKit;
-  const selections = props.selections;
-  const playerData = props.playerData;
-  const nextOpponent = props.nextOpponent;
-  const fieldImage = props.fieldImage;
-  const StandardRatings = props.StandardRatings;
-  const TeamAbbreviations = props.TeamAbbreviations;
   const [chosenFormation, setChosenFormation] = useState(
     type === 'fantasy' ? '4-4-2' : selections.formation
   );
@@ -197,7 +199,7 @@ function PlayerPage(props) {
 
   function captainHandler(index) {
     setPlayerModalState(true);
-    playerInfo.map(player => {
+    playerInfo.forEach(player => {
       if (player.key === index) player.captain = !player.captain;
       else player.captain = false;
     });
@@ -430,7 +432,7 @@ function PlayerPage(props) {
             type='font-awesome'
             size={findFontSize(25)}
             color={colors.primary}
-            onPress={randomizePlayers}
+            onPress={playerData.length > 0 ? randomizePlayers : null}
           />
         </View>
 
@@ -594,7 +596,7 @@ function PlayerPage(props) {
           <Text
             allowFontScaling={false}
             style={styles.headerTextStyle}
-          >{`Scout's Selection for ${props.currentGW}`}</Text>
+          >{`Scout's Selection for ${currentGW}`}</Text>
         ) : null}
         {type === 'fantasy' ? (
           <View style={styles.infoIconStyle}>

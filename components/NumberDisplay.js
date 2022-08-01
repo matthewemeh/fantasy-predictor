@@ -3,14 +3,14 @@ import { View, Text, StyleSheet } from 'react-native';
 import { findFontSize } from '../utilities';
 import { colors } from '../constants';
 
-function NumberDisplay(props) {
+function NumberDisplay({ number, title }) {
   return (
     <View style={styles.mainView}>
       <Text allowFontScaling={false} style={styles.numberTextStyle}>
-        {props.number}
+        {number}
       </Text>
       <Text allowFontScaling={false} style={styles.titleTextStyle}>
-        {props.title}
+        {title}
       </Text>
     </View>
   );

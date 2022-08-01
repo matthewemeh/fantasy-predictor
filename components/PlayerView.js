@@ -8,37 +8,44 @@ const textWidth = Math.round(0.185 * deviceWidth);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 90);
 
-function PlayerView(props) {
-  let playerName = props.playerName;
-  let playerContent = props.playerContent;
+function PlayerView({
+  imgVal,
+  captain,
+  command,
+  available,
+  playerName,
+  longCommand,
+  extraStyles,
+  playerContent,
+  activeOpacity,
+  extraTextStyles1,
+  extraTextStyles2,
+  extraShirtStyles,
+}) {
   return (
-    <View style={{ ...styles.mainView, ...props.extraStyles }}>
+    <View style={{ ...styles.mainView, ...extraStyles }}>
       <View style={styles.captainBadgeView}>
-        {props.captain && props.playerName !== '' ? (
+        {captain && playerName !== '' && (
           <Text allowFontScaling={false} style={styles.captainBadgeTextStyle}>
             C
           </Text>
-        ) : null}
+        )}
       </View>
       <TouchableOpacity
         style={styles.shirtView}
-        activeOpacity={props.activeOpacity ? props.activeOpacity : 0.6}
-        onPress={props.command}
-        onLongPress={props.longCommand}
+        activeOpacity={activeOpacity ? activeOpacity : 0.6}
+        onPress={command}
+        onLongPress={longCommand}
       >
         <Image
-          style={{ ...styles.image, ...props.extraShirtStyles }}
-          source={
-            typeof props.imgVal == 'string'
-              ? { uri: props.imgVal, headers: { Accept: '*/*' } }
-              : props.imgVal
-          }
+          style={{ ...styles.image, ...extraShirtStyles }}
+          source={typeof imgVal == 'string' ? { uri: imgVal, headers: { Accept: '*/*' } } : imgVal}
         />
       </TouchableOpacity>
       <Text
         allowFontScaling={false}
         numberOfLines={1}
-        style={{ ...styles.nameView, fontSize: findFontSize(9), ...props.extraTextStyles1 }}
+        style={{ ...styles.nameView, fontSize: findFontSize(9), ...extraTextStyles1 }}
       >
         {playerName}
       </Text>
@@ -46,12 +53,12 @@ function PlayerView(props) {
         allowFontScaling={false}
         style={{
           ...styles.contentView,
-          backgroundColor: props.available ? colors.contentViewColor : colors.red,
+          backgroundColor: available ? colors.contentViewColor : colors.red,
           fontSize:
             playerContent.length >= maxTextLength
               ? findFontSize(8) / (0.085 * playerContent.length)
               : findFontSize(8),
-          ...props.extraTextStyles2,
+          ...extraTextStyles2,
         }}
       >
         {playerContent}

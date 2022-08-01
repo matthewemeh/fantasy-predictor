@@ -16,14 +16,12 @@ import CryptoBar from '../components/CryptoBar';
 import LogPage from './LogPage';
 import { numbersInString, sum, findFontSize } from '../utilities';
 
-function MorePage(props) {
+function MorePage({ update, appVersion }) {
   // async function initializeId() {
   //   await setTestDeviceIDAsync('EMULATOR');
   // }
   // useEffect(initializeId, []);
 
-  const update = props.update;
-  const appVersion = props.appVersion;
   const message = `This app will help you in planning your team properly for gameweeks in the Fantasy Premier League. By following our regularly predicted scores and scout selections, you will arrive at the perfect XI for your team.`;
   const [arrowDirectionAbout, setArrowDirectionAbout] = useState(false);
   const [arrowDirectionSupport, setArrowDirectionSupport] = useState(false);
