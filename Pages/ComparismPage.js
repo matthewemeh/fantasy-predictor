@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState, useEffect, memo } from 'react';
+import { StyleSheet, View, ScrollView } from 'react-native';
 
-import PlayerView from '../components/PlayerView';
-import { colors } from '../constants';
 import InfoView from '../components/InfoView';
-import PlayerSelectModal, {
-  getPlayerData,
-  getChosenPosition,
-  getChosenTeam,
-} from '../components/PlayerSelectModal';
+import PlayerView from '../components/PlayerView';
+import PlayerSelectModal from '../components/PlayerSelectModal';
+
+import { colors } from '../constants';
 import {
+  player,
+  average,
   findData,
-  findPlayerInfo,
-  unknownImage,
+  isNumber,
+  findReturns,
   deviceWidth,
   findFontSize,
   deviceHeight,
+  findPlayerInfo,
+  findGameweekNumber,
 } from '../utilities';
 
 const textHeight = Math.round(0.92 * 0.95 * 0.25 * 0.165 * deviceHeight);
@@ -23,165 +24,220 @@ const textWidth = Math.round(0.95 * deviceWidth);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 650);
 
-function findChancesOfStarting(data) {
-  let starts = 0;
-  if (!data.available) return '0';
-  let points = data.points;
-  let recentPoints = points.slice(-5);
-  recentPoints.forEach(point => (starts += point !== 0 ? 1 : 0));
-  return `${Math.round((starts * 100) / recentPoints.length)}`;
-}
-
-function ComparismPage({
+const ComparismPage = ({
   teams,
+  currentGW,
   goalieKit,
   playerKit,
   playerData,
   nextOpponent,
   StandardRatings,
   TeamAbbreviations,
-}) {
+}) => {
+  const { teamIndex } = StandardRatings;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [playerInfo] = useState([player(0), player(1)]);
   const [chosenTeam, setChosenTeam] = useState('All Teams');
+  const [playerDetails, setPlayerDetails] = useState([{}, {}]);
+  const [playerModalVisible, setPlayerModalVisible] = useState(false);
   const [chosenPosition, setChosenPosition] = useState('All Positions');
-  const [playerModalState, setPlayerModalState] = useState(false);
-  function onClose() {
-    setPlayerModalState(false);
-    setChosenPosition(getChosenPosition());
-    setChosenTeam(getChosenTeam());
-  }
-  function onSelect() {
-    let initialData = getPlayerData();
-    playerInfo[currentIndex] = {
-      ...initialData,
-      data: findData(initialData.playerKey, playerData),
-    };
-    setPlayerModalState(false);
-    setChosenPosition(getChosenPosition());
-    setChosenTeam(getChosenTeam());
-  }
-  function playerViewCommand(key) {
-    setCurrentIndex(key);
-    setPlayerModalState(true);
-  }
-  const [playerInfo, setPlayerInfo] = useState([
+
+  const [compareDetails, setCompareDetails] = useState([
     {
-      playerName: '',
-      playerKey: '',
-      key: 0,
-      shirtImage: unknownImage,
-      playerContent: '',
-      data: {},
+      teamForm: '0.0',
+      gamesToPlay: '0',
+      playerForm: '0.0',
+      expectedGoals: '0.0',
+      expectedSaves: '0.0',
+      expectedAssists: '0.0',
+      chancesOfStarting: '0',
     },
     {
-      playerName: '',
-      playerKey: '',
-      key: 1,
-      shirtImage: unknownImage,
-      playerContent: '',
-      data: {},
+      teamForm: '0.0',
+      gamesToPlay: '0',
+      playerForm: '0.0',
+      expectedGoals: '0.0',
+      expectedSaves: '0.0',
+      expectedAssists: '0.0',
+      chancesOfStarting: '0',
     },
   ]);
+
+  const findChancesOfStarting = (points, available, opponent) => {
+    if (!available || opponent === '-') return '0';
+
+    const recentPoints = points.slice(-5);
+    const starts = recentPoints.filter(num => num > 0).length;
+
+    return `${Math.round((starts * 100) / recentPoints.length)}`;
+  };
+
+  const gameweek = findGameweekNumber(currentGW);
+
+  const pointsRange = -gameweek;
+
+  const playerViewCommand = key => {
+    setCurrentIndex(key);
+    setPlayerModalVisible(true);
+  };
+
+  useEffect(() => {
+    const newDetails = playerInfo.map(({ playerKey }) => findData(playerKey, playerData) || {});
+    setPlayerDetails(newDetails);
+  }, [playerInfo, playerModalVisible]);
+
+  useEffect(() => {
+    playerDetails.forEach((details, index) => {
+      if (Object.keys(details).length > 0) {
+        const newCompareDetails = compareDetails;
+        const { playerContent } = playerInfo[index];
+        const { team, points, key, available } = details;
+        const { goals, assists, saves } = findReturns(
+          key,
+          StandardRatings,
+          playerData,
+          pointsRange
+        );
+        const gamesToPlay =
+          playerContent && playerContent !== '-' ? playerContent.split(',').length : '0';
+
+        const expectedGoals = (goals / gameweek).toFixed(1);
+        const expectedSaves = (saves / gameweek).toFixed(0);
+        const expectedAssists = (assists / gameweek).toFixed(1);
+        const teamForm = (teamIndex[team] * (10 / 3)).toFixed(1);
+        const playerForm = average(points.slice(pointsRange)).toFixed(1);
+        const chancesOfStarting = findChancesOfStarting(points, available, playerContent);
+
+        newCompareDetails[index] = {
+          teamForm,
+          playerForm,
+          gamesToPlay,
+          expectedGoals,
+          expectedSaves,
+          expectedAssists,
+          chancesOfStarting,
+        };
+        setCompareDetails([...newCompareDetails]);
+      }
+    });
+  }, [playerDetails]);
 
   return (
     <View style={styles.mainView}>
       <PlayerSelectModal
-        visible={playerModalState}
-        currentIndex={currentIndex}
         teams={teams}
         playerKit={playerKit}
         goalieKit={goalieKit}
         playerData={playerData}
         playerInfo={playerInfo}
-        nextOpponent={nextOpponent}
-        TeamAbbreviations={TeamAbbreviations}
-        chosenPosition={chosenPosition}
         chosenTeam={chosenTeam}
-        onRequestClose={onClose}
-        onSelectPlayer={onSelect}
         posPickerEnabled={true}
         teamPickerEnabled={true}
-        key={chosenPosition}
+        currentIndex={currentIndex}
+        nextOpponent={nextOpponent}
+        visible={playerModalVisible}
+        setChosenTeam={setChosenTeam}
+        chosenPosition={chosenPosition}
+        setChosenPosition={setChosenPosition}
+        TeamAbbreviations={TeamAbbreviations}
+        setPlayerModalVisible={setPlayerModalVisible}
       />
+
       <View style={styles.containerView}>
         <View style={styles.playerFrame}>
-          {playerInfo.map(player => {
-            return (
-              <PlayerView
-                key={player.key}
-                imgVal={player.shirtImage}
-                playerName={player.playerName}
-                extraTextStyles1={{ fontSize: findFontSize(9) }}
-                playerContent={player.playerContent}
-                extraTextStyles2={{
-                  fontSize:
-                    player.playerContent.length >= maxTextLength
-                      ? findFontSize(10) / (0.085 * player.playerContent.length)
-                      : findFontSize(9),
-                }}
-                extraShirtStyles={{ height: '75%' }}
-                extraStyles={{ width: '25%', marginHorizontal: '30%' }}
-                available={findPlayerInfo(player.playerKey, 'available', playerData)}
-                command={() => playerViewCommand(player.key)}
-                longCommand={null}
-              />
-            );
-          })}
+          {playerInfo.map(({ shirtImage, playerName, playerContent, playerKey, key }) => (
+            <PlayerView
+              key={key}
+              longCommand={null}
+              imgVal={shirtImage}
+              playerName={playerName}
+              playerContent={playerContent}
+              extraShirtStyles={{ height: '75%' }}
+              command={() => playerViewCommand(key)}
+              extraTextStyles1={{ fontSize: findFontSize(9) }}
+              extraStyles={{ width: '25%', marginHorizontal: '30%' }}
+              available={!playerKey || findPlayerInfo(playerKey, 'available', playerData)}
+              extraTextStyles2={{
+                fontSize:
+                  playerContent.length >= maxTextLength
+                    ? findFontSize(10) / (0.085 * playerContent.length)
+                    : findFontSize(9),
+              }}
+            />
+          ))}
         </View>
-        <View style={styles.infoView}>
+
+        <ScrollView style={styles.infoView}>
           <InfoView
-            infoName={'Better Fixture'}
-            infoValue1={nextOpponent[playerInfo[0].data.team]}
-            infoValue2={nextOpponent[playerInfo[1].data.team]}
+            type='reverse'
+            infoName='Better Fixture'
+            StandardRatings={StandardRatings}
             playerContent1={playerInfo[0].playerContent}
             playerContent2={playerInfo[1].playerContent}
-            StandardRatings={StandardRatings}
+            infoValue1={nextOpponent[playerDetails[0]?.team]}
+            infoValue2={nextOpponent[playerDetails[1]?.team]}
           />
+
           <InfoView
-            infoName={'Player Form'}
-            infoValue1={playerInfo[0].data.index ? playerInfo[0].data.index.toFixed(1) : '0.0'}
-            infoValue2={playerInfo[1].data.index ? playerInfo[1].data.index.toFixed(1) : '0.0'}
+            type='forward'
+            infoName='Player Form'
             StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].playerForm}
+            infoValue2={compareDetails[1].playerForm}
           />
+
           <InfoView
-            infoName={'Team Form'}
-            infoValue1={
-              playerInfo[0].data.team
-                ? (StandardRatings.teamIndex[playerInfo[0].data.team] * (10 / 3)).toFixed(1)
-                : '0.0'
-            }
-            infoValue2={
-              playerInfo[1].data.team
-                ? (StandardRatings.teamIndex[playerInfo[1].data.team] * (10 / 3)).toFixed(1)
-                : '0.0'
-            }
+            type='forward'
+            infoName='Team Form'
             StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].teamForm}
+            infoValue2={compareDetails[1].teamForm}
           />
+
           <InfoView
-            infoName={'Games To Play'}
-            infoValue1={
-              playerInfo[0].playerContent.length > 0
-                ? playerInfo[0].playerContent.split(',').length
-                : '0'
-            }
-            infoValue2={
-              playerInfo[1].playerContent.length > 0
-                ? playerInfo[1].playerContent.split(',').length
-                : '0'
-            }
+            type='forward'
+            infoName='Games To Play'
             StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].gamesToPlay}
+            infoValue2={compareDetails[1].gamesToPlay}
           />
+
           <InfoView
-            infoName={'Chances of Starting'}
-            infoValue1={playerInfo[0].data.points ? findChancesOfStarting(playerInfo[0].data) : '0'}
-            infoValue2={playerInfo[1].data.points ? findChancesOfStarting(playerInfo[1].data) : '0'}
+            type='forward'
+            infoName='Chances of Starting'
             StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].chancesOfStarting}
+            infoValue2={compareDetails[1].chancesOfStarting}
           />
-        </View>
+
+          <InfoView
+            type='forward'
+            infoName='Expected Goals(xG) per match'
+            StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].expectedGoals}
+            infoValue2={compareDetails[1].expectedGoals}
+          />
+
+          <InfoView
+            type='forward'
+            infoName='Expected Assists(xA) per match'
+            StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].expectedAssists}
+            infoValue2={compareDetails[1].expectedAssists}
+          />
+
+          <InfoView
+            type='forward'
+            infoName='Expected Saves per match'
+            StandardRatings={StandardRatings}
+            infoValue1={compareDetails[0].expectedSaves}
+            infoValue2={compareDetails[1].expectedSaves}
+          />
+        </ScrollView>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   mainView: {
@@ -192,20 +248,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.grey,
   },
   containerView: {
-    width: '95%',
-    height: '95%',
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
+    justifyContent: 'space-between',
   },
-  infoView: { width: '100%', height: '70%', borderTopWidth: 2, borderColor: colors.secondary },
   playerFrame: {
-    flexDirection: 'row',
     width: '100%',
     height: '25%',
+    borderBottomWidth: 2,
+    flexDirection: 'row',
     alignItems: 'center',
+    borderColor: colors.secondary,
     justifyContent: 'space-evenly',
   },
+  infoView: { width: '100%', height: '75%' },
 });
 
-export default React.memo(ComparismPage);
+export default memo(ComparismPage);

@@ -1,31 +1,32 @@
-import React from 'react';
+import React, { memo } from 'react';
+
 import PlayerPage from './PlayerPage';
 
-function FantasyPage({
-  playerData,
+const FantasyPage = ({
   teams,
-  selections,
   playerKit,
   goalieKit,
+  currentGW,
   fieldImage,
+  selections,
+  playerData,
   nextOpponent,
-  TeamAbbreviations,
   StandardRatings,
-}) {
-  return (
-    <PlayerPage
-      type={'fantasy'}
-      playerData={playerData}
-      teams={teams}
-      selections={selections}
-      playerKit={playerKit}
-      goalieKit={goalieKit}
-      fieldImage={fieldImage}
-      nextOpponent={nextOpponent}
-      TeamAbbreviations={TeamAbbreviations}
-      StandardRatings={StandardRatings}
-    />
-  );
-}
+  TeamAbbreviations,
+}) => (
+  <PlayerPage
+    type='fantasy'
+    teams={teams}
+    playerKit={playerKit}
+    goalieKit={goalieKit}
+    currentGW={currentGW}
+    fieldImage={fieldImage}
+    selections={selections}
+    playerData={playerData}
+    nextOpponent={nextOpponent}
+    StandardRatings={StandardRatings}
+    TeamAbbreviations={TeamAbbreviations}
+  />
+);
 
-export default React.memo(FantasyPage);
+export default memo(FantasyPage);

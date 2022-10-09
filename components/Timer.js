@@ -1,31 +1,41 @@
-import React from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { findFontSize } from '../utilities';
-import { colors } from '../constants';
+import React, { memo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-function Timer({ timeInSeconds }) {
-  let minutes = parseInt(timeInSeconds / 60);
-  let seconds = timeInSeconds - minutes * 60;
+import { colors } from '../constants';
+import { findFontSize } from '../utilities';
+
+const Timer = ({ timeInSeconds }) => {
+  const minutes = parseInt(timeInSeconds / 60);
+  const seconds = timeInSeconds - minutes * 60;
 
   return (
-    <Text allowFontScaling={false} style={styles.textStyle}>{`${
-      minutes < 10 ? '0' : ''
-    }${minutes} : ${seconds < 10 ? '0' : ''}${seconds}`}</Text>
+    <View style={styles.timerView}>
+      <Text allowFontScaling={false} style={styles.textStyle}>
+        {minutes.toString().padStart(2, '0')} : {seconds.toString().padStart(2, '0')}
+      </Text>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   textStyle: {
     width: '60%',
     height: '80%',
-    backgroundColor: colors.white,
     borderRadius: 5,
-    fontSize: findFontSize(35),
-    fontFamily: 'PoppinsBold',
-    color: colors.forward,
     textAlign: 'center',
+    color: colors.forward,
+    fontFamily: 'PoppinsBold',
+    fontSize: findFontSize(35),
     textAlignVertical: 'center',
+    backgroundColor: colors.white,
+  },
+  timerView: {
+    width: '100%',
+    height: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.forward,
   },
 });
 
-export default React.memo(Timer);
+export default memo(Timer);
