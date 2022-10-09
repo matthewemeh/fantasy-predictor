@@ -1,31 +1,30 @@
-import React from 'react';
+import React, { memo } from 'react';
+
 import PlayerPage from './PlayerPage';
 
-function ScoutPage({
-  playerData,
-  selections,
+const ScoutPage = ({
+  teams,
   playerKit,
   goalieKit,
+  currentGW,
+  selections,
+  playerData,
   fieldImage,
-  teams,
   nextOpponent,
   TeamAbbreviations,
-  currentGW,
-}) {
-  return (
-    <PlayerPage
-      type={'scout'}
-      playerData={playerData}
-      selections={selections}
-      playerKit={playerKit}
-      goalieKit={goalieKit}
-      fieldImage={fieldImage}
-      teams={teams}
-      nextOpponent={nextOpponent}
-      TeamAbbreviations={TeamAbbreviations}
-      currentGW={currentGW}
-    />
-  );
-}
+}) => (
+  <PlayerPage
+    type='scout'
+    teams={teams}
+    playerKit={playerKit}
+    goalieKit={goalieKit}
+    currentGW={currentGW}
+    playerData={playerData}
+    fieldImage={fieldImage}
+    selections={selections}
+    nextOpponent={nextOpponent}
+    TeamAbbreviations={TeamAbbreviations}
+  />
+);
 
-export default React.memo(ScoutPage);
+export default memo(ScoutPage);
