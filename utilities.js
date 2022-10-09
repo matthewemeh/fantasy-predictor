@@ -1,9 +1,10 @@
+import regression from 'regression';
 import { Dimensions } from 'react-native';
 import { colors, activeNavButton, inactiveNavButton } from './constants';
 
+export const defaultAdHeight = 55;
 export const deviceWidth = Dimensions.get('window').width;
 export const deviceHeight = Dimensions.get('window').height;
-export const defaultAdHeight = 55;
 
 const baseWidth = 376.47059527510464;
 const baseHeight = 705.0980524006648;
@@ -13,11 +14,11 @@ const scale = Math.min(scaleWidth, scaleHeight);
 
 export const findFontSize = size => Math.ceil(size * scale);
 
-export const activity = {
-  goal: require('./assets/Activity/goal.webp'),
-  assist: require('./assets/Activity/assist.webp'),
-  save: require('./assets/Activity/gloves.webp'),
-  onTarget: require('./assets/Activity/aim.webp'),
+export const activityImage = {
+  goalImage: require('./assets/Activity/goal.webp'),
+  assistImage: require('./assets/Activity/assist.webp'),
+  saveImage: require('./assets/Activity/gloves.webp'),
+  onTargetImage: require('./assets/Activity/aim.webp'),
 };
 
 export const unknownImage = require('./assets/unknown.webp');
@@ -36,139 +37,159 @@ export const findColor = (index, value1, value2, type = 'forward') => {
 };
 
 export const findArrow = index => {
-  if (index > 0 && index <= 2) return require('./assets/Arrows/arrowDown.webp');
-  else if (index > 2 && index <= 4) return require('./assets/Arrows/arrowDownRight.webp');
-  else if (index > 4 && index <= 6) return require('./assets/Arrows/arrowRight.webp');
-  else if (index > 6 && index <= 8) return require('./assets/Arrows/arrowUpRight.webp');
-  else if (index > 8 && index <= 10) return require('./assets/Arrows/arrowUp.webp');
-  return require('./assets/Arrows/arrowDown.webp');
+  if (index >= 8) return require('./assets/Arrows/arrowUp.webp');
+  else if (index >= 6) return require('./assets/Arrows/arrowUpRight.webp');
+  else if (index >= 4) return require('./assets/Arrows/arrowRight.webp');
+  else if (index >= 2) return require('./assets/Arrows/arrowDownRight.webp');
+  else return require('./assets/Arrows/arrowDown.webp');
 };
 
-export const findAverageOfOpponentIndex = (opponent, ratings) => {
-  let opponentIndexList = [],
-    opponentList = opponent.split(',');
+export const sum = array => (array.length > 0 ? array.reduce((x, y) => x + y) : 0);
 
-  opponentList.forEach(item =>
-    opponentIndexList.push(ratings.teamIndex[item.substring(0, item.indexOf('('))])
-  );
-  return (sum(opponentIndexList) / opponentIndexList.length).toFixed(1);
+export const average = array => (array.length > 0 ? sum(array) / array.length : 0);
+
+export const findAverageOfOpponentIndex = (fixtures, teamIndices) => {
+  const opponents = fixtures.split(',');
+  const opponentIndices = opponents.map(opponent => {
+    const bracketIndex = opponent.indexOf('(');
+    const opponentFullName = opponent.substring(0, bracketIndex);
+
+    return teamIndices[opponentFullName];
+  });
+
+  return average(opponentIndices).toFixed(1);
 };
 
-export const sum = numberList => numberList.reduce((x, y) => x + y);
+const getPointsData = array => array.map((point, index) => [index + 1, point]);
 
-export const predict = (playerInfo, StandardRatings, nextOpponent) => {
-  const team = playerInfo.team,
-    playerIndex = playerInfo.index,
-    teamIndex = StandardRatings.teamIndex[playerInfo.team],
-    points = playerInfo.points.slice(-3).filter(pt => pt >= 0);
+export const predict = (playerDetails, StandardRatings, nextOpponent, gameweek) => {
+  const { available, team, index, points } = playerDetails;
+  const opponent = nextOpponent[team];
 
-  const opponent = nextOpponent[team],
-    pointsAverage = sum(points) / points.length;
+  if (!available || opponent === 'No Opponent') return 0;
 
-  if (!playerInfo.available || opponent === 'No Opponent') return 0;
+  const { teamIndex } = StandardRatings;
+  const teamRating = teamIndex[team];
+  const pointsRange = -gameweek;
+  const pointsData = getPointsData(points.slice(pointsRange));
+  const results = regression.linear(pointsData);
 
-  const opponentIndex = findAverageOfOpponentIndex(opponent, StandardRatings);
+  const [, pointsAverage] = results.predict(gameweek);
+  const opponentIndex = findAverageOfOpponentIndex(opponent, teamIndex);
 
-  const predictedPoint = pointsAverage - 0.5 * opponentIndex + teamIndex + 0.1 * playerIndex;
+  const predictedPoint =
+    0.8 * pointsAverage - Math.E ** (0.5 * opponentIndex) + teamRating + 0.1 * index;
 
   if (predictedPoint < 0) return 0;
 
   return Math.ceil(predictedPoint);
 };
 
-export const descendingPointsOrder = (a, b) => sum(a.points.slice(-3)) < sum(b.points.slice(-3));
+export const descendingPointsOrder = (a, b) => sum(b.points.slice(-3)) - sum(a.points.slice(-3));
+
+export const findData = (playerKey, playerData) => playerData.find(({ key }) => key === playerKey);
 
 export const findPlayerInfo = (playerKey, property, playerData) => {
-  let player = playerData.find(player => player.key === playerKey);
-  if (playerKey === '') return true;
-  return player[property];
+  const player = findData(playerKey, playerData);
+  return player && player[property];
 };
 
-export const findInfo = (playerKey, StandardRatings, playerData) => {
-  let points = findPlayerInfo(playerKey, 'points', playerData).slice(-3);
-  let pos = findPlayerInfo(playerKey, 'position', playerData);
-  let goals = 0;
-  let assists = 0;
-  let saves = 0;
-  let bonus = 0;
+export const findReturns = (playerKey, StandardRatings, playerData, pointsRange = -3) => {
+  const points = findPlayerInfo(playerKey, 'points', playerData).slice(pointsRange);
+  const position = findPlayerInfo(playerKey, 'position', playerData);
+  const {
+    goalPoint,
+    assistPoint,
+    savesPerPoint,
+    minBonusPoint,
+    maxBonusPoint,
+    appearancePoint,
+    cleanSheetPoint,
+    savedPenaltyPoint,
+  } = StandardRatings;
+  let goals = 0,
+    assists = 0,
+    saves = 0,
+    bonus = 0;
+
   for (let i = 0; i < points.length; i++) {
-    let pts = points[i] - StandardRatings.appearancePoint;
-    let tempGoals = 0;
-    let tempAssists = 0;
-    let tempSaves = 0;
-    let tempBonus = 0;
+    let pts = points[i] - appearancePoint;
+    let tempGoals = 0,
+      tempAssists = 0,
+      tempSaves = 0,
+      tempBonus = 0;
+
     while (pts > 0) {
-      if (pos === 'goalkeeper') {
-        if (pts >= StandardRatings.cleanSheetPoint[pos]) {
-          pts -= StandardRatings.cleanSheetPoint[pos];
+      if (position === 'goalkeeper') {
+        if (pts >= cleanSheetPoint[position]) {
+          pts -= cleanSheetPoint[position];
           tempSaves += 1;
         }
-        if (pts >= StandardRatings.savedPenaltyPoint) {
+        if (pts >= savedPenaltyPoint) {
           tempSaves += 1;
-          pts -= StandardRatings.savedPenaltyPoint;
+          pts -= savedPenaltyPoint;
         }
         if (pts >= 1) {
-          tempSaves += StandardRatings.savesPerPoint[pos];
+          tempSaves += savesPerPoint[position];
           pts -= 1;
         }
-        if (pts >= StandardRatings.goalPoint[pos]) {
-          tempGoals += 1;
-          pts -= StandardRatings.goalPoint[pos];
-        }
-        if (pts >= StandardRatings.assistPoint[pos]) {
+        if (pts >= assistPoint[position]) {
           tempAssists += 1;
-          pts -= StandardRatings.assistPoint[pos];
+          pts -= assistPoint[position];
         }
-        if (pts >= StandardRatings.minBonusPoint && tempBonus < StandardRatings.maxBonusPoint) {
-          tempBonus += StandardRatings.minBonusPoint;
-          pts -= StandardRatings.minBonusPoint;
+        if (pts >= minBonusPoint && tempBonus < maxBonusPoint) {
+          tempBonus += minBonusPoint;
+          pts -= minBonusPoint;
+        }
+        if (pts >= goalPoint[position]) {
+          tempGoals += 1;
+          pts -= goalPoint[position];
         }
       } else {
-        if (pts >= StandardRatings.cleanSheetPoint[pos])
-          pts -= StandardRatings.cleanSheetPoint[pos];
-        if (pts >= StandardRatings.goalPoint[pos]) {
+        if (pts >= cleanSheetPoint[position]) pts -= cleanSheetPoint[position];
+        if (pts >= goalPoint[position]) {
           tempGoals += 1;
-          pts -= StandardRatings.goalPoint[pos];
+          pts -= goalPoint[position];
         }
-        if (pts >= StandardRatings.assistPoint[pos]) {
+        if (pts >= assistPoint[position]) {
           tempAssists += 1;
-          pts -= StandardRatings.assistPoint[pos];
+          pts -= assistPoint[position];
         }
-        if (pts >= StandardRatings.minBonusPoint && tempBonus < StandardRatings.maxBonusPoint) {
-          tempBonus += StandardRatings.minBonusPoint;
-          pts -= StandardRatings.minBonusPoint;
+        if (pts >= minBonusPoint && tempBonus < maxBonusPoint) {
+          tempBonus += minBonusPoint;
+          pts -= minBonusPoint;
         }
       }
     }
+
     goals += tempGoals;
     assists += tempAssists;
     saves += tempSaves;
     bonus += tempBonus;
   }
-  return { goals: goals, assists: assists, saves: saves, bonus: bonus };
+
+  return { goals, assists, saves, bonus };
 };
 
 export const findAbbreviation = (teamName, TeamAbbreviations) =>
-  teamName !== 'All Teams' ? TeamAbbreviations[teamName] : 'null';
-
-export const findData = (playerKey, playerData) =>
-  playerData.find(player => player.key === playerKey);
+  teamName === 'All Teams' ? 'null' : TeamAbbreviations[teamName];
 
 export const findOpponentAbbreviation = (team, nextOpponent, TeamAbbreviations) => {
-  let opponent = nextOpponent[team];
+  const opponent = nextOpponent[team];
+
   if (opponent === 'No Opponent') return '-';
-  let tempTeams = opponent.split(',');
-  let tempTeamsLength = tempTeams.length;
-  let opponentAbbreviation = '';
-  tempTeams.forEach(
-    (team, index) =>
-      (opponentAbbreviation += `${
-        TeamAbbreviations[team.substring(0, team.indexOf('('))]
-      }${team.substring(team.indexOf('('))}${
-        index !== tempTeamsLength - 1 ? ',' : ''
-      }`.toUpperCase())
-  );
-  return opponentAbbreviation;
+
+  const opponents = opponent.split(',');
+  const opponentAbbreviations = opponents.map(opponent => {
+    const bracketIndex = opponent.indexOf('(');
+    const teamName = opponent.substring(0, bracketIndex);
+    const teamAbbName = TeamAbbreviations[teamName];
+    const playingGround = opponent.substring(bracketIndex);
+
+    return `${teamAbbName}${playingGround}`.toUpperCase();
+  });
+
+  return opponentAbbreviations.join(',');
 };
 
 export const getRndInteger = (min, max) => {
@@ -176,35 +197,33 @@ export const getRndInteger = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-export const sumOfPoints = playerInfo => {
-  let sum = 0;
-  playerInfo.forEach(item => (sum += item.playerContent));
-  return sum;
-};
-
-export const averageOfPoints = playerInfo =>
-  Math.round(sumOfPoints(playerInfo) / playerInfo.length);
-
-export const highestPoint = playerInfo => {
-  let points = [];
-  playerInfo.forEach(item => points.push(item.playerContent));
-  return Math.max(...points);
-};
-
 export const findImage = (isActive, type) =>
   isActive ? activeNavButton[type] : inactiveNavButton[type];
+
+export const isNumber = string => {
+  const numberPattern = /^\d$/;
+
+  if (string.length > 1) {
+    for (let i = 0; i < string.length; i++) {
+      if (!numberPattern.test(string[i])) return false;
+    }
+    return true;
+  }
+
+  return numberPattern.test(string);
+};
 
 export const numbersInString = string => {
   const sepChar = ',';
   let newString = '';
 
-  // version string should not contain dots(.) to avoid unexpected results!!!!
-  for (let i = 0; i < string.length; i++) newString += isNaN(string[i]) ? sepChar : string[i];
+  for (let i = 0; i < string.length; i++) newString += isNumber(string[i]) ? string[i] : sepChar;
 
   // convert strings to numbers
-  const newNumArray = newString.split(sepChar).map(num => parseInt(num));
+  const numberArray = newString.split(sepChar).map(num => parseInt(num));
 
-  return newNumArray;
+  // if any remove NaN, then return numbers
+  return numberArray.filter(num => !isNaN(num));
 };
 
 export const shuffle = array => {
@@ -226,13 +245,29 @@ export const shuffle = array => {
 
 export const player = key => {
   return {
-    playerName: '',
-    playerKey: '',
     key: key,
-    shirtImage: unknownImage,
-    playerContent: '',
+    playerKey: '',
     captain: false,
+    playerName: '',
+    playerContent: '',
+    shirtImage: unknownImage,
   };
 };
 
-export const capitalize = word => `${word.charAt(0).toUpperCase()}${word.substring(1)}`;
+export const randomSelect = array => array[getRndInteger(0, array.length)];
+
+export const findGameweekNumber = string => {
+  let stringNumber = '0';
+
+  for (let i = 0; i < string.length; i++) {
+    if (isNumber(string[i])) stringNumber += string[i];
+  }
+
+  return parseInt(stringNumber);
+};
+
+export const findScaledFontSize = (text, maxTextLength, normalSize, scale) => {
+  return text && text.length >= maxTextLength
+    ? findFontSize(normalSize) / (scale * text.length)
+    : findFontSize(normalSize);
+};
