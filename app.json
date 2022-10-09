@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fantasy Predictor",
     "slug": "FantasyPredictor",
-    "version": "2023-2024_3",
+    "version": "2023-2024_9",
     "orientation": "portrait",
     "icon": "./assets/appIcon.png",
     "splash": {
@@ -12,13 +12,13 @@
     },
     "updates": { "fallbackToCacheTimeout": 0 },
     "assetBundlePatterns": [
-      "assets/Activity/*",
-      "assets/Arrows/*",
+      "assets/*",
       "assets/fonts/*",
+      "assets/Arrows/*",
+      "assets/Activity/*",
       "assets/Goalkeepers/*",
-      "assets/NavigationImages/*",
       "assets/OutfieldPlayers/*",
-      "assets/*"
+      "assets/NavigationImages/*"
     ],
     "ios": {
       "supportsTablet": true,
@@ -29,9 +29,9 @@
       "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
       "package": "com.gamehub.fantasypredictor",
       "permissions": [],
-      "versionCode": 7
+      "versionCode": 9
     },
     "web": { "favicon": "./assets/appIcon.png" }
   },
-  "version": "7.0.0"
+  "version": "9.0.0"
 }

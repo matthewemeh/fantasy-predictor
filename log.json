@@ -1,6 +1,18 @@
 {
   "logs": [
     {
+      "version": "2023-2024_9",
+      "info": [
+        ["add", "Bug fixes"],
+        ["add", "Added more comparism statistics"],
+        ["add", "Improved point predict algorithm"]
+      ]
+    },
+    {
+      "version": "2023-2024_4",
+      "info": [["add", "Minor bug fixes"]]
+    },
+    {
       "version": "2023-2024_3",
       "info": [
         ["add", "Improved point prediction algorithm"],
