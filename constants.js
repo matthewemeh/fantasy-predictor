@@ -7,9 +7,9 @@ export const colors = {
   defender: '#2afd8c',
   midfielder: '#2bf0fd',
   forward: '#e0115f',
-  white: '#ffffff',
-  black: '#000000',
-  red: '#ff0000',
+  white: '#fff',
+  black: '#000',
+  red: '#e00',
   contentViewColor: '#01532d',
   nameViewColor: '#016a39',
   skyBlue: '#d9f1ff',
@@ -21,7 +21,7 @@ export const colors = {
 };
 
 export const fieldConstants = {
-  positions: ['All Positions', 'Goalkeepers', 'Defenders', 'Midfielders', 'Forwards'],
+  positions: ['All Positions', 'goalkeepers', 'defenders', 'midfielders', 'forwards'],
   formations: ['3-5-2', '3-4-3', '4-4-2', '4-3-3', '4-5-1', '5-3-2', '5-2-3', '5-4-1'],
 };
 
