@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import { findFontSize } from '../utilities';
 import { colors } from '../constants';
+import { findFontSize } from '../utilities';
 
-function Button({
+const Button = ({
   enabled,
   command,
   buttonText,
@@ -13,28 +13,25 @@ function Button({
   activeOpacity,
   extraTextStyles,
   buttonTextColor,
-}) {
-  return (
-    <TouchableOpacity
-      style={{ ...styles.mainView, ...extraStyles }}
-      onPress={enabled ? command : null}
-      activeOpacity={enabled ? (activeOpacity ? activeOpacity : 0.9) : 1}
+}) => (
+  <TouchableOpacity
+    onPress={enabled ? command : null}
+    style={{ ...styles.mainView, ...extraStyles }}
+    activeOpacity={enabled && activeOpacity ? activeOpacity : 1}
+  >
+    <Text
+      allowFontScaling={false}
+      style={{
+        ...styles.buttonTextStyle,
+        color: enabled ? buttonTextColor : '#94948da0',
+        backgroundColor: enabled ? buttonColor : colors.grey,
+        ...extraTextStyles,
+      }}
     >
-      <Text
-        allowFontScaling={false}
-        style={{
-          ...styles.buttonTextStyle,
-          fontFamily: 'PoppinsBold',
-          backgroundColor: enabled ? buttonColor : colors.grey,
-          color: enabled ? buttonTextColor : colors.white,
-          ...extraTextStyles,
-        }}
-      >
-        {buttonText}
-      </Text>
-    </TouchableOpacity>
-  );
-}
+      {buttonText}
+    </Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   mainView: { width: '45%', height: '75%' },
@@ -43,10 +40,11 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
     textAlign: 'center',
-    textAlignVertical: 'center',
-    fontSize: findFontSize(27),
     color: colors.white,
+    fontFamily: 'PoppinsBold',
+    fontSize: findFontSize(27),
+    textAlignVertical: 'center',
   },
 });
 
-export default React.memo(Button);
+export default memo(Button);
