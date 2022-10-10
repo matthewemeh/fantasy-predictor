@@ -1,5 +1,6 @@
-import React, { memo } from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { memo, useEffect, useRef } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { Text as AnimatableText } from 'react-native-animatable';
 
 import { colors } from '../constants';
 import { findFontSize } from '../utilities';
@@ -13,25 +14,53 @@ const Button = ({
   activeOpacity,
   extraTextStyles,
   buttonTextColor,
-}) => (
-  <TouchableOpacity
-    onPress={enabled ? command : null}
-    style={{ ...styles.mainView, ...extraStyles }}
-    activeOpacity={enabled && activeOpacity ? activeOpacity : 1}
-  >
-    <Text
-      allowFontScaling={false}
-      style={{
-        ...styles.buttonTextStyle,
-        color: enabled ? buttonTextColor : '#94948da0',
-        backgroundColor: enabled ? buttonColor : colors.grey,
-        ...extraTextStyles,
-      }}
+}) => {
+  const buttonRef = useRef();
+  const initialRender = useRef(true);
+
+  const animations = {
+    buttonDisabled: {
+      from: { backgroundColor: buttonColor, color: buttonTextColor },
+      to: { backgroundColor: colors.grey, color: '#94948da0' },
+    },
+    buttonEnabled: {
+      from: { backgroundColor: colors.grey, color: '#94948da0' },
+      to: { backgroundColor: buttonColor, color: buttonTextColor },
+    },
+  };
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false;
+      return;
+    }
+
+    if (enabled) buttonRef.current.animate(animations.buttonEnabled);
+    else buttonRef.current.animate(animations.buttonDisabled);
+  }, [enabled]);
+
+  return (
+    <TouchableOpacity
+      onPress={enabled ? command : null}
+      style={{ ...styles.mainView, ...extraStyles }}
+      activeOpacity={enabled && activeOpacity ? activeOpacity : 1}
     >
-      {buttonText}
-    </Text>
-  </TouchableOpacity>
-);
+      <AnimatableText
+        duration={400}
+        ref={buttonRef}
+        allowFontScaling={false}
+        style={{
+          ...styles.buttonTextStyle,
+          color: enabled ? buttonTextColor : '#94948da0',
+          backgroundColor: enabled ? buttonColor : colors.grey,
+          ...extraTextStyles,
+        }}
+      >
+        {buttonText}
+      </AnimatableText>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   mainView: { width: '45%', height: '75%' },
