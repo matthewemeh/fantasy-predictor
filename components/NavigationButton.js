@@ -1,34 +1,34 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
+
 import { colors } from '../constants';
 import { findImage, findFontSize } from '../utilities';
 
-function NavigationButton({ extraStyles, command, activeOpacity, active, type, title }) {
-  return (
-    <TouchableOpacity
-      style={{ ...styles.mainView, ...extraStyles }}
-      onPress={command}
-      activeOpacity={activeOpacity ? activeOpacity : 1}
-    >
-      <View style={styles.buttonView}>
-        <View style={styles.imageView}>
-          <Image style={styles.image} source={findImage(active, type)} />
-        </View>
-        <View style={styles.activeTextView}>
-          <Text
-            allowFontScaling={false}
-            style={{
-              ...styles.activeTextStyle,
-              color: active ? colors.secondary : colors.gray,
-            }}
-          >
-            {title}
-          </Text>
-        </View>
+const NavigationButton = ({ extraStyles, command, activeOpacity, active, type, title }) => (
+  <TouchableOpacity
+    onPress={command}
+    style={{ ...styles.mainView, ...extraStyles }}
+    activeOpacity={activeOpacity ? activeOpacity : 1}
+  >
+    <View style={styles.buttonView}>
+      <View style={styles.imageView}>
+        <Image style={styles.image} source={findImage(active, type)} />
       </View>
-    </TouchableOpacity>
-  );
-}
+
+      <View style={styles.activeTextView}>
+        <Text
+          allowFontScaling={false}
+          style={{
+            ...styles.activeTextStyle,
+            color: active ? colors.secondary : colors.gray,
+          }}
+        >
+          {title}
+        </Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   mainView: { width: '20%', height: '100%', alignItems: 'center', justifyContent: 'flex-end' },
@@ -42,15 +42,15 @@ const styles = StyleSheet.create({
   imageView: { width: '100%', height: '70%', alignItems: 'center', justifyContent: 'center' },
   activeTextView: { width: '100%', height: '30%' },
   activeTextStyle: {
-    position: 'relative',
     bottom: '5%',
     width: '100%',
     height: '100%',
     color: colors.grey,
     textAlign: 'center',
-    fontSize: findFontSize(10),
+    position: 'relative',
     fontFamily: 'PoppinsBold',
+    fontSize: findFontSize(10),
   },
 });
 
-export default React.memo(NavigationButton);
+export default memo(NavigationButton);
