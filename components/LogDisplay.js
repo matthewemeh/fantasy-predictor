@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
   logView: { flexDirection: 'row', width: '100%', height: deviceHeight * 0.05 },
   textView: {
     width: '80%',
-    textAlign: 'left',
     color: colors.secondary,
     fontSize: findFontSize(11),
     textAlignVertical: 'center',
@@ -52,7 +51,6 @@ const styles = StyleSheet.create({
   },
   versionTextStyle: {
     width: '100%',
-    textAlign: 'left',
     paddingLeft: '10%',
     color: colors.secondary,
     fontFamily: 'PoppinsBold',

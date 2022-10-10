@@ -1,5 +1,6 @@
 import React, { useEffect, useState, memo } from 'react';
 import { Icon } from 'react-native-elements';
+import { LinearGradient } from 'expo-linear-gradient';
 import { View, Modal, StyleSheet, FlatList } from 'react-native';
 
 import Timer from './Timer';
@@ -256,13 +257,19 @@ const SimulationBoard = ({
           />
         </View>
 
-        <View style={styles.body}>
-          <FlatList data={events} renderItem={({ item }) => <EventActivity event={item} />} />
-        </View>
+        <LinearGradient colors={['#000000a0', colors.grey]} style={styles.gradientView} />
+
+        <FlatList
+          data={events}
+          style={styles.body}
+          renderItem={({ item }) => <EventActivity event={item} />}
+        />
+
+        <LinearGradient colors={[colors.grey, '#000000a0']} style={styles.gradientView} />
 
         <View style={styles.bottom}>
           <Icon
-            name='refresh'
+            name='undo'
             onPress={refresh}
             type='font-awesome'
             color={colors.forward}
@@ -283,8 +290,9 @@ const SimulationBoard = ({
 
 const styles = StyleSheet.create({
   main: { width: '100%', height: '100%' },
-  header: { width: '100%', height: '20%', borderBottomWidth: 2 },
-  body: { width: '100%', height: '70%', backgroundColor: colors.grey },
+  gradientView: { height: '0.5%', width: '100%' },
+  header: { width: '100%', height: '20%' },
+  body: { width: '100%', height: '69%', backgroundColor: colors.grey },
   bottom: {
     width: '100%',
     height: '10%',

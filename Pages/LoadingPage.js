@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Modal, StyleSheet, Image } from 'react-native';
+
 import { colors } from '../constants';
 
-function LoadingPage() {
-  return (
-    <Modal visible={true} transparent={true}>
-      <View style={styles.mainView}>
-        <Image source={require('../assets/loading.gif')} />
-      </View>
-    </Modal>
-  );
-}
+const LoadingPage = () => (
+  <Modal visible={true} transparent={true}>
+    <View style={styles.mainView}>
+      <Image source={require('../assets/loading.gif')} />
+    </View>
+  </Modal>
+);
 
 const styles = StyleSheet.create({
   mainView: {
@@ -21,4 +20,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(LoadingPage);
+export default memo(LoadingPage);

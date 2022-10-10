@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
     height: '10%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: '5%',
+    paddingHorizontal: '3%',
     backgroundColor: colors.forward,
   },
   body: { width: '100%', height: '80%', backgroundColor: colors.white },

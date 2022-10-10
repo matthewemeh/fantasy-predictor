@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
   textView: {
     height: '100%',
     width: '38.75%',
-    textAlign: 'left',
     fontFamily: 'PoppinsBold',
     textAlignVertical: 'center',
   },

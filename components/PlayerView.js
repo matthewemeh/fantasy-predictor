@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   captainBadgeText: {
     zIndex: 1,
     opacity: 0,
-    top: '30%',
+    top: '40%',
     left: '60%',
     textAlign: 'center',
     color: colors.white,

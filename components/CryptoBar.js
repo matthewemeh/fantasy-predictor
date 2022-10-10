@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
   addressText: {
     width: '73%',
     height: '80%',
-    textAlign: 'left',
     paddingLeft: '2%',
     color: colors.secondary,
     fontSize: findFontSize(13),

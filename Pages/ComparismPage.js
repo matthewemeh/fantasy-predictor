@@ -1,4 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View, ScrollView } from 'react-native';
 
 import InfoView from '../components/InfoView';
@@ -10,7 +11,6 @@ import {
   player,
   average,
   findData,
-  isNumber,
   findReturns,
   deviceWidth,
   findFontSize,
@@ -167,6 +167,8 @@ const ComparismPage = ({
           ))}
         </View>
 
+        <LinearGradient colors={['#000000a0', colors.grey]} style={styles.gradientView} />
+
         <ScrollView style={styles.infoView}>
           <InfoView
             type='reverse'
@@ -256,14 +258,15 @@ const styles = StyleSheet.create({
   },
   playerFrame: {
     width: '100%',
-    height: '25%',
-    borderBottomWidth: 2,
+    height: '24.5%',
+    paddingBottom: '5%',
     flexDirection: 'row',
     alignItems: 'center',
     borderColor: colors.secondary,
     justifyContent: 'space-evenly',
   },
   infoView: { width: '100%', height: '75%' },
+  gradientView: { height: '0.5%', width: '100%' },
 });
 
 export default memo(ComparismPage);

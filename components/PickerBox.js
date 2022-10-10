@@ -1,6 +1,6 @@
 import React, { useState, memo } from 'react';
+import { Text as AnimatableText } from 'react-native-animatable';
 import { View, StyleSheet, TouchableOpacity, Text, Modal, ScrollView } from 'react-native';
-// import { Picker } from "@react-native-community/picker";
 
 import { colors } from '../constants';
 import { deviceHeight, findFontSize } from '../utilities';
@@ -17,24 +17,35 @@ const PickerBox = ({
 }) => {
   const [opened, setOpened] = useState(false);
 
-  const openPicker = () => {
+  const togglePicker = () => {
     if (enabled) setOpened(!opened);
   };
 
+  const closePicker = () => setOpened(false);
+
   const onChange = item => {
     selectedItemHandler(item);
-    setOpened(false);
+    closePicker();
+  };
+
+  const animations = {
+    pickerDisabled: {
+      from: { backgroundColor: colors.white },
+      to: { backgroundColor: colors.grey },
+    },
   };
 
   return (
     <TouchableOpacity
-      onPress={openPicker}
+      onPress={togglePicker}
       activeOpacity={enabled ? 0.9 : 1}
       style={{ ...styles.mainView, ...extraStyles }}
     >
-      <Text
+      <AnimatableText
+        duration={400}
         numberOfLines={1}
         allowFontScaling={false}
+        animation={enabled ? null : animations.pickerDisabled}
         style={{
           ...styles.selectedValueStyle,
           backgroundColor: enabled ? colors.white : colors.grey,
@@ -42,21 +53,17 @@ const PickerBox = ({
         }}
       >
         {selectedValue}
-      </Text>
+      </AnimatableText>
 
-      <Modal visible={opened && enabled} onRequestClose={() => setOpened(false)} transparent={true}>
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setOpened(false)}
-          style={styles.modalViewContainer}
-        >
-          <View style={{ ...styles.listViewStyle, ...extraListStyles }}>
+      <Modal visible={opened && enabled} onRequestClose={closePicker} transparent={true}>
+        <TouchableOpacity activeOpacity={1} onPress={closePicker} style={styles.modalView}>
+          <View style={{ ...styles.listView, ...extraListStyles }}>
             <ScrollView>
               {list.map(item => (
                 <TouchableOpacity
                   activeOpacity={item === selectedValue ? 1 : 0.8}
                   style={{
-                    ...styles.listItemStyle,
+                    ...styles.listItem,
                     backgroundColor: item === selectedValue ? colors.grey : colors.white,
                   }}
                   onPress={item === selectedValue ? null : () => onChange(item)}
@@ -65,7 +72,7 @@ const PickerBox = ({
                   <Text
                     numberOfLines={1}
                     allowFontScaling={false}
-                    style={{ ...styles.textItemStyle, ...extraTextItemStyles }}
+                    style={{ ...styles.textItem, ...extraTextItemStyles }}
                   >
                     {item}
                   </Text>
@@ -78,16 +85,6 @@ const PickerBox = ({
     </TouchableOpacity>
   );
 };
-// <Picker
-//   selectedValue={selectedValue}
-//   enabled={enabled ? enabled : false}
-//   mode={mode ? mode : "dialog"}
-//   onValueChange={enabled ? props.onValueChange : null}
-// >
-//   {list.map(item => (
-//     <Picker.Item label={item} value={item} key={item} />
-//   ))}
-// </Picker>
 
 const styles = StyleSheet.create({
   mainView: { width: '45%', height: '70%', alignItems: 'center', justifyContent: 'center' },
@@ -102,7 +99,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PoppinsRegular',
     backgroundColor: colors.white,
   },
-  listViewStyle: {
+  listView: {
     top: '2.5%',
     left: '35%',
     width: '30%',
@@ -112,18 +109,17 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: colors.white,
   },
-  listItemStyle: { width: '100%', height: deviceHeight * 0.07 },
-  textItemStyle: {
+  listItem: { width: '100%', height: deviceHeight * 0.07 },
+  textItem: {
     width: '100%',
     height: '100%',
-    textAlign: 'left',
     color: colors.secondary,
     paddingHorizontal: '10%',
     fontSize: findFontSize(12),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },
-  modalViewContainer: { width: '100%', height: '100%' },
+  modalView: { width: '100%', height: '100%' },
 });
 
 export default memo(PickerBox);

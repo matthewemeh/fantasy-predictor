@@ -120,7 +120,6 @@ const styles = StyleSheet.create({
   textStyle: {
     width: '70%',
     height: '100%',
-    textAlign: 'left',
     paddingHorizontal: '5%',
     color: colors.secondary,
     textAlignVertical: 'center',

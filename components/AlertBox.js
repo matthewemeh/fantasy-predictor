@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
   titleView: {
     width: '100%',
     paddingLeft: '6%',
-    textAlign: 'left',
     borderTopLeftRadius: 7,
     borderTopRightRadius: 7,
     color: colors.secondary,
@@ -63,7 +62,6 @@ const styles = StyleSheet.create({
   messageView: {
     width: '100%',
     height: undefined,
-    textAlign: 'left',
     paddingHorizontal: '6%',
     color: colors.secondary,
     textAlignVertical: 'top',
