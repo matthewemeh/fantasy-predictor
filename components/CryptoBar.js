@@ -13,22 +13,22 @@ const CryptoBar = ({ address, name }) => {
 
   return (
     <View style={styles.mainView}>
-      <Text allowFontScaling={false} style={styles.nameTextStyle} numberOfLines={1}>
+      <Text allowFontScaling={false} style={styles.nameText} numberOfLines={1}>
         {name}
       </Text>
 
-      <Text allowFontScaling={false} style={styles.addressTextStyle} numberOfLines={1}>
+      <Text allowFontScaling={false} style={styles.addressText} numberOfLines={1}>
         {address}
       </Text>
 
-      <Icon
-        onPress={onPress}
-        name='file-text-o'
-        type='font-awesome'
-        size={findFontSize(25)}
-        style={styles.iconView}
-        color={colors.darkBlue}
-      />
+      <View onTouchStart={onPress}>
+        <Icon
+          name='file-text-o'
+          type='font-awesome'
+          size={findFontSize(25)}
+          color={colors.darkBlue}
+        />
+      </View>
     </View>
   );
 };
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  nameTextStyle: {
+  nameText: {
     width: '15%',
     height: '80%',
     borderRadius: 5,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PoppinsRegular',
     backgroundColor: colors.darkBlue,
   },
-  addressTextStyle: {
+  addressText: {
     width: '73%',
     height: '80%',
     textAlign: 'left',
@@ -65,12 +65,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
     backgroundColor: colors.white,
-  },
-  iconView: {
-    width: '10%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 
