@@ -1,43 +1,70 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { findFontSize } from '../utilities';
-import { colors } from '../constants';
 
-function Scoreboard({ score1, score2 }) {
-  return (
+import { colors } from '../constants';
+import { findFontSize, findAbbreviation } from '../utilities';
+
+const Scoreboard = ({ score1, score2, teamName1, teamName2, TeamAbbreviations }) => (
+  <View style={styles.scoreBoardView}>
+    <Text allowFontScaling={false} style={styles.teamTextStyle}>
+      {findAbbreviation(teamName1, TeamAbbreviations)}
+    </Text>
+
     <View style={styles.mainView}>
       <Text allowFontScaling={false} style={styles.textStyle}>
-        {score1 ? score1 : '0'}
+        {score1}
       </Text>
+
       <View style={styles.separatorView} />
+
       <Text allowFontScaling={false} style={styles.textStyle}>
-        {score2 ? score2 : '0'}
+        {score2}
       </Text>
     </View>
-  );
-}
+
+    <Text allowFontScaling={false} style={styles.teamTextStyle}>
+      {findAbbreviation(teamName2, TeamAbbreviations)}
+    </Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   mainView: {
-    flexDirection: 'row',
-    width: '49.5%',
     height: '80%',
+    width: '49.5%',
     borderRadius: 5,
-    backgroundColor: colors.forward,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.forward,
   },
   separatorView: { height: '60%', width: '1%', backgroundColor: colors.white },
   textStyle: {
     width: '49.5%',
     height: '100%',
     textAlign: 'center',
-    textAlignVertical: 'center',
-    color: colors.forward,
+    color: colors.white,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(33),
-    color: colors.white,
+    textAlignVertical: 'center',
+  },
+  scoreBoardView: {
+    width: '100%',
+    height: '50%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    justifyContent: 'space-evenly',
+  },
+  teamTextStyle: {
+    width: '25%',
+    height: '100%',
+    textAlign: 'center',
+    color: colors.forward,
+    fontFamily: 'PoppinsBold',
+    fontSize: findFontSize(19),
+    textAlignVertical: 'center',
   },
 });
 
-export default React.memo(Scoreboard);
+export default memo(Scoreboard);
