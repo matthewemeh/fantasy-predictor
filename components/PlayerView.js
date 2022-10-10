@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { Text as AnimatableText } from 'react-native-animatable';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 
 import { colors } from '../constants';
@@ -22,49 +23,63 @@ const PlayerView = ({
   extraTextStyles1,
   extraTextStyles2,
   extraShirtStyles,
-}) => (
-  <View style={{ ...styles.mainView, ...extraStyles }}>
-    <View style={styles.captainBadgeView}>
-      {captain && playerName && (
-        <Text allowFontScaling={false} style={styles.captainBadgeText}>
-          C
-        </Text>
-      )}
+}) => {
+  const animations = {
+    playerUnavailable: {
+      from: { backgroundColor: colors.contentViewColor },
+      to: { backgroundColor: colors.red },
+    },
+    captain: { from: { opacity: 0 }, to: { opacity: 1 } },
+    unCaptain: { from: { opacity: 0 }, to: { opacity: 0 } },
+  };
+
+  return (
+    <View style={{ ...styles.mainView, ...extraStyles }}>
+      <AnimatableText
+        duration={400}
+        allowFontScaling={false}
+        style={styles.captainBadgeText}
+        animation={captain && playerName ? animations.captain : animations.unCaptain}
+      >
+        C
+      </AnimatableText>
+
+      <TouchableOpacity
+        onPress={command}
+        style={styles.shirtView}
+        onLongPress={longCommand}
+        activeOpacity={activeOpacity || 0.6}
+      >
+        <Image
+          style={{ ...styles.image, ...extraShirtStyles }}
+          source={typeof imgVal == 'string' ? { uri: imgVal, headers: { Accept: '*/*' } } : imgVal}
+        />
+      </TouchableOpacity>
+
+      <Text
+        numberOfLines={1}
+        allowFontScaling={false}
+        style={{ ...styles.nameView, ...extraTextStyles1 }}
+      >
+        {playerName}
+      </Text>
+
+      <AnimatableText
+        duration={200}
+        allowFontScaling={false}
+        animation={available ? null : animations.playerUnavailable}
+        style={{
+          ...styles.contentView,
+          backgroundColor: available ? colors.contentViewColor : colors.red,
+          fontSize: findScaledFontSize(playerContent, maxTextLength, 8, 0.085),
+          ...extraTextStyles2,
+        }}
+      >
+        {playerContent}
+      </AnimatableText>
     </View>
-
-    <TouchableOpacity
-      onPress={command}
-      style={styles.shirtView}
-      onLongPress={longCommand}
-      activeOpacity={activeOpacity || 0.6}
-    >
-      <Image
-        style={{ ...styles.image, ...extraShirtStyles }}
-        source={typeof imgVal == 'string' ? { uri: imgVal, headers: { Accept: '*/*' } } : imgVal}
-      />
-    </TouchableOpacity>
-
-    <Text
-      numberOfLines={1}
-      allowFontScaling={false}
-      style={{ ...styles.nameView, ...extraTextStyles1 }}
-    >
-      {playerName}
-    </Text>
-
-    <Text
-      allowFontScaling={false}
-      style={{
-        ...styles.contentView,
-        backgroundColor: available ? colors.contentViewColor : colors.red,
-        fontSize: findScaledFontSize(playerContent, maxTextLength, 8, 0.085),
-        ...extraTextStyles2,
-      }}
-    >
-      {playerContent}
-    </Text>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   mainView: { width: '18.5%', height: '100%', justifyContent: 'flex-start' },
@@ -94,10 +109,10 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     backgroundColor: colors.contentViewColor,
   },
-  captainBadgeView: { width: '100%', height: '10%' },
   captainBadgeText: {
     zIndex: 1,
-    top: '330%',
+    opacity: 0,
+    top: '30%',
     left: '60%',
     textAlign: 'center',
     color: colors.white,

@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 
 import { colors } from '../constants';
-import { findArrow, deviceWidth, deviceHeight, findScaledFontSize } from '../utilities';
+import { findRotationAngle, deviceWidth, deviceHeight, findScaledFontSize } from '../utilities';
 
 const textHeight = Math.round(0.8 * 0.085 * deviceHeight);
 const textWidth = Math.round(0.3875 * deviceWidth);
@@ -18,53 +18,61 @@ const PlayerItem = ({
   playerIndex,
   extraStyles,
   activeOpacity,
-}) => (
-  <TouchableOpacity
-    onPress={enabled ? command : null}
-    activeOpacity={enabled ? activeOpacity : 1}
-    style={{
-      ...styles.mainView,
-      ...extraStyles,
-      backgroundColor: enabled ? colors.white : colors.grey,
-    }}
-  >
-    <View style={styles.imageView}>
-      <Image
-        source={
-          typeof shirtImage == 'string'
-            ? { uri: shirtImage, headers: { Accept: '*/*' } }
-            : shirtImage
-        }
-        style={styles.imageStyle}
-      />
-    </View>
+}) => {
+  const rotationAngle = findRotationAngle(playerIndex);
+  const arrowImage = require('../assets/arrowUp.webp');
 
-    <View style={styles.arrowView}>
-      <Image source={findArrow(playerIndex)} style={styles.arrowStyles} />
-    </View>
-
-    <Text
-      allowFontScaling={false}
+  return (
+    <TouchableOpacity
+      onPress={enabled ? command : null}
+      activeOpacity={enabled ? activeOpacity : 1}
       style={{
-        ...styles.textView,
-        paddingLeft: '3%',
-        fontSize: findScaledFontSize(playerName, maxTextLength, 11, 0.085),
+        ...styles.mainView,
+        ...extraStyles,
+        backgroundColor: enabled ? colors.white : colors.grey,
       }}
     >
-      {playerName}
-    </Text>
+      <View style={styles.imageView}>
+        <Image
+          source={
+            typeof shirtImage == 'string'
+              ? { uri: shirtImage, headers: { Accept: '*/*' } }
+              : shirtImage
+          }
+          style={styles.imageStyle}
+        />
+      </View>
 
-    <Text
-      allowFontScaling={false}
-      style={{
-        ...styles.textView,
-        fontSize: findScaledFontSize(team, maxTextLength, 11, 0.085),
-      }}
-    >
-      {team}
-    </Text>
-  </TouchableOpacity>
-);
+      <View style={styles.arrowView}>
+        <Image
+          source={arrowImage}
+          style={{ ...styles.arrowStyles, transform: [{ rotate: rotationAngle }] }}
+        />
+      </View>
+
+      <Text
+        allowFontScaling={false}
+        style={{
+          ...styles.textView,
+          paddingLeft: '3%',
+          fontSize: findScaledFontSize(playerName, maxTextLength, 11, 0.085),
+        }}
+      >
+        {playerName}
+      </Text>
+
+      <Text
+        allowFontScaling={false}
+        style={{
+          ...styles.textView,
+          fontSize: findScaledFontSize(team, maxTextLength, 11, 0.085),
+        }}
+      >
+        {team}
+      </Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   mainView: {
