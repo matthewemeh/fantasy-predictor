@@ -1,216 +1,274 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
+import { Icon } from 'react-native-elements';
+import { View as AnimatableView } from 'react-native-animatable';
 import { View, StyleSheet, Modal, FlatList, TextInput, StatusBar } from 'react-native';
-import { colors, fieldConstants } from '../constants';
+
+import PickerBox from './PickerBox';
 import PlayerItem from './PlayerItem';
-import PickerBox, { getSelectedItem } from './PickerBox';
-import { findOpponentAbbreviation, descendingPointsOrder, deviceHeight } from '../utilities';
 
-var selectedPlayerData = {};
-var selectedTeam = '';
-var selectedPosition = '';
+import { colors, fieldConstants } from '../constants';
+import {
+  deviceHeight,
+  findFontSize,
+  descendingPointsOrder,
+  findOpponentAbbreviation,
+} from '../utilities';
 
-function PlayerSelectModal(props) {
-  const teams = props.teams;
-  const playerKit = props.playerKit;
-  const goalieKit = props.goalieKit;
-  const playerData = props.playerData;
-  const playerInfo = props.playerInfo;
-  const currentIndex = props.currentIndex;
-  const nextOpponent = props.nextOpponent;
-  const posPickerEnabled = props.posPickerEnabled;
-  const teamPickerEnabled = props.teamPickerEnabled;
-  const TeamAbbreviations = props.TeamAbbreviations;
+const PlayerSelectModal = ({
+  teams,
+  visible,
+  playerKit,
+  goalieKit,
+  playerData,
+  chosenTeam,
+  playerInfo,
+  nextOpponent,
+  currentIndex,
+  setChosenTeam,
+  onSelectPlayer,
+  chosenPosition,
+  setTeamPredicted,
+  posPickerEnabled,
+  setChosenPosition,
+  TeamAbbreviations,
+  teamPickerEnabled,
+  setPlayerModalVisible,
+}) => {
+  const { positions } = fieldConstants;
   const [searchValue, setSearchValue] = useState('');
-  const [manualFilter, setManualFilter] = useState(false);
-  const [chosenTeam, setChosenTeam] = useState(`${props.chosenTeam}`);
-  const [chosenPosition, setChosenPosition] = useState(`${props.chosenPosition}`);
-  selectedTeam = chosenTeam;
-  selectedPosition = chosenPosition;
+  const [scrolling, setScrolling] = useState(false);
 
   const changeTextHandler = input => {
-    selectedTeam = input.length > 0 && teamPickerEnabled ? 'All Teams' : chosenTeam;
-    selectedPosition = input.length > 0 && posPickerEnabled ? 'All Positions' : chosenPosition;
-    setManualFilter(input.length > 0);
-    setChosenTeam(selectedTeam);
-    setChosenPosition(selectedPosition);
     setSearchValue(input);
+    setChosenTeam(input && teamPickerEnabled ? 'All Teams' : chosenTeam);
+    setChosenPosition(input && posPickerEnabled ? 'All Positions' : chosenPosition);
   };
 
   const findPlayers = () => {
     let filteredPlayerList = [];
-    let pos = `${chosenPosition.charAt(0).toLowerCase()}${chosenPosition.substring(
-      1,
-      chosenPosition.length - 1
-    )}`;
-    if (manualFilter) {
-      if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions')
+    const searchToLower = searchValue.toLowerCase();
+    const pos = chosenPosition.substring(0, chosenPosition.length - 1);
+
+    if (searchValue) {
+      if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions') {
         filteredPlayerList = playerData.filter(
-          item =>
-            item.playerName.toLowerCase().includes(searchValue.toLowerCase()) &&
-            item.position === pos
+          ({ playerName, position }) =>
+            playerName.toLowerCase().includes(searchToLower) && position === pos
         );
-      else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions')
+      } else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions') {
         filteredPlayerList = playerData.filter(
-          item =>
-            item.playerName.toLowerCase().includes(searchValue.toLowerCase()) &&
-            item.team === chosenTeam
+          ({ playerName, team }) =>
+            playerName.toLowerCase().includes(searchToLower) && team === chosenTeam
         );
-      else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions')
+      } else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions') {
         filteredPlayerList = playerData.filter(
-          item =>
-            item.playerName.toLowerCase().includes(searchValue.toLowerCase()) &&
-            item.team === chosenTeam &&
-            item.position === pos
+          ({ playerName, team, position }) =>
+            playerName.toLowerCase().includes(searchToLower) &&
+            team === chosenTeam &&
+            position === pos
         );
-      else
-        filteredPlayerList = playerData.filter(item =>
-          item.playerName.toLowerCase().includes(searchValue.toLowerCase())
+      } else {
+        filteredPlayerList = playerData.filter(({ playerName }) =>
+          playerName.toLowerCase().includes(searchToLower)
         );
-    } else if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions')
-      filteredPlayerList = playerData.filter(item => item.position === pos);
-    else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions')
-      filteredPlayerList = playerData.filter(item => item.team === chosenTeam);
-    else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions')
+      }
+    } else if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions') {
+      filteredPlayerList = playerData.filter(({ position }) => position === pos);
+    } else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions') {
+      filteredPlayerList = playerData.filter(({ team }) => team === chosenTeam);
+    } else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions') {
       filteredPlayerList = playerData.filter(
-        item => item.team === chosenTeam && item.position === pos
+        ({ team, position }) => team === chosenTeam && position === pos
       );
-    else filteredPlayerList = playerData;
+    } else filteredPlayerList = playerData;
+
     return filteredPlayerList.sort(descendingPointsOrder);
   };
 
-  function closeCommand() {
-    props.onRequestClose();
+  const closeCommand = () => {
     setSearchValue('');
-    setManualFilter(false);
-  }
+    setPlayerModalVisible(false);
+  };
 
-  function onSelectCommand(item) {
-    selectedPlayerData = item;
+  const onSelectCommand = newDetails => {
+    const { playerKey } = newDetails;
+
     setSearchValue('');
-    setManualFilter(false);
-    props.onSelectPlayer();
-  }
 
-  function separator() {
-    return (
-      <View style={{ backgroundColor: colors.grey, width: '100%', height: deviceHeight * 0.007 }} />
-    );
-  }
+    // update current player details
+    playerInfo[currentIndex] = newDetails;
+    setPlayerModalVisible(false);
+
+    if (setTeamPredicted) setTeamPredicted(false);
+    if (onSelectPlayer) onSelectPlayer(playerKey);
+  };
+
+  const stopScrolling = () => setTimeout(() => setScrolling(false), 500);
+
+  const startScrolling = () => setScrolling(true);
+
+  const separator = () => (
+    <View style={{ backgroundColor: colors.grey, width: '100%', height: deviceHeight * 0.007 }} />
+  );
+
+  const animations = {
+    popIn: {
+      from: { right: '-50%' },
+      to: { right: '8%' },
+    },
+    popOut: {
+      from: { right: '8%' },
+      to: { right: '-50%' },
+    },
+  };
 
   return (
     <Modal
-      visible={props.visible}
-      animationType={'slide'}
-      onRequestClose={closeCommand}
+      visible={visible}
+      animationType='slide'
       statusBarTranslucent={true}
+      onRequestClose={closeCommand}
     >
       <View style={styles.mainModalView}>
         <View style={styles.headerModalView}>
           <View style={styles.inputView}>
             <TextInput
-              allowFontScaling={false}
-              style={styles.input}
               blurOnSubmit
-              autoCorrect={false}
               maxLength={30}
-              placeholder={'Search'}
+              value={searchValue}
+              style={styles.input}
+              placeholder='Search'
+              allowFontScaling={false}
               placeholderTextColor={colors.grey}
               onChangeText={input => changeTextHandler(input)}
-              value={searchValue}
             />
           </View>
+
           <View style={styles.pickerView}>
             <PickerBox
+              list={positions}
               selectedValue={chosenPosition}
-              enabled={posPickerEnabled && !manualFilter}
-              list={fieldConstants.positions}
+              selectedItemHandler={setChosenPosition}
+              enabled={posPickerEnabled && !searchValue}
+              extraTextItemStyles={{ textTransform: 'capitalize' }}
+              extraSelectedValueStyles={{ textTransform: 'capitalize' }}
               extraListStyles={{ top: '11.5%', left: '7.5%', width: '38.4%' }}
-              onPickerClose={() => setChosenPosition(getSelectedItem())}
             />
             <PickerBox
-              selectedValue={chosenTeam}
-              enabled={teamPickerEnabled && !manualFilter}
               list={teams.sort()}
+              selectedValue={chosenTeam}
+              selectedItemHandler={setChosenTeam}
+              enabled={teamPickerEnabled && !searchValue}
+              extraTextItemStyles={{ textTransform: 'capitalize' }}
+              extraSelectedValueStyles={{ textTransform: 'capitalize' }}
               extraListStyles={{ top: '11.5%', left: '54%', width: '38.4%', marginBottom: '25%' }}
-              onPickerClose={() => setChosenTeam(getSelectedItem())}
             />
           </View>
         </View>
+
         <View style={styles.bodyModalView}>
           <FlatList
+            data={findPlayers()}
+            ItemSeparatorComponent={separator}
             initialNumToRender={Math.ceil(deviceHeight / 36)}
             maxToRenderPerBatch={Math.ceil(deviceHeight / 18)}
-            ItemSeparatorComponent={separator}
-            data={findPlayers()}
-            renderItem={({ item }) => (
-              <PlayerItem
-                playerName={item.playerName}
-                team={item.team}
-                playerIndex={item.index}
-                shirtImage={
-                  item.position === 'goalkeeper' ? goalieKit[item.team] : playerKit[item.team]
-                }
-                enabled={
-                  !playerInfo.find(
-                    player => player.playerKey === item.key || player.key === item.key
-                  )
-                }
-                command={() =>
-                  onSelectCommand({
-                    playerName: item.playerName,
-                    playerKey: item.key,
-                    key: currentIndex,
-                    shirtImage:
-                      item.position === 'goalkeeper' ? goalieKit[item.team] : playerKit[item.team],
-                    playerContent: findOpponentAbbreviation(
-                      item.team,
-                      nextOpponent,
-                      TeamAbbreviations
-                    ),
-                    captain: playerInfo[currentIndex].captain,
-                  })
-                }
-              />
-            )}
+            // onScrollBeginDrag={() => setScrolling(true)}
+            onScrollEndDrag={stopScrolling}
+            onTouchMove={startScrolling}
+            renderItem={({ item }) => {
+              const { team, index, playerName, position, key } = item;
+
+              return (
+                <PlayerItem
+                  team={team}
+                  activeOpacity={0.7}
+                  playerIndex={index}
+                  playerName={playerName}
+                  shirtImage={position === 'goalkeeper' ? goalieKit[team] : playerKit[team]}
+                  enabled={
+                    !playerInfo.find(player => player.playerKey === key || player.key === key)
+                  }
+                  command={() =>
+                    onSelectCommand({
+                      playerName,
+                      playerKey: key,
+                      key: currentIndex,
+                      captain: playerInfo[currentIndex].captain,
+                      playerContent: findOpponentAbbreviation(
+                        team,
+                        nextOpponent,
+                        TeamAbbreviations
+                      ),
+                      shirtImage: position === 'goalkeeper' ? goalieKit[team] : playerKit[team],
+                    })
+                  }
+                />
+              );
+            }}
           />
         </View>
+
+        <AnimatableView
+          duration={400}
+          style={styles.close}
+          onTouchStart={closeCommand}
+          animation={scrolling ? animations.popOut : animations.popIn}
+        >
+          <Icon
+            name='times'
+            type='font-awesome'
+            color={colors.white}
+            size={findFontSize(27)}
+            style={styles.closeIcon}
+          />
+        </AnimatableView>
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   inputView: { width: '85%', height: '50%', justifyContent: 'center' },
   pickerView: {
-    flexDirection: 'row',
     width: '85%',
     height: '50%',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'space-between',
   },
   input: {
     height: '65%',
     borderRadius: 4,
     paddingHorizontal: '5%',
-    backgroundColor: colors.white,
     color: colors.secondary,
     fontFamily: 'PoppinsRegular',
+    backgroundColor: colors.white,
   },
   mainModalView: { width: '100%', height: '100%', paddingTop: StatusBar.currentHeight },
   headerModalView: {
     width: '100%',
     height: '20%',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.forward,
+  },
+  bodyModalView: { width: '100%', height: '80%', backgroundColor: colors.grey },
+  close: {
+    width: 50,
+    height: 50,
+    elevation: 7,
+    right: '8%',
+    bottom: '8%',
+    borderRadius: 25,
+    position: 'absolute',
+    backgroundColor: colors.forward,
+  },
+  closeIcon: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bodyModalView: { width: '100%', height: '80%', backgroundColor: colors.grey },
 });
 
-export const getPlayerData = () => selectedPlayerData;
-
-export const getChosenPosition = () => selectedPosition;
-
-export const getChosenTeam = () => selectedTeam;
-
-export default React.memo(PlayerSelectModal);
+export default memo(PlayerSelectModal);
