@@ -36,12 +36,12 @@ export const findColor = (index, value1, value2, type = 'forward') => {
   }
 };
 
-export const findArrow = index => {
-  if (index >= 8) return require('./assets/Arrows/arrowUp.webp');
-  else if (index >= 6) return require('./assets/Arrows/arrowUpRight.webp');
-  else if (index >= 4) return require('./assets/Arrows/arrowRight.webp');
-  else if (index >= 2) return require('./assets/Arrows/arrowDownRight.webp');
-  else return require('./assets/Arrows/arrowDown.webp');
+export const findRotationAngle = index => {
+  if (index >= 8) return '0deg';
+  else if (index >= 6) return '45deg';
+  else if (index >= 4) return '90deg';
+  else if (index >= 2) return '135deg';
+  else return '180deg';
 };
 
 export const sum = array => (array.length > 0 ? array.reduce((x, y) => x + y) : 0);
