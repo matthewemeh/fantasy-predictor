@@ -81,6 +81,7 @@ const MorePage = ({ update, appVersion }) => {
       title: 'About',
       iconName: 'info-circle',
       expandable: true,
+      expandedHeight: 170,
       expandedContent: (
         <View style={{ ...styles.contentView, paddingHorizontal: '3%' }}>
           <Text allowFontScaling={false} style={styles.messageTextStyle}>
@@ -104,6 +105,7 @@ const MorePage = ({ update, appVersion }) => {
       title: 'Support Us',
       iconName: 'bitcoin',
       expandable: true,
+      expandedHeight: 240,
       expandedContent: (
         <View style={{ ...styles.contentView, marginTop: 5 }}>
           <CryptoBar name='BTC' address={update.btcAddress} />
@@ -119,13 +121,14 @@ const MorePage = ({ update, appVersion }) => {
 
   return (
     <ScrollView style={styles.mainView}>
-      {buttons.map(({ expandable, expandedContent, iconName, title, onPress }) => (
+      {buttons.map(({ expandable, expandedContent, iconName, title, onPress, expandedHeight }) => (
         <MoreBubble
           key={title}
           title={title}
           onPress={onPress}
           iconName={iconName}
           expandable={expandable}
+          expandedHeight={expandedHeight}
           expandedContent={expandedContent}
         />
       ))}

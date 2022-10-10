@@ -1,15 +1,47 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useRef, memo } from 'react';
 import { Icon } from 'react-native-elements';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import { View as AnimatableView } from 'react-native-animatable';
 
 import { colors } from '../constants';
 import { findFontSize } from '../utilities';
 
-const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent }) => {
+const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, expandedHeight }) => {
+  const bubble = useRef();
+  const dropdownIcon = useRef();
   const [expanded, setExpanded] = useState(false);
 
+  const animations = {
+    expand: {
+      from: { paddingVertical: 0, height: 60 },
+      to: { paddingVertical: 10, height: expandedHeight || 60 },
+    },
+    collapse: {
+      from: { paddingVertical: 10, height: expandedHeight || 60 },
+      to: { paddingVertical: 0, height: 60 },
+    },
+    rotate180: {
+      from: { transform: [{ rotate: '0deg' }] },
+      to: { transform: [{ rotate: '180deg' }] },
+    },
+    rotate0: {
+      from: { transform: [{ rotate: '180deg' }] },
+      to: { transform: [{ rotate: '0deg' }] },
+    },
+  };
+
   const handlePress = () => {
-    if (expandable) setExpanded(!expanded);
+    if (expandable) {
+      if (expanded) {
+        dropdownIcon.current.animate(animations.rotate0);
+        bubble.current.animate(animations.collapse);
+      } else {
+        dropdownIcon.current.animate(animations.rotate180);
+        bubble.current.animate(animations.expand);
+      }
+
+      setExpanded(!expanded);
+    }
     if (onPress) onPress();
   };
 
@@ -38,19 +70,26 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent }) =
       justifyContent: 'center',
       backgroundColor: colors.skyBlue,
       paddingVertical: expandable && expanded ? 10 : 0,
-      height: expandable && expanded ? undefined : 60,
+      height: expandable && expanded ? expandedHeight || 60 : 60,
     },
     iconView: { width: 25 },
     dropdownIcon: { width: 20 },
   });
 
   return (
-    <TouchableOpacity activeOpacity={1} onPress={handlePress} style={styles.viewStyle}>
+    <AnimatableView
+      ref={bubble}
+      duration={400}
+      activeOpacity={1}
+      onPress={handlePress}
+      style={styles.viewStyle}
+      onTouchStart={handlePress}
+    >
       <View style={styles.touchableHeaderView}>
         <Icon
           name={iconName}
-          style={styles.iconView}
           type='font-awesome'
+          style={styles.iconView}
           size={findFontSize(25)}
           color={colors.darkBlue}
         />
@@ -60,18 +99,20 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent }) =
         </Text>
 
         {expandable && (
-          <Icon
-            type='font-awesome'
-            size={findFontSize(25)}
-            color={colors.darkBlue}
-            style={styles.dropdownIcon}
-            name={expanded ? 'caret-up' : 'caret-down'}
-          />
+          <AnimatableView duration={400} ref={dropdownIcon}>
+            <Icon
+              name='caret-down'
+              type='font-awesome'
+              size={findFontSize(25)}
+              color={colors.darkBlue}
+              style={styles.dropdownIcon}
+            />
+          </AnimatableView>
         )}
       </View>
 
       {expanded && <View style={{ width: '100%', flex: 1 }}>{expandedContent}</View>}
-    </TouchableOpacity>
+    </AnimatableView>
   );
 };
 
