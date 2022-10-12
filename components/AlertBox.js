@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Modal } from 'react-native';
 
 import Button from '../components/Button';
 
@@ -8,8 +8,8 @@ import { deviceHeight, findFontSize } from '../utilities';
 
 const AlertBox = ({ title, message, buttons, visible, onRequestClose }) => (
   <Modal visible={visible} transparent={true} onRequestClose={onRequestClose}>
-    <TouchableOpacity style={styles.mainView} onPress={onRequestClose} activeOpacity={1}>
-      <View style={styles.containerView}>
+    <View style={styles.mainView} onTouchStart={onRequestClose}>
+      <View style={styles.containerView} onTouchStart={e => e.stopPropagation()}>
         <Text allowFontScaling={false} style={styles.titleView}>
           {title}
         </Text>
@@ -34,7 +34,7 @@ const AlertBox = ({ title, message, buttons, visible, onRequestClose }) => (
           ))}
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   </Modal>
 );
 
@@ -46,38 +46,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.alertBackground,
   },
-  containerView: { width: '70%', height: undefined, elevation: 10 },
+  containerView: { width: '70%', elevation: 10, borderRadius: 7, backgroundColor: colors.white },
   titleView: {
     width: '100%',
     paddingLeft: '6%',
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
     color: colors.secondary,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(17),
     textAlignVertical: 'center',
     height: 0.06 * deviceHeight,
-    backgroundColor: colors.white,
   },
   messageView: {
     width: '100%',
-    height: undefined,
     paddingHorizontal: '6%',
     color: colors.secondary,
     textAlignVertical: 'top',
     fontSize: findFontSize(13),
     fontFamily: 'PoppinsRegular',
-    backgroundColor: colors.white,
   },
   buttonsView: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomLeftRadius: 7,
     justifyContent: 'flex-end',
-    borderBottomRightRadius: 7,
     height: 0.06 * deviceHeight,
-    backgroundColor: colors.white,
   },
 });
 
