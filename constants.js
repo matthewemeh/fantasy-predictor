@@ -25,17 +25,10 @@ export const fieldConstants = {
   formations: ['3-5-2', '3-4-3', '4-4-2', '4-3-3', '4-5-1', '5-3-2', '5-2-3', '5-4-1'],
 };
 
-export const activeNavButton = {
-  compare: require('./assets/NavigationImages/compare_active.webp'),
-  selection: require('./assets/NavigationImages/selection_active.webp'),
-  settings: require('./assets/NavigationImages/settings_active.webp'),
-  shirt: require('./assets/NavigationImages/shirt_active.webp'),
-  simulate: require('./assets/NavigationImages/simulate_active.webp'),
-};
-export const inactiveNavButton = {
-  compare: require('./assets/NavigationImages/compare_inactive.webp'),
-  selection: require('./assets/NavigationImages/selection_inactive.webp'),
-  settings: require('./assets/NavigationImages/settings_inactive.webp'),
-  shirt: require('./assets/NavigationImages/shirt_inactive.webp'),
-  simulate: require('./assets/NavigationImages/simulate_inactive.webp'),
+export const navIcon = {
+  more: require('./assets/NavigationImages/settings.webp'),
+  predict: require('./assets/NavigationImages/shirt.webp'),
+  scout: require('./assets/NavigationImages/selection.webp'),
+  compare: require('./assets/NavigationImages/compare.webp'),
+  simulate: require('./assets/NavigationImages/simulate.webp'),
 };
