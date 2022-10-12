@@ -122,7 +122,7 @@ export default function App() {
     if (update.length > 0) {
       const { info, currentVersion, updateLink } = update[0];
 
-      if (info) {
+      if (info && loadedData === 9) {
         setAlertComponents({
           title: 'Info',
           message: info,
@@ -131,6 +131,7 @@ export default function App() {
         });
         setAlertVisible(true);
       }
+
       if (sum(numbersInString(currentVersion)) > sum(numbersInString(appVersion))) {
         setAlertComponents({
           onCloseAlert: null,
@@ -144,7 +145,7 @@ export default function App() {
     }
   };
 
-  useEffect(checkForUpdate, [update]);
+  useEffect(checkForUpdate, [update, loadedData]);
 
   useEffect(() => {
     let tempLoadedData = 0;
