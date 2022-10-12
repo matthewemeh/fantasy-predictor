@@ -8,6 +8,7 @@ import PlayerItem from './PlayerItem';
 
 import { colors, fieldConstants } from '../constants';
 import {
+  deviceWidth,
   deviceHeight,
   findFontSize,
   descendingPointsOrder,
@@ -36,7 +37,6 @@ const PlayerSelectModal = ({
 }) => {
   const { positions } = fieldConstants;
   const [searchValue, setSearchValue] = useState('');
-  const [scrolling, setScrolling] = useState(false);
 
   const changeTextHandler = input => {
     setSearchValue(input);
@@ -103,23 +103,44 @@ const PlayerSelectModal = ({
     if (onSelectPlayer) onSelectPlayer(playerKey);
   };
 
-  const stopScrolling = () => setTimeout(() => setScrolling(false), 500);
+  const separator = () => <View style={styles.separator} />;
 
-  const startScrolling = () => setScrolling(true);
+  const PLAYER_ITEM_HEIGHT = deviceHeight * 0.085;
 
-  const separator = () => (
-    <View style={{ backgroundColor: colors.grey, width: '100%', height: deviceHeight * 0.007 }} />
-  );
+  const getItemLayout = (data, index) => ({
+    length: PLAYER_ITEM_HEIGHT,
+    offset: PLAYER_ITEM_HEIGHT * index,
+    index,
+  });
+
+  const renderItem = ({ item }) => {
+    const { team, index, playerName, position, key } = item;
+
+    return (
+      <PlayerItem
+        team={team}
+        activeOpacity={0.7}
+        playerIndex={index}
+        playerName={playerName}
+        shirtImage={position === 'goalkeeper' ? goalieKit[team] : playerKit[team]}
+        enabled={!playerInfo.find(player => player.playerKey === key || player.key === key)}
+        command={() =>
+          onSelectCommand({
+            playerName,
+            playerKey: key,
+            key: currentIndex,
+            captain: playerInfo[currentIndex].captain,
+            playerContent: findOpponentAbbreviation(team, nextOpponent, TeamAbbreviations),
+            shirtImage: position === 'goalkeeper' ? goalieKit[team] : playerKit[team],
+          })
+        }
+      />
+    );
+  };
 
   const animations = {
-    popIn: {
-      from: { right: '-50%' },
-      to: { right: '8%' },
-    },
-    popOut: {
-      from: { right: '8%' },
-      to: { right: '-50%' },
-    },
+    popIn: { from: { right: '-50%' }, to: { right: '8%' } },
+    popOut: { from: { right: '8%' }, to: { right: '-50%' } },
   };
 
   return (
@@ -139,6 +160,7 @@ const PlayerSelectModal = ({
               style={styles.input}
               placeholder='Search'
               allowFontScaling={false}
+              selectionColor={colors.secondary}
               placeholderTextColor={colors.grey}
               onChangeText={input => changeTextHandler(input)}
             />
@@ -166,54 +188,17 @@ const PlayerSelectModal = ({
           </View>
         </View>
 
-        <View style={styles.bodyModalView}>
-          <FlatList
-            data={findPlayers()}
-            ItemSeparatorComponent={separator}
-            initialNumToRender={Math.ceil(deviceHeight / 36)}
-            maxToRenderPerBatch={Math.ceil(deviceHeight / 18)}
-            // onScrollBeginDrag={() => setScrolling(true)}
-            onScrollEndDrag={stopScrolling}
-            onTouchMove={startScrolling}
-            renderItem={({ item }) => {
-              const { team, index, playerName, position, key } = item;
+        <FlatList
+          data={findPlayers()}
+          renderItem={renderItem}
+          style={styles.bodyModalView}
+          getItemLayout={getItemLayout}
+          ItemSeparatorComponent={separator}
+          initialNumToRender={Math.ceil(deviceHeight / 36)}
+          maxToRenderPerBatch={Math.ceil(deviceHeight / 18)}
+        />
 
-              return (
-                <PlayerItem
-                  team={team}
-                  activeOpacity={0.7}
-                  playerIndex={index}
-                  playerName={playerName}
-                  shirtImage={position === 'goalkeeper' ? goalieKit[team] : playerKit[team]}
-                  enabled={
-                    !playerInfo.find(player => player.playerKey === key || player.key === key)
-                  }
-                  command={() =>
-                    onSelectCommand({
-                      playerName,
-                      playerKey: key,
-                      key: currentIndex,
-                      captain: playerInfo[currentIndex].captain,
-                      playerContent: findOpponentAbbreviation(
-                        team,
-                        nextOpponent,
-                        TeamAbbreviations
-                      ),
-                      shirtImage: position === 'goalkeeper' ? goalieKit[team] : playerKit[team],
-                    })
-                  }
-                />
-              );
-            }}
-          />
-        </View>
-
-        <AnimatableView
-          duration={400}
-          style={styles.close}
-          onTouchStart={closeCommand}
-          animation={scrolling ? animations.popOut : animations.popIn}
-        >
+        <AnimatableView duration={400} style={styles.close} onTouchStart={closeCommand}>
           <Icon
             name='times'
             type='font-awesome'
@@ -254,14 +239,14 @@ const styles = StyleSheet.create({
   },
   bodyModalView: { width: '100%', height: '80%', backgroundColor: colors.grey },
   close: {
-    width: 50,
-    height: 50,
     elevation: 7,
     right: '8%',
     bottom: '8%',
-    borderRadius: 25,
     position: 'absolute',
+    width: 0.15 * deviceWidth,
+    height: 0.15 * deviceWidth,
     backgroundColor: colors.forward,
+    borderRadius: 0.075 * deviceWidth,
   },
   closeIcon: {
     width: '100%',
@@ -269,6 +254,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  separator: { width: '100%', height: deviceHeight * 0.005 },
 });
 
 export default memo(PlayerSelectModal);
