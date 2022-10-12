@@ -214,9 +214,9 @@ export default function App() {
     >
       <StatusBar translucent={true} />
 
-      {loadedData === 9 && fontLoaded ? null : <LoadingPage />}
+      {(loadedData === 9 && fontLoaded) || <LoadingPage />}
 
-      {loadedData === 9 && fontLoaded ? (
+      {loadedData === 9 && fontLoaded && (
         <ScoutPage
           teams={teams[0].teams}
           playerData={playerData}
@@ -231,9 +231,9 @@ export default function App() {
           setAlertComponents={setAlertComponents}
           TeamAbbreviations={TeamAbbreviations[0]}
         />
-      ) : null}
+      )}
 
-      {loadedData === 9 && fontLoaded ? (
+      {loadedData === 9 && fontLoaded && (
         <ComparismPage
           teams={teams[0].teams}
           playerData={playerData}
@@ -245,9 +245,9 @@ export default function App() {
           StandardRatings={StandardRatings[0]}
           TeamAbbreviations={TeamAbbreviations[0]}
         />
-      ) : null}
+      )}
 
-      {loadedData === 9 && fontLoaded ? (
+      {loadedData === 9 && fontLoaded && (
         <FantasyPage
           teams={teams[0].teams}
           playerData={playerData}
@@ -262,9 +262,9 @@ export default function App() {
           setAlertComponents={setAlertComponents}
           TeamAbbreviations={TeamAbbreviations[0]}
         />
-      ) : null}
+      )}
 
-      {loadedData === 9 && fontLoaded ? (
+      {loadedData === 9 && fontLoaded && (
         <SimulationPage
           teams={teams[0].teams}
           playerData={playerData}
@@ -278,11 +278,11 @@ export default function App() {
           setAlertComponents={setAlertComponents}
           TeamAbbreviations={TeamAbbreviations[0]}
         />
-      ) : null}
+      )}
 
-      {loadedData === 9 && fontLoaded ? (
+      {loadedData === 9 && fontLoaded && (
         <MorePage update={update[0]} appVersion={appVersion} visible={activeNavIndex === 5} />
-      ) : null}
+      )}
 
       {fontLoaded && (
         <ConnectionErrorPage
