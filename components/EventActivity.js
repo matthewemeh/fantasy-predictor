@@ -58,7 +58,6 @@ const EventActivity = ({ event }) => {
 const styles = StyleSheet.create({
   mainView: {
     width: '100%',
-    marginBottom: 3,
     flexDirection: 'row',
     alignItems: 'center',
     height: deviceHeight * 0.085,

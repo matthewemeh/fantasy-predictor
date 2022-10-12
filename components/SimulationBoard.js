@@ -14,6 +14,7 @@ import {
   findReturns,
   findFontSize,
   randomSelect,
+  deviceHeight,
   getRndInteger,
 } from '../utilities';
 
@@ -242,6 +243,18 @@ const SimulationBoard = ({
     setScore2(0);
   };
 
+  const PLAYER_ITEM_HEIGHT = deviceHeight * 0.085;
+
+  const separator = () => <View style={styles.separator} />;
+
+  const getItemLayout = (data, index) => ({
+    length: PLAYER_ITEM_HEIGHT,
+    offset: PLAYER_ITEM_HEIGHT * index,
+    index,
+  });
+
+  const renderItem = ({ item }) => <EventActivity event={item} />;
+
   return (
     <Modal visible={visible} onRequestClose={onRequestClose}>
       <View style={styles.main}>
@@ -262,7 +275,9 @@ const SimulationBoard = ({
         <FlatList
           data={events}
           style={styles.body}
-          renderItem={({ item }) => <EventActivity event={item} />}
+          renderItem={renderItem}
+          getItemLayout={getItemLayout}
+          ItemSeparatorComponent={separator}
         />
 
         <LinearGradient colors={[colors.grey, '#000000a0']} style={styles.gradientView} />
@@ -300,6 +315,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
+  separator: { width: '100%', height: deviceHeight * 0.005 },
 });
 
 export default memo(SimulationBoard);
