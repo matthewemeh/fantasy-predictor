@@ -190,9 +190,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => setConnectionErrorState(loadedData < 9), 15000);
-    return () => clearTimeout(timer);
-  }, [loadedData]);
+    if (loadedData < 9 && !connectionErrorState) {
+      const timer = setTimeout(() => setConnectionErrorState(loadedData < 9), 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [loadedData, connectionErrorState]);
 
   useEffect(() => {
     if (loadedData === 9 && fontLoaded) {
@@ -291,13 +293,15 @@ export default function App() {
         />
       )}
 
-      <AlertBox
-        visible={alertVisible}
-        title={alertComponents.title}
-        message={alertComponents.message}
-        buttons={alertComponents.buttons}
-        onRequestClose={alertComponents.onCloseAlert}
-      />
+      {fontLoaded && (
+        <AlertBox
+          visible={alertVisible}
+          title={alertComponents.title}
+          message={alertComponents.message}
+          buttons={alertComponents.buttons}
+          onRequestClose={alertComponents.onCloseAlert}
+        />
+      )}
 
       {fontLoaded && (
         <View style={styles.bottomView}>
