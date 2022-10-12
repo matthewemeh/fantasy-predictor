@@ -4,6 +4,7 @@ import PlayerPage from './PlayerPage';
 
 const FantasyPage = ({
   teams,
+  visible,
   playerKit,
   goalieKit,
   currentGW,
@@ -12,11 +13,14 @@ const FantasyPage = ({
   playerData,
   nextOpponent,
   StandardRatings,
+  setAlertVisible,
   TeamAbbreviations,
+  setAlertComponents,
 }) => (
   <PlayerPage
     type='fantasy'
     teams={teams}
+    visible={visible}
     playerKit={playerKit}
     goalieKit={goalieKit}
     currentGW={currentGW}
@@ -24,8 +28,10 @@ const FantasyPage = ({
     selections={selections}
     playerData={playerData}
     nextOpponent={nextOpponent}
+    setAlertVisible={setAlertVisible}
     StandardRatings={StandardRatings}
     TeamAbbreviations={TeamAbbreviations}
+    setAlertComponents={setAlertComponents}
   />
 );
 

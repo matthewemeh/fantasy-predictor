@@ -9,7 +9,7 @@ import MoreBubble from '../components/MoreBubble';
 import { colors } from '../constants';
 import { numbersInString, sum, findFontSize, defaultAdHeight } from '../utilities';
 
-const MorePage = ({ update, appVersion }) => {
+const MorePage = ({ update, appVersion, visible }) => {
   // componentDidMount
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
 
@@ -120,7 +120,7 @@ const MorePage = ({ update, appVersion }) => {
   ];
 
   return (
-    <ScrollView style={styles.mainView}>
+    <ScrollView style={{ ...styles.mainView, display: visible ? 'flex' : 'none' }}>
       {buttons.map(({ expandable, expandedContent, iconName, title, onPress, expandedHeight }) => (
         <MoreBubble
           key={title}

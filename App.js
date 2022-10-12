@@ -1,52 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  LogBox,
-  KeyboardAvoidingView,
-  Platform,
-  StatusBar,
-  Linking,
-} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
+import {
+  View,
+  LogBox,
+  Linking,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  KeyboardAvoidingView,
+} from 'react-native';
 
-import { numbersInString, sum } from './utilities';
-import { colors } from './constants';
-import AlertBox from './components/AlertBox';
-import NavigationButton from './components/NavigationButton';
-import FantasyPage from './Pages/FantasyPage';
 import MorePage from './Pages/MorePage';
 import ScoutPage from './Pages/ScoutPage';
-import SimulationPage from './Pages/SimulationPage';
+import AlertBox from './components/AlertBox';
 import LoadingPage from './Pages/LoadingPage';
+import FantasyPage from './Pages/FantasyPage';
+import ComparismPage from './Pages/ComparismPage';
+import SimulationPage from './Pages/SimulationPage';
+import NavigationButton from './components/NavigationButton';
 import ConnectionErrorPage from './Pages/ConnectionErrorPage';
+
+import { colors } from './constants';
+import { numbersInString, sum } from './utilities';
+
 import db from './firebase';
 import { onSnapshot, collection, query, where } from 'firebase/firestore';
-import ComparismPage from './Pages/ComparismPage';
 
 export default function App() {
   LogBox.ignoreLogs(['Setting a timer', 'VirtualizedList']);
+
   const [fontLoaded] = useFonts({
-    PoppinsRegular: require('./assets/fonts/Poppins-Regular.ttf'),
     PoppinsBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
+    PoppinsRegular: require('./assets/fonts/Poppins-Regular.ttf'),
   });
   const fieldImage = require('./assets/field.png');
-  const [button1_state, setButton1_state] = useState(false);
-  const [button2_state, setButton2_state] = useState(false);
-  const [button3_state, setButton3_state] = useState(true);
-  const [button4_state, setButton4_state] = useState(false);
-  const [button5_state, setButton5_state] = useState(false);
   const [loadedData, setLoadedData] = useState(0);
-  const [alertState, setAlertState] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [activeNavIndex, setActiveNavIndex] = useState(0);
   const [alertComponents, setAlertComponents] = useState({
     title: '',
     message: '',
     buttons: [],
     onCloseAlert: null,
   });
-  const appVersion = '2023-2024_3';
-  const [queryComplete, setQueryComplete] = useState(false);
+
+  const appVersion = '2023-2024_9';
   const [teams, setTeams] = useState([]);
   const [update, setUpdate] = useState([]);
   const [selections, setSelections] = useState([]);
@@ -58,87 +57,92 @@ export default function App() {
   const [TeamAbbreviations, setTeamAbbreviations] = useState([]);
   const [connectionErrorState, setConnectionErrorState] = useState(false);
 
-  function getPlayerData(relegatedTeams) {
+  const getPlayerData = relegatedTeams => {
+    if (playerData.length > 0) return;
+
+    let correctedRelegatedTeams = relegatedTeams;
+
     // relegated teams' array length must be at least 1 and should never exceed 10!!!
-    if (relegatedTeams.length === 0) relegatedTeams = [''];
-    while (relegatedTeams.length > 10) relegatedTeams.pop();
+    if (correctedRelegatedTeams.length === 0) correctedRelegatedTeams = [''];
+    while (correctedRelegatedTeams.length > 10) correctedRelegatedTeams.pop();
 
-    if (playerData.length === 0) {
-      const q = query(collection(db, 'players'), where('team', 'not-in', relegatedTeams));
-      onSnapshot(q, querySnapshot => querySnapshot.forEach(doc => playerData.push(doc.data())));
-      setQueryComplete(true);
-    }
-  }
+    const collectionRef = collection(db, 'players');
+    const q = query(collectionRef, where('team', 'not-in', correctedRelegatedTeams));
 
-  function getTeams() {
+    onSnapshot(q, snapshot => setPlayerData(snapshot.docs.map(doc => doc.data())));
+  };
+
+  const getTeams = () => {
     onSnapshot(collection(db, 'teams'), snapshot => setTeams(snapshot.docs.map(doc => doc.data())));
-  }
+  };
 
-  function getRatings() {
+  const getRatings = () => {
     onSnapshot(collection(db, 'StandardRatings'), snapshot =>
       setStandardRatings(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function getNextOpponents() {
+  const getNextOpponents = () => {
     onSnapshot(collection(db, 'nextOpponent'), snapshot =>
       setNextOpponent(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function getAbbreviations() {
+  const getAbbreviations = () => {
     onSnapshot(collection(db, 'abbreviations'), snapshot =>
       setTeamAbbreviations(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function getSelections() {
+  const getSelections = () => {
     onSnapshot(collection(db, 'selection'), snapshot =>
       setSelections(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function getRelegatedTeams() {
+  const getRelegatedTeams = () => {
     onSnapshot(collection(db, 'relegatedTeams'), snapshot =>
       setRelegatedTeams(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function getUpdates() {
+  const getUpdates = () => {
     onSnapshot(collection(db, 'updates'), snapshot =>
       setUpdate(snapshot.docs.map(doc => doc.data()))
     );
-  }
+  };
 
-  function checkForUpdate() {
-    if (update.length !== 0) {
-      if (update[0].info !== '') {
-        setAlertComponents({
-          title: 'Info',
-          message: `${update[0].info}`,
-          buttons: [['OK', closeAlert]],
-          onCloseAlert: closeAlert,
-        });
-        setAlertState(true);
-      }
-      if (sum(numbersInString(update[0].currentVersion)) > sum(numbersInString(appVersion))) {
-        setAlertComponents({
-          title: 'Update Available',
-          message:
-            'There is an update available for this app. Please kindly update to enjoy the latest features.',
-          buttons: [['UPDATE', () => Linking.openURL(update[0].updateLink)]],
-          onCloseAlert: null,
-        });
-        setAlertState(true);
-      }
-    }
-  }
-
-  function getShirtLinks() {
+  const getShirtLinks = () => {
     onSnapshot(collection(db, 'teamImageUrls'), snapshot => {
       setShirtLinks(snapshot.docs.map(doc => doc.data()));
     });
-  }
+  };
+
+  const checkForUpdate = () => {
+    if (update.length > 0) {
+      const { info, currentVersion, updateLink } = update[0];
+
+      if (info) {
+        setAlertComponents({
+          title: 'Info',
+          message: info,
+          onCloseAlert: closeAlert,
+          buttons: [{ text: 'OK', onPress: closeAlert }],
+        });
+        setAlertVisible(true);
+      }
+      if (sum(numbersInString(currentVersion)) > sum(numbersInString(appVersion))) {
+        setAlertComponents({
+          onCloseAlert: null,
+          title: 'Update Available',
+          buttons: [{ text: 'UPDATE', onPress: () => Linking.openURL(updateLink) }],
+          message:
+            'There is an update available for this app. Please kindly update to enjoy the latest features.',
+        });
+        setAlertVisible(true);
+      }
+    }
+  };
 
   useEffect(checkForUpdate, [update]);
 
@@ -146,32 +150,33 @@ export default function App() {
     let tempLoadedData = 0;
     [
       teams,
-      selections,
-      relegatedTeams,
-      TeamAbbreviations,
-      nextOpponent,
-      StandardRatings,
       update,
+      playerData,
       shirtLinks,
-    ].map(item => (tempLoadedData += item.length > 0));
-    setLoadedData(tempLoadedData + queryComplete);
+      selections,
+      nextOpponent,
+      relegatedTeams,
+      StandardRatings,
+      TeamAbbreviations,
+    ].forEach(item => (tempLoadedData += item.length > 0));
+    setLoadedData(tempLoadedData);
   }, [
-    playerData,
     teams,
-    selections,
-    relegatedTeams,
-    TeamAbbreviations,
-    nextOpponent,
-    StandardRatings,
     update,
+    playerData,
+    selections,
     shirtLinks,
-    queryComplete,
+    nextOpponent,
+    relegatedTeams,
+    StandardRatings,
+    TeamAbbreviations,
   ]);
 
   useEffect(() => {
     if (relegatedTeams.length > 0) getPlayerData(relegatedTeams[0].relegatedTeams);
   }, [relegatedTeams]);
 
+  // componentDidMount
   useEffect(() => {
     if (teams.length === 0) getTeams();
     if (update.length === 0) getUpdates();
@@ -191,73 +196,102 @@ export default function App() {
   useEffect(() => {
     if (loadedData === 9 && fontLoaded) {
       setConnectionErrorState(false);
-      switchActiveButton(3);
-      setContent(
-        <FantasyPage
-          playerData={playerData}
-          teams={teams[0].teams}
-          playerKit={shirtLinks[0]}
-          goalieKit={shirtLinks[1]}
-          fieldImage={fieldImage}
-          nextOpponent={nextOpponent[0]}
-          TeamAbbreviations={TeamAbbreviations[0]}
-          StandardRatings={StandardRatings[0]}
-        />
-      );
+      setActiveNavIndex(3);
     }
   }, [loadedData, fontLoaded]);
 
-  function switchActiveButton(n) {
-    setButton1_state(false);
-    setButton2_state(false);
-    setButton3_state(false);
-    setButton4_state(false);
-    setButton5_state(false);
-    switch (n) {
-      case 1:
-        setButton1_state(true);
-        break;
-      case 2:
-        setButton2_state(true);
-        break;
-      case 3:
-        setButton3_state(true);
-        break;
-      case 4:
-        setButton4_state(true);
-        break;
-      case 5:
-        setButton5_state(true);
-        break;
-    }
-  }
-
-  function closeAlert() {
-    setAlertState(false);
-  }
-
-  const [content, setContent] = useState(<LoadingPage />);
+  const closeAlert = () => setAlertVisible(false);
 
   StatusBar.setBackgroundColor('#00000050');
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
-      enabled={Platform.OS === 'ios' ? true : false}
+      enabled={Platform.OS === 'ios'}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <StatusBar translucent={true}></StatusBar>
+      <StatusBar translucent={true} />
 
-      {content}
+      {loadedData === 9 && fontLoaded ? null : <LoadingPage />}
 
-      <ConnectionErrorPage
-        visible={connectionErrorState && fontLoaded}
-        command={() => setConnectionErrorState(false)}
-      />
+      {loadedData === 9 && fontLoaded ? (
+        <ScoutPage
+          teams={teams[0].teams}
+          playerData={playerData}
+          fieldImage={fieldImage}
+          playerKit={shirtLinks[0]}
+          goalieKit={shirtLinks[1]}
+          selections={selections[0]}
+          visible={activeNavIndex === 1}
+          nextOpponent={nextOpponent[0]}
+          currentGW={update[0].currentGW}
+          setAlertVisible={setAlertVisible}
+          setAlertComponents={setAlertComponents}
+          TeamAbbreviations={TeamAbbreviations[0]}
+        />
+      ) : null}
+
+      {loadedData === 9 && fontLoaded ? (
+        <ComparismPage
+          teams={teams[0].teams}
+          playerData={playerData}
+          playerKit={shirtLinks[0]}
+          goalieKit={shirtLinks[1]}
+          visible={activeNavIndex === 2}
+          nextOpponent={nextOpponent[0]}
+          currentGW={update[0].currentGW}
+          StandardRatings={StandardRatings[0]}
+          TeamAbbreviations={TeamAbbreviations[0]}
+        />
+      ) : null}
+
+      {loadedData === 9 && fontLoaded ? (
+        <FantasyPage
+          teams={teams[0].teams}
+          playerData={playerData}
+          fieldImage={fieldImage}
+          playerKit={shirtLinks[0]}
+          goalieKit={shirtLinks[1]}
+          visible={activeNavIndex === 3}
+          nextOpponent={nextOpponent[0]}
+          currentGW={update[0].currentGW}
+          setAlertVisible={setAlertVisible}
+          StandardRatings={StandardRatings[0]}
+          setAlertComponents={setAlertComponents}
+          TeamAbbreviations={TeamAbbreviations[0]}
+        />
+      ) : null}
+
+      {loadedData === 9 && fontLoaded ? (
+        <SimulationPage
+          teams={teams[0].teams}
+          playerData={playerData}
+          fieldImage={fieldImage}
+          playerKit={shirtLinks[0]}
+          goalieKit={shirtLinks[1]}
+          visible={activeNavIndex === 4}
+          nextOpponent={nextOpponent[0]}
+          setAlertVisible={setAlertVisible}
+          StandardRatings={StandardRatings[0]}
+          setAlertComponents={setAlertComponents}
+          TeamAbbreviations={TeamAbbreviations[0]}
+        />
+      ) : null}
+
+      {loadedData === 9 && fontLoaded ? (
+        <MorePage update={update[0]} appVersion={appVersion} visible={activeNavIndex === 5} />
+      ) : null}
+
+      {fontLoaded && (
+        <ConnectionErrorPage
+          visible={connectionErrorState}
+          command={() => setConnectionErrorState(false)}
+        />
+      )}
 
       <AlertBox
-        visible={alertState}
+        visible={alertVisible}
         title={alertComponents.title}
         message={alertComponents.message}
         buttons={alertComponents.buttons}
@@ -267,96 +301,32 @@ export default function App() {
       {fontLoaded && (
         <View style={styles.bottomView}>
           <LinearGradient colors={[colors.grey, colors.black]} style={styles.gradientView} />
+
           <View style={styles.navBar}>
             <NavigationButton
-              title={'Scout'}
-              type={'selection'}
-              active={button1_state}
-              command={() => {
-                switchActiveButton(1);
-                setContent(
-                  <ScoutPage
-                    playerData={playerData}
-                    playerKit={shirtLinks[0]}
-                    goalieKit={shirtLinks[1]}
-                    selections={selections[0]}
-                    fieldImage={fieldImage}
-                    teams={teams[0].teams}
-                    nextOpponent={nextOpponent[0]}
-                    TeamAbbreviations={TeamAbbreviations[0]}
-                    currentGW={update[0].currentGW}
-                  />
-                );
-              }}
+              title='scout'
+              active={activeNavIndex === 1}
+              command={() => setActiveNavIndex(1)}
             />
             <NavigationButton
-              title={'Compare'}
-              type={'compare'}
-              active={button2_state}
-              command={() => {
-                switchActiveButton(2);
-                setContent(
-                  <ComparismPage
-                    playerData={playerData}
-                    teams={teams[0].teams}
-                    playerKit={shirtLinks[0]}
-                    goalieKit={shirtLinks[1]}
-                    nextOpponent={nextOpponent[0]}
-                    TeamAbbreviations={TeamAbbreviations[0]}
-                    StandardRatings={StandardRatings[0]}
-                  />
-                );
-              }}
+              title='compare'
+              active={activeNavIndex === 2}
+              command={() => setActiveNavIndex(2)}
             />
             <NavigationButton
-              title={'Predict'}
-              type={'shirt'}
-              active={button3_state}
-              command={() => {
-                switchActiveButton(3);
-                setContent(
-                  <FantasyPage
-                    playerData={playerData}
-                    teams={teams[0].teams}
-                    playerKit={shirtLinks[0]}
-                    goalieKit={shirtLinks[1]}
-                    fieldImage={fieldImage}
-                    nextOpponent={nextOpponent[0]}
-                    selections={selections[0]}
-                    TeamAbbreviations={TeamAbbreviations[0]}
-                    StandardRatings={StandardRatings[0]}
-                  />
-                );
-              }}
+              title='predict'
+              active={activeNavIndex === 3}
+              command={() => setActiveNavIndex(3)}
             />
             <NavigationButton
-              title={'Simulate'}
-              type={'simulate'}
-              active={button4_state}
-              command={() => {
-                switchActiveButton(4);
-                setContent(
-                  <SimulationPage
-                    playerData={playerData}
-                    teams={teams[0].teams}
-                    playerKit={shirtLinks[0]}
-                    goalieKit={shirtLinks[1]}
-                    fieldImage={fieldImage}
-                    nextOpponent={nextOpponent[0]}
-                    TeamAbbreviations={TeamAbbreviations[0]}
-                    StandardRatings={StandardRatings[0]}
-                  />
-                );
-              }}
+              title='simulate'
+              active={activeNavIndex === 4}
+              command={() => setActiveNavIndex(4)}
             />
             <NavigationButton
-              title={'More'}
-              type={'settings'}
-              active={button5_state}
-              command={() => {
-                switchActiveButton(5);
-                setContent(<MorePage update={update[0]} appVersion={appVersion} />);
-              }}
+              title='more'
+              active={activeNavIndex === 5}
+              command={() => setActiveNavIndex(5)}
             />
           </View>
         </View>
@@ -367,11 +337,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: StatusBar.currentHeight,
-    backgroundColor: colors.white,
     justifyContent: 'flex-end',
+    backgroundColor: colors.white,
+    paddingTop: StatusBar.currentHeight,
   },
-  navBar: { flexDirection: 'row', height: '90%', width: '100%' },
   bottomView: { height: '8%', width: '100%' },
   gradientView: { height: '10%', width: '100%' },
+  navBar: { flexDirection: 'row', height: '90%', width: '100%' },
 });

@@ -6,9 +6,10 @@ import { colors } from '../constants';
 import { findFontSize } from '../utilities';
 
 const CryptoBar = ({ address, name }) => {
-  const onPress = () => {
+  const onPress = e => {
     Clipboard.setString(address);
     ToastAndroid.show(`${name} address copied`, 2000);
+    e.stopPropagation();
   };
 
   return (

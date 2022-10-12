@@ -26,6 +26,7 @@ const maxTextLength = Math.floor(area / 650);
 
 const ComparismPage = ({
   teams,
+  visible,
   currentGW,
   goalieKit,
   playerKit,
@@ -102,7 +103,7 @@ const ComparismPage = ({
           playerContent && playerContent !== '-' ? playerContent.split(',').length : '0';
 
         const expectedGoals = (goals / gameweek).toFixed(1);
-        const expectedSaves = (saves / gameweek).toFixed(0);
+        const expectedSaves = (saves / gameweek).toFixed(1);
         const expectedAssists = (assists / gameweek).toFixed(1);
         const teamForm = (teamIndex[team] * (10 / 3)).toFixed(1);
         const playerForm = average(points.slice(pointsRange)).toFixed(1);
@@ -123,7 +124,7 @@ const ComparismPage = ({
   }, [playerDetails]);
 
   return (
-    <View style={styles.mainView}>
+    <View style={{ ...styles.mainView, display: visible ? 'flex' : 'none' }}>
       <PlayerSelectModal
         teams={teams}
         playerKit={playerKit}

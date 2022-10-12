@@ -10,8 +10,6 @@ import {
 } from 'react-native';
 import { AdMobBanner, setTestDeviceIDAsync, AdMobInterstitial } from 'expo-ads-admob';
 
-import AlertBox from '../components/AlertBox';
-
 import Button from '../components/Button';
 import PickerBox from '../components/PickerBox';
 import FilterBar from '../components/FilterBar';
@@ -35,13 +33,16 @@ import {
 
 const SimulationPage = ({
   teams,
+  visible,
   playerKit,
   goalieKit,
   playerData,
   fieldImage,
   nextOpponent,
   StandardRatings,
+  setAlertVisible,
   TeamAbbreviations,
+  setAlertComponents,
 }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
 
@@ -53,18 +54,11 @@ const SimulationPage = ({
   const [clicks, setClicks] = useState(1);
   const [squad1, setSquad1] = useState([]);
   const [squad2, setSquad2] = useState([]);
-  const [alertVisible, setAlertVisible] = useState(false);
   const [boardVisible, setBoardVisible] = useState(false);
   const [chosenTeam1, setChosenTeam1] = useState('All Teams');
   const [chosenTeam2, setChosenTeam2] = useState('All Teams');
   const [playerSelectVisible, setPlayerSelectVisible] = useState(false);
   const [simulateButtonEnabled, setSimulateButtonEnabled] = useState(false);
-  const [alertComponents, setAlertComponents] = useState({
-    title: '',
-    message: '',
-    buttons: [],
-    onCloseAlert: null,
-  });
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chosenFormation, setChosenFormation] = useState('4-4-2');
@@ -291,8 +285,19 @@ const SimulationPage = ({
 
   useEffect(() => {
     if (chosenTeam1 !== 'All Teams' && chosenTeam2 !== 'All Teams' && chosenTeam1 !== chosenTeam2) {
-      setSquad1(getTeam(chosenTeam1));
-      setSquad2(getTeam(chosenTeam2));
+      if (teamEnough(chosenTeam1)) {
+        setSquad1(getTeam(chosenTeam1));
+      } else {
+        setSquad1([]);
+        ToastAndroid.show(`${chosenTeam1}'s players are not enough. Try again later`, 2000);
+      }
+
+      if (teamEnough(chosenTeam2)) {
+        setSquad2(getTeam(chosenTeam2));
+      } else {
+        setSquad2([]);
+        ToastAndroid.show(`${chosenTeam2}'s players are not enough. Try again later`, 2000);
+      }
     } else {
       setSquad1([]);
       setSquad2([]);
@@ -315,27 +320,23 @@ const SimulationPage = ({
     let squad = [];
     const formation = findBestFormation(teamName);
 
-    if (teamEnough(teamName)) {
-      const bestGoalies = playerData
-        .filter(({ team, position }) => team === teamName && position === 'goalkeeper')
-        .sort(descendingPointsOrder);
-      const bestDefenders = playerData
-        .filter(({ team, position }) => team === teamName && position === 'defender')
-        .sort(descendingPointsOrder);
-      const bestMidfielders = playerData
-        .filter(({ team, position }) => team === teamName && position === 'midfielder')
-        .sort(descendingPointsOrder);
-      const bestForwards = playerData
-        .filter(({ team, position }) => team === teamName && position === 'forward')
-        .sort(descendingPointsOrder);
+    const bestGoalies = playerData
+      .filter(({ team, position }) => team === teamName && position === 'goalkeeper')
+      .sort(descendingPointsOrder);
+    const bestDefenders = playerData
+      .filter(({ team, position }) => team === teamName && position === 'defender')
+      .sort(descendingPointsOrder);
+    const bestMidfielders = playerData
+      .filter(({ team, position }) => team === teamName && position === 'midfielder')
+      .sort(descendingPointsOrder);
+    const bestForwards = playerData
+      .filter(({ team, position }) => team === teamName && position === 'forward')
+      .sort(descendingPointsOrder);
 
-      squad.push(bestGoalies[0]);
-      squad.push(...bestDefenders.slice(0, parseInt(formation.charAt(0))));
-      squad.push(...bestMidfielders.slice(0, parseInt(formation.charAt(2))));
-      squad.push(...bestForwards.slice(0, parseInt(formation.charAt(4))));
-
-      return squad;
-    }
+    squad.push(bestGoalies[0]);
+    squad.push(...bestDefenders.slice(0, parseInt(formation.charAt(0))));
+    squad.push(...bestMidfielders.slice(0, parseInt(formation.charAt(2))));
+    squad.push(...bestForwards.slice(0, parseInt(formation.charAt(4))));
 
     return squad;
   };
@@ -422,7 +423,7 @@ const SimulationPage = ({
   }, [numberOfDefenders, numberOfMidfielders, numberOfForwards]);
 
   return (
-    <View style={styles.main}>
+    <View style={{ ...styles.main, display: visible ? 'flex' : 'none' }}>
       <Modal visible={playerSelectVisible} onRequestClose={onSelectModalClose} transparent={true}>
         <View style={styles.mainSelect}>
           <PlayerSelectModal
@@ -445,14 +446,6 @@ const SimulationPage = ({
             setPlayerModalVisible={setPlayerModalVisible1}
           />
 
-          <AlertBox
-            visible={alertVisible}
-            title={alertComponents.title}
-            message={alertComponents.message}
-            buttons={alertComponents.buttons}
-            onRequestClose={alertComponents.onCloseAlert}
-          />
-
           <View style={styles.headerSelect}>
             <PickerBox
               enabled={true}
@@ -465,7 +458,7 @@ const SimulationPage = ({
 
           <View style={styles.bodySelect}>
             <ImageBackground
-              imageStyle={styles.imageBackgroundStyle}
+              imageStyle={styles.imageBackground}
               source={
                 typeof fieldImage == 'string'
                   ? { uri: fieldImage, headers: { Accept: '*/*' } }
@@ -592,7 +585,7 @@ const SimulationPage = ({
           selectedValue={chosenTeam1}
           extraStyles={{ width: '45%' }}
           selectedItemHandler={setChosenTeam1}
-          extraListStyles={{ top: '1.5%', left: '5%', width: '40.3%', marginBottom: '35%' }}
+          extraListStyles={{ top: '1%', left: '3%', width: '42.5%', marginBottom: '35%' }}
         />
 
         <Text allowFontScaling={false} style={styles.textStyle}>
@@ -605,7 +598,7 @@ const SimulationPage = ({
           selectedValue={chosenTeam2}
           extraStyles={{ width: '45%' }}
           selectedItemHandler={setChosenTeam2}
-          extraListStyles={{ top: '1.5%', left: '54.6%', width: '40.5%', marginBottom: '35%' }}
+          extraListStyles={{ top: '1%', left: '54.6%', width: '42.5%', marginBottom: '35%' }}
         />
       </View>
 
@@ -748,7 +741,7 @@ const styles = StyleSheet.create({
     paddingVertical: '5%',
     justifyContent: 'space-evenly',
   },
-  imageBackgroundStyle: {
+  imageBackground: {
     width: undefined,
     height: undefined,
     resizeMode: 'cover',
@@ -758,9 +751,9 @@ const styles = StyleSheet.create({
   admobView: {
     width: '100%',
     height: '50%',
-    backgroundColor: colors.grey,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.grey,
   },
   admobContainer: { width: '100%', height: '23%', alignItems: 'center', justifyContent: 'center' },
 });

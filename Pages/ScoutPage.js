@@ -4,6 +4,7 @@ import PlayerPage from './PlayerPage';
 
 const ScoutPage = ({
   teams,
+  visible,
   playerKit,
   goalieKit,
   currentGW,
@@ -11,11 +12,14 @@ const ScoutPage = ({
   playerData,
   fieldImage,
   nextOpponent,
+  setAlertVisible,
   TeamAbbreviations,
+  setAlertComponents,
 }) => (
   <PlayerPage
     type='scout'
     teams={teams}
+    visible={visible}
     playerKit={playerKit}
     goalieKit={goalieKit}
     currentGW={currentGW}
@@ -23,7 +27,9 @@ const ScoutPage = ({
     fieldImage={fieldImage}
     selections={selections}
     nextOpponent={nextOpponent}
+    setAlertVisible={setAlertVisible}
     TeamAbbreviations={TeamAbbreviations}
+    setAlertComponents={setAlertComponents}
   />
 );
 

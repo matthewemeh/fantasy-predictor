@@ -3,7 +3,6 @@ import { View, StyleSheet, Text, ImageBackground } from 'react-native';
 import { AdMobBanner, setTestDeviceIDAsync, AdMobInterstitial } from 'expo-ads-admob';
 
 import Footer from '../components/Footer';
-import AlertBox from '../components/AlertBox';
 import FilterBar from '../components/FilterBar';
 import PickerBox from '../components/PickerBox';
 import InfoCircle from '../components/InfoCircle';
@@ -28,6 +27,7 @@ import {
 const PlayerPage = ({
   type,
   teams,
+  visible,
   playerKit,
   goalieKit,
   currentGW,
@@ -35,8 +35,10 @@ const PlayerPage = ({
   playerData,
   fieldImage,
   nextOpponent,
+  setAlertVisible,
   StandardRatings,
   TeamAbbreviations,
+  setAlertComponents,
 }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
 
@@ -48,22 +50,15 @@ const PlayerPage = ({
   const gameweek = findGameweekNumber(currentGW);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chosenFormation, setChosenFormation] = useState(
-    type === 'fantasy' ? '4-4-2' : selections.formation
+    type === 'fantasy' ? '4-4-2' : selections?.formation
   );
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertComponents, setAlertComponents] = useState({
-    title: '',
-    message: '',
-    buttons: [],
-    onCloseAlert: null,
-  });
   const [teamPredicted, setTeamPredicted] = useState(false);
   const [chosenTeam, setChosenTeam] = useState('All Teams');
   const [currentScoutIndex, setCurrentScoutIndex] = useState(0);
   const [playerModalVisible, setPlayerModalVisible] = useState(false);
   const [chosenPosition, setChosenPosition] = useState('All Positions');
   const [revealButtonClicked, setRevealButtonClicked] = useState(false);
-  const [predictButtonVisible, setPredictButtonVisible] = useState(false);
+  const [footerButtonEnabled, setFooterButtonEnabled] = useState(false);
 
   const numberOfGoalkeepers = 1;
   const [numberOfForwards, setNumberOfForwards] = useState(2);
@@ -85,8 +80,8 @@ const PlayerPage = ({
 
   useEffect(() => {
     const allSelected = playerInfo.every(({ playerName }) => playerName);
-    setPredictButtonVisible(allSelected);
-  }, [playerModalVisible, predictButtonVisible, playerInfo]);
+    setFooterButtonEnabled(allSelected);
+  }, [playerModalVisible, footerButtonEnabled, playerInfo]);
 
   useEffect(() => {
     if (type === 'scout') changeFormationHandler(chosenFormation);
@@ -352,34 +347,26 @@ const PlayerPage = ({
   }, [numberOfDefenders, numberOfMidfielders, numberOfForwards]);
 
   return (
-    <View style={styles.main}>
+    <View style={{ ...styles.main, display: visible ? 'flex' : 'none' }}>
       <PlayerSelectModal
-        visible={playerModalVisible}
-        currentIndex={currentIndex}
         teams={teams}
+        key={chosenPosition}
         playerKit={playerKit}
         goalieKit={goalieKit}
         playerData={playerData}
         playerInfo={playerInfo}
-        nextOpponent={nextOpponent}
-        TeamAbbreviations={TeamAbbreviations}
-        chosenPosition={chosenPosition}
         chosenTeam={chosenTeam}
-        setChosenPosition={setChosenPosition}
-        setPlayerModalVisible={setPlayerModalVisible}
-        setTeamPredicted={setTeamPredicted}
-        setChosenTeam={setChosenTeam}
         posPickerEnabled={false}
         teamPickerEnabled={true}
-        key={chosenPosition}
-      />
-
-      <AlertBox
-        visible={alertVisible}
-        title={alertComponents.title}
-        message={alertComponents.message}
-        buttons={alertComponents.buttons}
-        onRequestClose={alertComponents.onCloseAlert}
+        currentIndex={currentIndex}
+        nextOpponent={nextOpponent}
+        visible={playerModalVisible}
+        setChosenTeam={setChosenTeam}
+        chosenPosition={chosenPosition}
+        setTeamPredicted={setTeamPredicted}
+        TeamAbbreviations={TeamAbbreviations}
+        setChosenPosition={setChosenPosition}
+        setPlayerModalVisible={setPlayerModalVisible}
       />
 
       <View
@@ -501,7 +488,7 @@ const PlayerPage = ({
           onPredict={onPredict}
           playerInfo={playerInfo}
           teamPredicted={teamPredicted}
-          predictButtonVisible={predictButtonVisible}
+          footerButtonEnabled={footerButtonEnabled}
         />
       </View>
     </View>
