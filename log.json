@@ -4,8 +4,9 @@
       "version": "2023-2024_9",
       "info": [
         ["add", "Bug fixes"],
-        ["add", "Added more comparism statistics"],
-        ["add", "Improved point predict algorithm"]
+        ["add", "Added more comparison statistics"],
+        ["add", "Improved point prediction algorithm"],
+        ["add", "Graphical comparison statistics coming soon"]
       ]
     },
     {
