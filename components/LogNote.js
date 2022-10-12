@@ -9,8 +9,8 @@ import { findFontSize } from '../utilities';
 
 const LogNote = ({ visible, onRequestClose }) => (
   <Modal visible={visible} transparent={true} animationType='slide' onRequestClose={onRequestClose}>
-    <View style={styles.containerView}>
-      <View style={styles.mainView}>
+    <View style={styles.containerView} onTouchStart={onRequestClose}>
+      <View style={styles.mainView} onTouchStart={e => e.stopPropagation()}>
         <Text allowFontScaling={false} style={styles.textView}>
           Logs
         </Text>
