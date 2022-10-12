@@ -1,6 +1,6 @@
 import regression from 'regression';
 import { Dimensions } from 'react-native';
-import { colors, activeNavButton, inactiveNavButton } from './constants';
+import { colors, navIcon } from './constants';
 
 export const defaultAdHeight = 55;
 export const deviceWidth = Dimensions.get('window').width;
@@ -197,8 +197,7 @@ export const getRndInteger = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-export const findImage = (isActive, type) =>
-  isActive ? activeNavButton[type] : inactiveNavButton[type];
+export const findNavIcon = type => navIcon[type];
 
 export const isNumber = string => {
   const numberPattern = /^\d$/;
