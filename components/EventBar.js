@@ -19,7 +19,7 @@ const EventBar = ({ event, extraStyles, extraTextStyles }) => {
         <View style={styles.mainView}>
           <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
-              <Image style={styles.imageStyle} source={goalImage} />
+              <Image style={styles.image} source={goalImage} />
             </View>
 
             <Text
@@ -36,7 +36,7 @@ const EventBar = ({ event, extraStyles, extraTextStyles }) => {
 
           <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
-              <Image style={styles.imageStyle} source={assistImage} />
+              <Image style={styles.image} source={assistImage} />
             </View>
 
             <Text
@@ -57,7 +57,7 @@ const EventBar = ({ event, extraStyles, extraTextStyles }) => {
         <View style={styles.mainView}>
           <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
-              <Image style={styles.imageStyle} source={onTargetImage} />
+              <Image style={styles.image} source={onTargetImage} />
             </View>
 
             <Text
@@ -78,7 +78,7 @@ const EventBar = ({ event, extraStyles, extraTextStyles }) => {
         <View style={styles.mainView}>
           <View style={{ ...styles.activityView, ...extraStyles }}>
             <View style={styles.imageView}>
-              <Image style={styles.imageStyle} source={saveImage} />
+              <Image style={styles.image} source={saveImage} />
             </View>
 
             <Text
@@ -107,14 +107,12 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.white,
   },
   activityView: {
     width: '100%',
     height: '50%',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     justifyContent: 'space-between',
   },
   textStyle: {
@@ -131,7 +129,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  imageStyle: {
+  image: {
     width: '50%',
     height: '65%',
     resizeMode: 'contain',

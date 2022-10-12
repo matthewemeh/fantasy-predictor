@@ -7,7 +7,7 @@ import NumberTab from './NumberTab';
 import { colors } from '../constants';
 import { findFontSize, sum, average } from '../utilities';
 
-const Footer = ({ playerInfo, predictButtonVisible, type, teamPredicted, onPredict, onReveal }) => {
+const Footer = ({ playerInfo, footerButtonEnabled, type, teamPredicted, onPredict, onReveal }) => {
   const points = playerInfo.map(({ playerContent }) => playerContent);
 
   return (
@@ -25,7 +25,7 @@ const Footer = ({ playerInfo, predictButtonVisible, type, teamPredicted, onPredi
         <Button
           enabled={
             type === 'fantasy'
-              ? predictButtonVisible
+              ? footerButtonEnabled
               : playerInfo.every(({ playerName }) => !playerName)
           }
           extraStyles={{ width: '90%', height: '80%' }}

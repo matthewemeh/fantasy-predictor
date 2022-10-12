@@ -6,7 +6,7 @@ import { deviceHeight, findFontSize } from '../utilities';
 
 const LogDisplay = ({ info, version }) => (
   <View style={{ ...styles.mainView, height: deviceHeight * 0.05 * (info.length + 1) }}>
-    <Text allowFontScaling={false} style={styles.versionTextStyle}>
+    <Text allowFontScaling={false} style={styles.versionText}>
       {version}
     </Text>
 
@@ -14,10 +14,7 @@ const LogDisplay = ({ info, version }) => (
       <View style={styles.logView} key={logMessage}>
         <Text
           allowFontScaling={false}
-          style={{
-            ...styles.signView,
-            color: logType === 'add' ? colors.emerald : colors.red,
-          }}
+          style={{ ...styles.signView, color: logType === 'add' ? colors.emerald : colors.red }}
         >
           {logType === 'add' ? '+' : '-'}
         </Text>
@@ -49,7 +46,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },
-  versionTextStyle: {
+  versionText: {
     width: '100%',
     paddingLeft: '10%',
     color: colors.secondary,

@@ -15,13 +15,12 @@ const LogNote = ({ visible, onRequestClose }) => (
           Logs
         </Text>
 
-        <View style={styles.bodyView}>
-          <FlatList
-            data={logs.logs}
-            keyExtractor={({ version }) => version}
-            renderItem={({ item }) => <LogDisplay info={item.info} version={item.version} />}
-          />
-        </View>
+        <FlatList
+          data={logs.logs}
+          style={styles.bodyView}
+          keyExtractor={({ version }) => version}
+          renderItem={({ item }) => <LogDisplay info={item.info} version={item.version} />}
+        />
       </View>
     </View>
   </Modal>

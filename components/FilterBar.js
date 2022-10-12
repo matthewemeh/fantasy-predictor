@@ -18,39 +18,36 @@ const FilterBar = ({
 }) =>
   type !== 'scout' && (
     <View style={styles.filterView}>
-      <View style={styles.iconView}>
-        <Icon
-          name='random'
-          type='font-awesome'
-          color={colors.primary}
-          size={findFontSize(25)}
-          onPress={randomizePlayers}
-        />
-      </View>
+      <Icon
+        name='random'
+        type='font-awesome'
+        color={colors.primary}
+        size={findFontSize(25)}
+        onPress={randomizePlayers}
+      />
 
-      <View
-        style={{ width: '70%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
-      >
-        <PickerBox
-          list={teams.sort()}
-          enabled={pickerEnabled}
-          selectedValue={chosenTeam}
-          selectedItemHandler={setChosenTeam}
-          extraStyles={{ width: '55%', height: '80%' }}
-          extraTextItemStyles={{ fontSize: findFontSize(15) }}
-          extraListStyles={{ top: '3%', left: '10%', width: '80%', marginBottom: '25%' }}
-        />
-      </View>
+      <PickerBox
+        list={teams.sort()}
+        enabled={pickerEnabled}
+        selectedValue={chosenTeam}
+        selectedItemHandler={setChosenTeam}
+        extraStyles={{ width: '45%', height: '80%' }}
+        extraListStyles={{
+          top: '10%',
+          left: '30.5%',
+          width: '41%',
+          height: '65%',
+          marginBottom: '25%',
+        }}
+      />
 
-      <View style={styles.iconView}>
-        <Icon
-          name='trash'
-          type='font-awesome'
-          color={colors.primary}
-          size={findFontSize(25)}
-          onPress={confirmRemoveAll}
-        />
-      </View>
+      <Icon
+        name='trash'
+        type='font-awesome'
+        color={colors.primary}
+        size={findFontSize(25)}
+        onPress={confirmRemoveAll}
+      />
     </View>
   );
 
@@ -59,7 +56,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '10%',
     flexDirection: 'row',
-    paddingHorizontal: '2%',
+    alignItems: 'center',
+    paddingHorizontal: '5%',
+    justifyContent: 'space-between',
     backgroundColor: colors.secondary,
   },
   iconView: { width: '15%', height: '100%', alignItems: 'center', justifyContent: 'center' },

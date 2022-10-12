@@ -61,13 +61,13 @@ const PickerBox = ({
             <ScrollView>
               {list.map(item => (
                 <TouchableOpacity
+                  key={item}
                   activeOpacity={item === selectedValue ? 1 : 0.8}
+                  onPress={item === selectedValue ? null : () => onChange(item)}
                   style={{
                     ...styles.listItem,
                     backgroundColor: item === selectedValue ? colors.grey : colors.white,
                   }}
-                  onPress={item === selectedValue ? null : () => onChange(item)}
-                  key={item}
                 >
                   <Text
                     numberOfLines={1}
@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     left: '35%',
     width: '30%',
     elevation: 5,
-    height: undefined,
     marginBottom: '20%',
     position: 'relative',
     backgroundColor: colors.white,

@@ -50,7 +50,7 @@ const Button = ({
         ref={buttonRef}
         allowFontScaling={false}
         style={{
-          ...styles.buttonTextStyle,
+          ...styles.buttonText,
           color: enabled ? buttonTextColor : '#94948da0',
           backgroundColor: enabled ? buttonColor : colors.grey,
           ...extraTextStyles,
@@ -64,7 +64,7 @@ const Button = ({
 
 const styles = StyleSheet.create({
   mainView: { width: '45%', height: '75%' },
-  buttonTextStyle: {
+  buttonText: {
     width: '100%',
     height: '100%',
     borderRadius: 4,

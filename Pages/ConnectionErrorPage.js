@@ -38,7 +38,7 @@ const ConnectionErrorPage = ({ visible, command }) => {
         buttonText='Retry'
         buttonColor={colors.primary}
         buttonTextColor={colors.secondary}
-        extraStyles={{ width: '25%', height: '65%' }}
+        extraStyles={{ width: '20%', height: '60%' }}
         extraTextStyles={{ fontSize: findFontSize(15), fontFamily: 'PoppinsRegular' }}
       />
     </AnimatableView>

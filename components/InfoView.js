@@ -51,49 +51,45 @@ const InfoView = props => {
   };
 
   return (
-    <View style={styles.mainView}>
-      <View style={styles.containerView}>
-        <Text
-          allowFontScaling={false}
-          style={{
-            ...styles.textStyle,
-            color: findColor(1),
-            fontSize: findScaledFontSize(findText(1), maxTextLength, 14, 0.085),
-          }}
-        >
-          {findText(1)}
-        </Text>
+    <View style={styles.containerView}>
+      <Text
+        allowFontScaling={false}
+        style={{
+          ...styles.text,
+          color: findColor(1),
+          fontSize: findScaledFontSize(findText(1), maxTextLength, 14, 0.085),
+        }}
+      >
+        {findText(1)}
+      </Text>
 
-        <Text allowFontScaling={false} style={styles.infoNameStyle}>
-          {infoName}
-        </Text>
+      <Text allowFontScaling={false} style={styles.infoNameText}>
+        {infoName}
+      </Text>
 
-        <Text
-          allowFontScaling={false}
-          style={{
-            ...styles.textStyle,
-            color: findColor(2),
-            fontSize: findScaledFontSize(findText(2), maxTextLength, 14, 0.085),
-          }}
-        >
-          {findText(2)}
-        </Text>
-      </View>
+      <Text
+        allowFontScaling={false}
+        style={{
+          ...styles.text,
+          color: findColor(2),
+          fontSize: findScaledFontSize(findText(2), maxTextLength, 14, 0.085),
+        }}
+      >
+        {findText(2)}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  mainView: { width: '100%', height: 75, backgroundColor: colors.white },
   containerView: {
+    height: 75,
     width: '100%',
-    height: '80%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: '2%',
     justifyContent: 'center',
   },
-  infoNameStyle: {
+  infoNameText: {
     width: '40%',
     height: '100%',
     textAlign: 'center',
@@ -102,7 +98,7 @@ const styles = StyleSheet.create({
     fontSize: findFontSize(12),
     textAlignVertical: 'center',
   },
-  textStyle: {
+  text: {
     width: '30%',
     height: '100%',
     textAlign: 'center',

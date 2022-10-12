@@ -38,17 +38,17 @@ const EventActivity = ({ event }) => {
 
   return (
     <View style={styles.mainView}>
-      <View style={styles.teamViewStyle}>
+      <View style={styles.eventView}>
         <EventBar event={teamEvent1} extraStyles={{ flexDirection: 'row-reverse' }} />
       </View>
 
       <View style={styles.timeView}>
-        <Text allowFontScaling={false} style={styles.timeTextStyle}>
+        <Text allowFontScaling={false} style={styles.timeText}>
           {Math.ceil(timeStamp / 60)}'
         </Text>
       </View>
 
-      <View style={styles.teamViewStyle}>
+      <View style={styles.eventView}>
         <EventBar event={teamEvent2} extraTextStyles={{ textAlign: 'right' }} />
       </View>
     </View>
@@ -64,14 +64,14 @@ const styles = StyleSheet.create({
     height: deviceHeight * 0.085,
     backgroundColor: colors.white,
   },
-  teamViewStyle: { width: '40%', height: '100%' },
+  eventView: { width: '40%', height: '100%' },
   timeView: {
     width: '20%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  timeTextStyle: {
+  timeText: {
     textAlign: 'center',
     color: colors.white,
     fontFamily: 'PoppinsBold',
