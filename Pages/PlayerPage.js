@@ -369,6 +369,8 @@ const PlayerPage = ({
         setPlayerModalVisible={setPlayerModalVisible}
       />
 
+      {type === 'fantasy' && <InfoCircle onPress={showInfo} />}
+
       <View
         style={{
           ...styles.header,
@@ -377,9 +379,7 @@ const PlayerPage = ({
           justifyContent: type === 'fantasy' ? 'center' : 'space-between',
         }}
       >
-        {type === 'fantasy' ? (
-          <InfoCircle onPress={showInfo} />
-        ) : (
+        {type === 'scout' && (
           <Text allowFontScaling={false} style={styles.headerText}>
             Scout's Selection for {currentGW}
           </Text>

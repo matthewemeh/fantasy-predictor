@@ -18,7 +18,7 @@ const InfoCircle = ({ onPress, extraStyles }) => (
 );
 
 const styles = StyleSheet.create({
-  infoIconStyle: { position: 'absolute', right: '3%', top: '33%' },
+  infoIconStyle: { position: 'absolute', right: '3%', top: '4.5%', zIndex: 1 },
 });
 
 export default memo(InfoCircle);
