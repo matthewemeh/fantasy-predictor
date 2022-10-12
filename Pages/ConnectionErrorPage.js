@@ -1,6 +1,7 @@
 import React, { memo, useRef, useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import { View as AnimatableView } from 'react-native-animatable';
+import { Icon } from 'react-native-elements';
 
 import Button from '../components/Button';
 
@@ -14,6 +15,7 @@ const ConnectionErrorPage = ({ visible, command }) => {
   const animations = {
     slideIn: { from: { bottom: '-10%' }, to: { bottom: '0%' } },
     slideOut: { from: { bottom: '0%' }, to: { bottom: '-10%' } },
+    glow: { from: { opacity: 0.3 }, to: { opacity: 1 } },
   };
 
   useEffect(() => {
@@ -22,33 +24,46 @@ const ConnectionErrorPage = ({ visible, command }) => {
       return;
     }
 
-    if (visible) viewRef.current.animate(animations.slideIn);
-    else viewRef.current.animate(animations.slideOut);
+    if (viewRef.current) {
+      if (visible) viewRef.current.animate(animations.slideIn);
+      else viewRef.current.animate(animations.slideOut);
+    }
   }, [visible]);
 
   return (
-    <AnimatableView duration={400} ref={viewRef} style={styles.errorBarView}>
-      <Text allowFontScaling={false} style={styles.textStyle}>
-        No Internet Connection
-      </Text>
+    <Modal visible={visible} transparent={true}>
+      <AnimatableView duration={400} ref={viewRef} style={styles.errorBarView}>
+        <View style={styles.network}>
+          <AnimatableView
+            duration={2000}
+            direction='alternate'
+            iterationCount='infinite'
+            animation={animations.glow}
+          >
+            <Icon name='wifi' type='font-awesome' size={findFontSize(25)} color={colors.white} />
+          </AnimatableView>
 
-      <Button
-        enabled={true}
-        command={command}
-        buttonText='Retry'
-        buttonColor={colors.primary}
-        buttonTextColor={colors.secondary}
-        extraStyles={{ width: '20%', height: '60%' }}
-        extraTextStyles={{ fontSize: findFontSize(15), fontFamily: 'PoppinsRegular' }}
-      />
-    </AnimatableView>
+          <Text allowFontScaling={false} style={styles.text}>
+            No Internet Connection
+          </Text>
+        </View>
+
+        <Button
+          enabled={true}
+          command={command}
+          buttonText='Retry'
+          buttonColor={colors.primary}
+          buttonTextColor={colors.secondary}
+          extraStyles={{ width: '20%', height: '60%' }}
+          extraTextStyles={{ fontSize: findFontSize(15), fontFamily: 'PoppinsRegular' }}
+        />
+      </AnimatableView>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  mainView: { width: '100%', height: '100%', justifyContent: 'flex-end' },
   errorBarView: {
-    zIndex: 2,
     height: '8%',
     width: '100%',
     bottom: '-10%',
@@ -59,13 +74,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: colors.secondary,
   },
-  textStyle: {
-    width: '75%',
-    height: '100%',
+  text: {
+    marginTop: '3%',
+    marginLeft: 10,
     color: colors.white,
     fontSize: findFontSize(11),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
+  },
+  network: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
