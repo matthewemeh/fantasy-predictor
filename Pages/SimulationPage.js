@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo, useContext } from 'react';
 import {
   View,
   Text,
@@ -31,20 +31,22 @@ import {
   findOpponentAbbreviation,
 } from '../utilities';
 
-const SimulationPage = ({
-  teams,
-  visible,
-  playerKit,
-  goalieKit,
-  playerData,
-  fieldImage,
-  nextOpponent,
-  StandardRatings,
-  setAlertVisible,
-  TeamAbbreviations,
-  setAlertComponents,
-}) => {
+import { AppContext } from '../App';
+
+const SimulationPage = ({ visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
+  const {
+    teams,
+    playerKit,
+    goalieKit,
+    playerData,
+    fieldImage,
+    nextOpponent,
+    StandardRatings,
+    setAlertVisible,
+    TeamAbbreviations,
+    setAlertComponents,
+  } = useContext(AppContext);
 
   // componentDidMount
   useEffect(initializeId, []);

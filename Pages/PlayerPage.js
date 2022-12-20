@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo, useContext } from 'react';
 import { View, StyleSheet, Text, ImageBackground } from 'react-native';
 import { AdMobBanner, setTestDeviceIDAsync, AdMobInterstitial } from 'expo-ads-admob';
 
@@ -24,23 +24,24 @@ import {
   findOpponentAbbreviation,
 } from '../utilities';
 
-const PlayerPage = ({
-  type,
-  teams,
-  visible,
-  playerKit,
-  goalieKit,
-  currentGW,
-  selections,
-  playerData,
-  fieldImage,
-  nextOpponent,
-  setAlertVisible,
-  StandardRatings,
-  TeamAbbreviations,
-  setAlertComponents,
-}) => {
+import { AppContext } from '../App';
+
+const PlayerPage = ({ type, visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
+  const {
+    teams,
+    playerKit,
+    goalieKit,
+    currentGW,
+    selections,
+    playerData,
+    fieldImage,
+    nextOpponent,
+    setAlertVisible,
+    StandardRatings,
+    TeamAbbreviations,
+    setAlertComponents,
+  } = useContext(AppContext);
 
   // componentDidMount
   useEffect(initializeId, []);
@@ -161,14 +162,19 @@ const PlayerPage = ({
     };
 
     if (chosenTeam === 'All Teams') {
+      const filteredPlayersLength = playerData.filter(({ position }) => position === pos).length;
+
       return returnLength
-        ? playerData.filter(({ position }) => position === pos).length
-        : playerData.filter(({ position }) => position === pos).length >= requiredNoOfPlayers[pos];
+        ? filteredPlayersLength
+        : filteredPlayersLength >= requiredNoOfPlayers[pos];
     } else {
+      const filteredPlayersLength = playerData.filter(
+        ({ position, team }) => position === pos && team === chosenTeam
+      ).length;
+
       return returnLength
-        ? playerData.filter(({ position, team }) => position === pos && team === chosenTeam).length
-        : playerData.filter(({ position, team }) => position === pos && team === chosenTeam)
-            .length >= requiredNoOfPlayers[pos];
+        ? filteredPlayersLength
+        : filteredPlayersLength >= requiredNoOfPlayers[pos];
     }
   };
 

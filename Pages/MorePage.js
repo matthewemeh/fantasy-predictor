@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useContext } from 'react';
 import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
 import { View, Text, Share, Linking, StyleSheet, ToastAndroid, ScrollView } from 'react-native';
 
@@ -9,9 +9,12 @@ import MoreBubble from '../components/MoreBubble';
 import { colors } from '../constants';
 import { numbersInString, sum, findFontSize, defaultAdHeight } from '../utilities';
 
-const MorePage = ({ update, appVersion, visible }) => {
+import { AppContext } from '../App';
+
+const MorePage = ({ visible }) => {
   // componentDidMount
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
+  const { update, appVersion } = useContext(AppContext);
 
   useEffect(initializeId, []);
 

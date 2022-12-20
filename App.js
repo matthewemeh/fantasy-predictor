@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useEffect, createContext } from 'react';
 import { useFonts } from 'expo-font';
 import {
-  View,
   LogBox,
   Linking,
   Platform,
@@ -16,16 +14,17 @@ import ScoutPage from './Pages/ScoutPage';
 import AlertBox from './components/AlertBox';
 import LoadingPage from './Pages/LoadingPage';
 import FantasyPage from './Pages/FantasyPage';
+import Navigation from './components/Navigation';
 import ComparismPage from './Pages/ComparismPage';
 import SimulationPage from './Pages/SimulationPage';
-import NavigationButton from './components/NavigationButton';
-import ConnectionErrorPage from './Pages/ConnectionErrorPage';
 
 import { colors } from './constants';
 import { numbersInString, sum } from './utilities';
 
 import db from './firebase';
 import { onSnapshot, collection, query, where } from 'firebase/firestore';
+
+export const AppContext = createContext();
 
 export default function App() {
   LogBox.ignoreLogs(['Setting a timer', 'VirtualizedList']);
@@ -45,7 +44,7 @@ export default function App() {
     onCloseAlert: null,
   });
 
-  const appVersion = '2023-2024_9';
+  const appVersion = '2023-2024_11';
   const [teams, setTeams] = useState([]);
   const [update, setUpdate] = useState([]);
   const [selections, setSelections] = useState([]);
@@ -207,93 +206,44 @@ export default function App() {
 
   StatusBar.setBackgroundColor('#00000050');
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      keyboardVerticalOffset={0}
-      enabled={Platform.OS === 'ios'}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  return loadedData === 9 && fontLoaded ? (
+    <AppContext.Provider
+      value={{
+        playerData,
+        fieldImage,
+        appVersion,
+        alertVisible,
+        setAlertVisible,
+        update: update[0],
+        setAlertComponents,
+        teams: teams[0].teams,
+        playerKit: shirtLinks[0],
+        goalieKit: shirtLinks[1],
+        selections: selections[0],
+        nextOpponent: nextOpponent[0],
+        currentGW: update[0].currentGW,
+        StandardRatings: StandardRatings[0],
+        TeamAbbreviations: TeamAbbreviations[0],
+      }}
     >
-      <StatusBar translucent={true} />
+      <KeyboardAvoidingView
+        style={styles.container}
+        keyboardVerticalOffset={0}
+        enabled={Platform.OS === 'ios'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <StatusBar translucent={true} />
 
-      {(loadedData === 9 && fontLoaded) || <LoadingPage />}
+        <ScoutPage visible={activeNavIndex === 1} />
 
-      {loadedData === 9 && fontLoaded && (
-        <ScoutPage
-          teams={teams[0].teams}
-          playerData={playerData}
-          fieldImage={fieldImage}
-          playerKit={shirtLinks[0]}
-          goalieKit={shirtLinks[1]}
-          selections={selections[0]}
-          visible={activeNavIndex === 1}
-          nextOpponent={nextOpponent[0]}
-          currentGW={update[0].currentGW}
-          setAlertVisible={setAlertVisible}
-          setAlertComponents={setAlertComponents}
-          TeamAbbreviations={TeamAbbreviations[0]}
-        />
-      )}
+        <ComparismPage visible={activeNavIndex === 2} />
 
-      {loadedData === 9 && fontLoaded && (
-        <ComparismPage
-          teams={teams[0].teams}
-          playerData={playerData}
-          playerKit={shirtLinks[0]}
-          goalieKit={shirtLinks[1]}
-          visible={activeNavIndex === 2}
-          nextOpponent={nextOpponent[0]}
-          currentGW={update[0].currentGW}
-          StandardRatings={StandardRatings[0]}
-          TeamAbbreviations={TeamAbbreviations[0]}
-        />
-      )}
+        <FantasyPage visible={activeNavIndex === 3} />
 
-      {loadedData === 9 && fontLoaded && (
-        <FantasyPage
-          teams={teams[0].teams}
-          playerData={playerData}
-          fieldImage={fieldImage}
-          playerKit={shirtLinks[0]}
-          goalieKit={shirtLinks[1]}
-          visible={activeNavIndex === 3}
-          nextOpponent={nextOpponent[0]}
-          currentGW={update[0].currentGW}
-          setAlertVisible={setAlertVisible}
-          StandardRatings={StandardRatings[0]}
-          setAlertComponents={setAlertComponents}
-          TeamAbbreviations={TeamAbbreviations[0]}
-        />
-      )}
+        <SimulationPage visible={activeNavIndex === 4} />
 
-      {loadedData === 9 && fontLoaded && (
-        <SimulationPage
-          teams={teams[0].teams}
-          playerData={playerData}
-          fieldImage={fieldImage}
-          playerKit={shirtLinks[0]}
-          goalieKit={shirtLinks[1]}
-          visible={activeNavIndex === 4}
-          nextOpponent={nextOpponent[0]}
-          setAlertVisible={setAlertVisible}
-          StandardRatings={StandardRatings[0]}
-          setAlertComponents={setAlertComponents}
-          TeamAbbreviations={TeamAbbreviations[0]}
-        />
-      )}
+        <MorePage visible={activeNavIndex === 5} />
 
-      {loadedData === 9 && fontLoaded && (
-        <MorePage update={update[0]} appVersion={appVersion} visible={activeNavIndex === 5} />
-      )}
-
-      {fontLoaded && (
-        <ConnectionErrorPage
-          visible={connectionErrorState}
-          command={() => setConnectionErrorState(false)}
-        />
-      )}
-
-      {fontLoaded && (
         <AlertBox
           visible={alertVisible}
           title={alertComponents.title}
@@ -301,42 +251,15 @@ export default function App() {
           buttons={alertComponents.buttons}
           onRequestClose={alertComponents.onCloseAlert}
         />
-      )}
 
-      {fontLoaded && (
-        <View style={styles.bottomView}>
-          <LinearGradient colors={[colors.grey, colors.black]} style={styles.gradientView} />
-
-          <View style={styles.navBar}>
-            <NavigationButton
-              title='scout'
-              active={activeNavIndex === 1}
-              command={() => setActiveNavIndex(1)}
-            />
-            <NavigationButton
-              title='compare'
-              active={activeNavIndex === 2}
-              command={() => setActiveNavIndex(2)}
-            />
-            <NavigationButton
-              title='predict'
-              active={activeNavIndex === 3}
-              command={() => setActiveNavIndex(3)}
-            />
-            <NavigationButton
-              title='simulate'
-              active={activeNavIndex === 4}
-              command={() => setActiveNavIndex(4)}
-            />
-            <NavigationButton
-              title='more'
-              active={activeNavIndex === 5}
-              command={() => setActiveNavIndex(5)}
-            />
-          </View>
-        </View>
-      )}
-    </KeyboardAvoidingView>
+        <Navigation activeNavIndex={activeNavIndex} setActiveNavIndex={setActiveNavIndex} />
+      </KeyboardAvoidingView>
+    </AppContext.Provider>
+  ) : (
+    <LoadingPage
+      connectionErrorState={connectionErrorState}
+      command={() => setConnectionErrorState(false)}
+    />
   );
 }
 const styles = StyleSheet.create({
@@ -346,7 +269,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     paddingTop: StatusBar.currentHeight,
   },
-  bottomView: { height: '8%', width: '100%' },
-  gradientView: { height: '10%', width: '100%' },
-  navBar: { flexDirection: 'row', height: '90%', width: '100%' },
 });

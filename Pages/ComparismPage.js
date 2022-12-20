@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo, useContext } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View, ScrollView } from 'react-native';
 
@@ -19,22 +19,25 @@ import {
   findGameweekNumber,
 } from '../utilities';
 
+import { AppContext } from '../App';
+
 const textHeight = Math.round(0.92 * 0.95 * 0.25 * 0.165 * deviceHeight);
 const textWidth = Math.round(0.95 * deviceWidth);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 650);
 
-const ComparismPage = ({
-  teams,
-  visible,
-  currentGW,
-  goalieKit,
-  playerKit,
-  playerData,
-  nextOpponent,
-  StandardRatings,
-  TeamAbbreviations,
-}) => {
+const ComparismPage = ({ visible }) => {
+  const {
+    teams,
+    playerData,
+    playerKit,
+    goalieKit,
+    nextOpponent,
+    currentGW,
+    StandardRatings,
+    TeamAbbreviations,
+  } = useContext(AppContext);
+
   const { teamIndex } = StandardRatings;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playerInfo] = useState([player(0), player(1)]);
