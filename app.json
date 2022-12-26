@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fantasy Predictor",
     "slug": "FantasyPredictor",
-    "version": "2023-2024_9",
+    "version": "2023-2024_11",
     "orientation": "portrait",
     "icon": "./assets/appIcon.png",
     "splash": {
@@ -29,9 +29,9 @@
       "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
       "package": "com.gamehub.fantasypredictor",
       "permissions": [],
-      "versionCode": 9
+      "versionCode": 11
     },
     "web": { "favicon": "./assets/appIcon.png" }
   },
-  "version": "9.0.0"
+  "version": "11.0.0"
 }

@@ -21,13 +21,14 @@ import SimulationPage from './Pages/SimulationPage';
 import { colors } from './constants';
 import { numbersInString, sum } from './utilities';
 
+import { getAll } from './api/server';
 import db from './firebase';
 import { onSnapshot, collection, query, where } from 'firebase/firestore';
 
 export const AppContext = createContext();
 
 export default function App() {
-  LogBox.ignoreLogs(['Setting a timer', 'VirtualizedList']);
+  LogBox.ignoreLogs(['Setting a timer', 'VirtualizedList', 'Require cycle']);
 
   const [fontLoaded] = useFonts({
     PoppinsBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
@@ -55,6 +56,8 @@ export default function App() {
   const [StandardRatings, setStandardRatings] = useState([]);
   const [TeamAbbreviations, setTeamAbbreviations] = useState([]);
   const [connectionErrorState, setConnectionErrorState] = useState(false);
+  const URI =
+    'mongodb+srv://mongo:hmj6QdfRGLOl2f2W@cluster0.lex5a.mongodb.net/app_data?retryWrites=true&w=majority';
 
   const getPlayerData = relegatedTeams => {
     if (playerData.length > 0) return;
@@ -145,6 +148,10 @@ export default function App() {
   };
 
   useEffect(checkForUpdate, [update, loadedData]);
+
+  useEffect(() => {
+    getAll(URI, 'players').then(res => setPlayerData(res));
+  }, []);
 
   useEffect(() => {
     let tempLoadedData = 0;

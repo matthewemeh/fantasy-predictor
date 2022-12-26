@@ -80,9 +80,7 @@ export const predict = (playerDetails, StandardRatings, nextOpponent, gameweek) 
   const predictedPoint =
     0.8 * pointsAverage - Math.E ** (0.5 * opponentIndex) + teamRating + 0.1 * index;
 
-  if (predictedPoint < 0) return 0;
-
-  return Math.ceil(predictedPoint);
+  return predictedPoint > 0 ? Math.ceil(predictedPoint) : 0;
 };
 
 export const descendingPointsOrder = (a, b) => sum(b.points.slice(-3)) - sum(a.points.slice(-3));
@@ -219,7 +217,7 @@ export const numbersInString = string => {
   for (let i = 0; i < string.length; i++) newString += isNumber(string[i]) ? string[i] : sepChar;
 
   // convert strings to numbers
-  const numberArray = newString.split(sepChar).map(num => parseInt(num));
+  const numberArray = newString.split(sepChar).map(Number);
 
   // if any remove NaN, then return numbers
   return numberArray.filter(num => !isNaN(num));
@@ -269,4 +267,26 @@ export const findScaledFontSize = (text, maxTextLength, normalSize, scale) => {
   return text && text.length >= maxTextLength
     ? findFontSize(normalSize) / (scale * text.length)
     : findFontSize(normalSize);
+};
+
+export const isDocumentValid = (document, requiredKeys) => {
+  const docKeys = Object.keys(document);
+  const docValues = Object.values(document);
+
+  const docKeysLength = docKeys.length;
+  const requiredKeysLength = requiredKeys.length;
+
+  if (docKeysLength < requiredKeysLength) return false;
+
+  // check if all required keys are in document
+  for (let i = 0; i < requiredKeysLength; i++) {
+    if (!docKeys.includes(requiredKeys[i])) return false;
+  }
+
+  // check if all values in document are defined
+  for (let j = 0; j < docKeysLength; j++) {
+    if (docValues[j] === undefined) return false;
+  }
+
+  return true;
 };
