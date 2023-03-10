@@ -9,19 +9,19 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 
-import MorePage from './Pages/MorePage';
-import ScoutPage from './Pages/ScoutPage';
 import AlertBox from './components/AlertBox';
-import LoadingPage from './Pages/LoadingPage';
-import FantasyPage from './Pages/FantasyPage';
 import Navigation from './components/Navigation';
-import ComparismPage from './Pages/ComparismPage';
-import SimulationPage from './Pages/SimulationPage';
+
+import MoreScreen from './screens/MoreScreen';
+import ScoutScreen from './screens/ScoutScreen';
+import FantasyScreen from './screens/FantasyScreen';
+import LoadingScreen from './screens/LoadingScreen';
+import ComparismScreen from './screens/ComparismScreen';
+import SimulationScreen from './screens/SimulationScreen';
 
 import { colors } from './constants';
 import { numbersInString, sum } from './utilities';
 
-import { getAll } from './api/server';
 import db from './firebase';
 import { onSnapshot, collection, query, where } from 'firebase/firestore';
 
@@ -56,8 +56,6 @@ export default function App() {
   const [StandardRatings, setStandardRatings] = useState([]);
   const [TeamAbbreviations, setTeamAbbreviations] = useState([]);
   const [connectionErrorState, setConnectionErrorState] = useState(false);
-  const URI =
-    'mongodb+srv://mongo:hmj6QdfRGLOl2f2W@cluster0.lex5a.mongodb.net/app_data?retryWrites=true&w=majority';
 
   const getPlayerData = relegatedTeams => {
     if (playerData.length > 0) return;
@@ -150,10 +148,6 @@ export default function App() {
   useEffect(checkForUpdate, [update, loadedData]);
 
   useEffect(() => {
-    getAll(URI, 'players').then(res => setPlayerData(res));
-  }, []);
-
-  useEffect(() => {
     let tempLoadedData = 0;
     [
       teams,
@@ -241,15 +235,15 @@ export default function App() {
       >
         <StatusBar translucent={true} />
 
-        <ScoutPage visible={activeNavIndex === 1} />
+        <ScoutScreen visible={activeNavIndex === 1} />
 
-        <ComparismPage visible={activeNavIndex === 2} />
+        <ComparismScreen visible={activeNavIndex === 2} />
 
-        <FantasyPage visible={activeNavIndex === 3} />
+        <FantasyScreen visible={activeNavIndex === 3} />
 
-        <SimulationPage visible={activeNavIndex === 4} />
+        <SimulationScreen visible={activeNavIndex === 4} />
 
-        <MorePage visible={activeNavIndex === 5} />
+        <MoreScreen visible={activeNavIndex === 5} />
 
         <AlertBox
           visible={alertVisible}
@@ -263,7 +257,7 @@ export default function App() {
       </KeyboardAvoidingView>
     </AppContext.Provider>
   ) : (
-    <LoadingPage
+    <LoadingScreen
       connectionErrorState={connectionErrorState}
       command={() => setConnectionErrorState(false)}
     />
