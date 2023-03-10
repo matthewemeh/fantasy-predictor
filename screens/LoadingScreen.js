@@ -3,12 +3,12 @@ import { View, StyleSheet, Image } from 'react-native';
 
 import { colors } from '../constants';
 
-import ConnectionErrorPage from './ConnectionErrorPage';
+import ConnectionErrorScreen from './ConnectionErrorScreen';
 
-const LoadingPage = ({ connectionErrorState, command }) => (
+const LoadingScreen = ({ connectionErrorState, command }) => (
   <View style={styles.mainView}>
     <Image source={require('../assets/loading.gif')} />
-    <ConnectionErrorPage visible={connectionErrorState} command={command} />
+    <ConnectionErrorScreen visible={connectionErrorState} command={command} />
   </View>
 );
 
@@ -21,4 +21,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(LoadingPage);
+export default memo(LoadingScreen);

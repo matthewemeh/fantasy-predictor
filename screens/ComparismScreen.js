@@ -26,7 +26,7 @@ const textWidth = Math.round(0.95 * deviceWidth);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 650);
 
-const ComparismPage = ({ visible }) => {
+const ComparismScreen = ({ visible }) => {
   const {
     teams,
     playerData,
@@ -273,4 +273,4 @@ const styles = StyleSheet.create({
   gradientView: { height: '0.5%', width: '100%' },
 });
 
-export default memo(ComparismPage);
+export default memo(ComparismScreen);

@@ -26,7 +26,7 @@ import {
 
 import { AppContext } from '../App';
 
-const PlayerPage = ({ type, visible }) => {
+const PlayerScreen = ({ type, visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const {
     teams,
@@ -533,4 +533,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(PlayerPage);
+export default memo(PlayerScreen);

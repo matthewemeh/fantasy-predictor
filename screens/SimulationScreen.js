@@ -33,7 +33,7 @@ import {
 
 import { AppContext } from '../App';
 
-const SimulationPage = ({ visible }) => {
+const SimulationScreen = ({ visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const {
     teams,
@@ -760,4 +760,4 @@ const styles = StyleSheet.create({
   admobContainer: { width: '100%', height: '23%', alignItems: 'center', justifyContent: 'center' },
 });
 
-export default memo(SimulationPage);
+export default memo(SimulationScreen);

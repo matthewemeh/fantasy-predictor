@@ -11,7 +11,7 @@ import { numbersInString, sum, findFontSize, defaultAdHeight } from '../utilitie
 
 import { AppContext } from '../App';
 
-const MorePage = ({ visible }) => {
+const MoreScreen = ({ visible }) => {
   // componentDidMount
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const { update, appVersion } = useContext(AppContext);
@@ -183,4 +183,4 @@ const styles = StyleSheet.create({
   contentView: { width: '100%', height: '100%', alignItems: 'center' },
 });
 
-export default memo(MorePage);
+export default memo(MoreScreen);

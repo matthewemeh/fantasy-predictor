@@ -8,7 +8,7 @@ import Button from '../components/Button';
 import { colors } from '../constants';
 import { findFontSize } from '../utilities';
 
-const ConnectionErrorPage = ({ visible, command }) => {
+const ConnectionErrorScreen = ({ visible, command }) => {
   const viewRef = useRef();
   const initialRender = useRef(true);
 
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(ConnectionErrorPage);
+export default memo(ConnectionErrorScreen);
