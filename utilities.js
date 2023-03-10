@@ -57,7 +57,7 @@ export const findAverageOfOpponentIndex = (fixtures, teamIndices) => {
     return teamIndices[opponentFullName];
   });
 
-  return average(opponentIndices).toFixed(1);
+  return Number(average(opponentIndices).toFixed(1));
 };
 
 const getPointsData = array => array.map((point, index) => [index + 1, point]);
@@ -169,8 +169,7 @@ export const findReturns = (playerKey, StandardRatings, playerData, pointsRange 
   return { goals, assists, saves, bonus };
 };
 
-export const findAbbreviation = (teamName, TeamAbbreviations) =>
-  teamName === 'All Teams' ? 'null' : TeamAbbreviations[teamName];
+export const findAbbreviation = (teamName, TeamAbbreviations) => TeamAbbreviations[teamName];
 
 export const findOpponentAbbreviation = (team, nextOpponent, TeamAbbreviations) => {
   const opponent = nextOpponent[team];
@@ -240,16 +239,14 @@ export const shuffle = array => {
   return array;
 };
 
-export const player = key => {
-  return {
-    key: key,
-    playerKey: '',
-    captain: false,
-    playerName: '',
-    playerContent: '',
-    shirtImage: unknownImage,
-  };
-};
+export const player = key => ({
+  key: key,
+  playerKey: '',
+  captain: false,
+  playerName: '',
+  playerContent: '',
+  shirtImage: unknownImage,
+});
 
 export const randomSelect = array => array[getRndInteger(0, array.length)];
 
