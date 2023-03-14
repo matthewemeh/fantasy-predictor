@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
 } from 'react-native';
+import appDetails from './app.json';
 
 import AlertBox from './components/AlertBox';
 import Navigation from './components/Navigation';
@@ -19,25 +20,28 @@ import LoadingScreen from './screens/LoadingScreen';
 import ComparismScreen from './screens/ComparismScreen';
 import SimulationScreen from './screens/SimulationScreen';
 
-import { colors } from './constants';
-import { numbersInString, sum } from './utilities';
+import { numbersInString, sum, findGameweekType, colors } from './utilities';
 
-import db from './firebase';
-import { onSnapshot, collection, query, where } from 'firebase/firestore';
+import { fetchData } from './server/firebase-db';
+import { fetchCurrentFixtures, fetchGeneralInfo } from './server/fpl-db';
 
 export const AppContext = createContext();
 
 export default function App() {
+  StatusBar.setBackgroundColor(colors.statusBarBackground);
   LogBox.ignoreLogs(['Setting a timer', 'VirtualizedList', 'Require cycle']);
 
   const [fontLoaded] = useFonts({
     PoppinsBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsRegular: require('./assets/fonts/Poppins-Regular.ttf'),
   });
+  const appVersion = appDetails.expo.version;
   const fieldImage = require('./assets/field.png');
-  const [loadedData, setLoadedData] = useState(0);
   const [alertVisible, setAlertVisible] = useState(false);
   const [activeNavIndex, setActiveNavIndex] = useState(0);
+  const [fpl_db_loaded, set_fpl_db_loaded] = useState(false);
+  const [firebaseDBLoaded, setFirebaseDBLoaded] = useState(false);
+  const [connectionErrorState, setConnectionErrorState] = useState(false);
   const [alertComponents, setAlertComponents] = useState({
     title: '',
     message: '',
@@ -45,84 +49,32 @@ export default function App() {
     onCloseAlert: null,
   });
 
-  const appVersion = '2023-2024_11';
-  const [teams, setTeams] = useState([]);
+  // data to be obtained from firebase db data
   const [update, setUpdate] = useState([]);
   const [selections, setSelections] = useState([]);
   const [shirtLinks, setShirtLinks] = useState([]);
+
+  // data to be obtained from FPL API data
+  const [teams, setTeams] = useState([]);
+  const [currentGW, setCurrentGW] = useState(0);
+  const [teamsData, setTeamsData] = useState([]);
   const [playerData, setPlayerData] = useState([]);
+  const [generalInfo, setGeneralInfo] = useState({});
+  const [fixturesData, setFixturesData] = useState([]);
   const [nextOpponent, setNextOpponent] = useState([]);
-  const [relegatedTeams, setRelegatedTeams] = useState([]);
-  const [StandardRatings, setStandardRatings] = useState([]);
-  const [TeamAbbreviations, setTeamAbbreviations] = useState([]);
-  const [connectionErrorState, setConnectionErrorState] = useState(false);
+  const [positionData, setPositionData] = useState([]);
+  const [currentGWType, setCurrentGWType] = useState('GW');
+  const [TeamAbbreviations, setTeamAbbreviations] = useState({});
+  const [gameweekFinished, setGameweekFinished] = useState(false);
 
-  const getPlayerData = relegatedTeams => {
-    if (playerData.length > 0) return;
-
-    let correctedRelegatedTeams = relegatedTeams;
-
-    // relegated teams' array length must be at least 1 and should never exceed 10!!!
-    if (correctedRelegatedTeams.length === 0) correctedRelegatedTeams = [''];
-    while (correctedRelegatedTeams.length > 10) correctedRelegatedTeams.pop();
-
-    const collectionRef = collection(db, 'players');
-    const q = query(collectionRef, where('team', 'not-in', correctedRelegatedTeams));
-
-    onSnapshot(q, snapshot => setPlayerData(snapshot.docs.map(doc => doc.data())));
-  };
-
-  const getTeams = () => {
-    onSnapshot(collection(db, 'teams'), snapshot => setTeams(snapshot.docs.map(doc => doc.data())));
-  };
-
-  const getRatings = () => {
-    onSnapshot(collection(db, 'StandardRatings'), snapshot =>
-      setStandardRatings(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getNextOpponents = () => {
-    onSnapshot(collection(db, 'nextOpponent'), snapshot =>
-      setNextOpponent(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getAbbreviations = () => {
-    onSnapshot(collection(db, 'abbreviations'), snapshot =>
-      setTeamAbbreviations(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getSelections = () => {
-    onSnapshot(collection(db, 'selection'), snapshot =>
-      setSelections(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getRelegatedTeams = () => {
-    onSnapshot(collection(db, 'relegatedTeams'), snapshot =>
-      setRelegatedTeams(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getUpdates = () => {
-    onSnapshot(collection(db, 'updates'), snapshot =>
-      setUpdate(snapshot.docs.map(doc => doc.data()))
-    );
-  };
-
-  const getShirtLinks = () => {
-    onSnapshot(collection(db, 'teamImageUrls'), snapshot => {
-      setShirtLinks(snapshot.docs.map(doc => doc.data()));
-    });
-  };
+  const expectedDataFromFPL = [generalInfo, fixturesData];
+  const expectedDataFromFirebase = [update, selections, shirtLinks];
 
   const checkForUpdate = () => {
     if (update.length > 0) {
       const { info, currentVersion, updateLink } = update[0];
 
-      if (info && loadedData === 9) {
+      if (info && firebaseDBLoaded) {
         setAlertComponents({
           title: 'Info',
           message: info,
@@ -145,86 +97,150 @@ export default function App() {
     }
   };
 
-  useEffect(checkForUpdate, [update, loadedData]);
-
-  useEffect(() => {
-    let tempLoadedData = 0;
-    [
-      teams,
-      update,
-      playerData,
-      shirtLinks,
-      selections,
-      nextOpponent,
-      relegatedTeams,
-      StandardRatings,
-      TeamAbbreviations,
-    ].forEach(item => (tempLoadedData += item.length > 0));
-    setLoadedData(tempLoadedData);
-  }, [
-    teams,
-    update,
-    playerData,
-    selections,
-    shirtLinks,
-    nextOpponent,
-    relegatedTeams,
-    StandardRatings,
-    TeamAbbreviations,
-  ]);
-
-  useEffect(() => {
-    if (relegatedTeams.length > 0) getPlayerData(relegatedTeams[0].relegatedTeams);
-  }, [relegatedTeams]);
-
-  // componentDidMount
-  useEffect(() => {
-    if (teams.length === 0) getTeams();
-    if (update.length === 0) getUpdates();
-    if (shirtLinks.length === 0) getShirtLinks();
-    if (selections.length === 0) getSelections();
-    if (StandardRatings.length === 0) getRatings();
-    if (nextOpponent.length === 0) getNextOpponents();
-    if (relegatedTeams.length === 0) getRelegatedTeams();
-    if (TeamAbbreviations.length === 0) getAbbreviations();
-  }, []);
-
-  useEffect(() => {
-    if (loadedData < 9 && !connectionErrorState) {
-      const timer = setTimeout(() => setConnectionErrorState(loadedData < 9), 15000);
-      return () => clearTimeout(timer);
-    }
-  }, [loadedData, connectionErrorState]);
-
-  useEffect(() => {
-    if (loadedData === 9 && fontLoaded) {
-      setConnectionErrorState(false);
-      setActiveNavIndex(3);
-    }
-  }, [loadedData, fontLoaded]);
+  const onError = () => setConnectionErrorState(true);
 
   const closeAlert = () => setAlertVisible(false);
 
-  StatusBar.setBackgroundColor('#00000050');
+  useEffect(checkForUpdate, [update, firebaseDBLoaded]);
 
-  return loadedData === 9 && fontLoaded ? (
+  useEffect(() => {
+    // check if all data expected from firebase database has been fetched
+    let dbLoaded = true,
+      expectedDataLength = expectedDataFromFirebase.length;
+
+    while (dbLoaded && expectedDataLength > 0) {
+      if (expectedDataFromFirebase[expectedDataLength - 1].length === 0) {
+        dbLoaded = false;
+      }
+      expectedDataLength--;
+    }
+
+    setFirebaseDBLoaded(dbLoaded);
+  }, expectedDataFromFirebase);
+
+  useEffect(() => {
+    // check if all data expected from fpl api has been fetched
+    let dbLoaded = true,
+      expectedDataLength = expectedDataFromFPL.length;
+
+    while (dbLoaded && expectedDataLength > 0) {
+      if (expectedDataFromFPL[expectedDataLength - 1].length === 0) {
+        dbLoaded = false;
+      }
+      expectedDataLength--;
+    }
+
+    set_fpl_db_loaded(dbLoaded);
+  }, expectedDataFromFPL);
+
+  // componentDidMount
+  useEffect(() => {
+    if (update.length === 0) fetchData('updates', setUpdate);
+    if (selections.length === 0) fetchData('selection', setSelections);
+    if (shirtLinks.length === 0) fetchData('teamImageUrls', setShirtLinks);
+
+    fetchGeneralInfo(setGeneralInfo);
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(generalInfo).length > 0) {
+      // ...then get and set basic gameweek and players/elements information
+      const { events, teams, elements, element_types } = generalInfo;
+
+      // set current gameweek
+      const currentGWData = events.find(({ is_current }) => is_current);
+      setCurrentGW(currentGWData?.id || 0);
+      setGameweekFinished(currentGWData?.finished);
+
+      // set teams and their abbreviations
+      const newAbbreviations = {};
+      setTeamsData(teams);
+      teams.forEach(({ name, short_name }) => {
+        newAbbreviations[name] = short_name;
+      });
+      setTeamAbbreviations(newAbbreviations);
+      setTeams(teams.map(({ name }) => name).sort());
+
+      // set players' data
+      setPlayerData(elements);
+
+      // set positions data
+      setPositionData(element_types);
+    }
+  }, [generalInfo]);
+
+  useEffect(() => {
+    if (currentGW > 0) fetchCurrentFixtures(currentGW, setFixturesData, onError);
+  }, [currentGW]);
+
+  useEffect(() => {
+    if (fixturesData.length > 0 && teamsData.length > 0) {
+      // update current gameweek type
+      setCurrentGWType(findGameweekType(fixturesData));
+
+      // set opponents for current gameweek
+      teamsData.forEach(({ id }) => {
+        let newOpponent = { team: 0, opponents: [] };
+        let fixtures = fixturesData.filter(({ team_a, team_h }) => team_a === id || team_h === id);
+
+        newOpponent.team === id;
+        fixtures.forEach(({ team_a, team_h, team_h_difficulty, team_a_difficulty }) => {
+          let oldOpponents = newOpponent.opponents;
+
+          if (team_a === id) {
+            newOpponent.opponents = [
+              ...oldOpponents,
+              { team: team_h, status: 'away', difficulty: team_a_difficulty },
+            ];
+          } else if (team_h === id) {
+            newOpponent.opponents = [
+              ...oldOpponents,
+              { team: team_a, status: 'home', difficulty: team_h_difficulty },
+            ];
+          }
+        });
+
+        setNextOpponent([...nextOpponent, newOpponent]);
+      });
+    }
+  }, [fixturesData, teamsData]);
+
+  useEffect(() => {
+    if (!(firebaseDBLoaded || fpl_db_loaded) && !connectionErrorState) {
+      const timer = setTimeout(() => setConnectionErrorState(false), 20000);
+      return () => clearTimeout(timer);
+    }
+  }, [firebaseDBLoaded, fpl_db_loaded, connectionErrorState]);
+
+  useEffect(() => {
+    if (firebaseDBLoaded && fpl_db_loaded && fontLoaded) {
+      setConnectionErrorState(false);
+      setActiveNavIndex(3);
+    }
+  }, [firebaseDBLoaded, fpl_db_loaded, fontLoaded]);
+
+  return firebaseDBLoaded && fpl_db_loaded && fontLoaded ? (
     <AppContext.Provider
       value={{
+        teams,
+        teamsData,
+        currentGW,
         playerData,
         fieldImage,
         appVersion,
+        fixturesData,
+        positionData,
+        nextOpponent,
         alertVisible,
+        currentGWType,
         setAlertVisible,
+        gameweekFinished,
+        TeamAbbreviations,
         update: update[0],
         setAlertComponents,
-        teams: teams[0].teams,
         playerKit: shirtLinks[0],
         goalieKit: shirtLinks[1],
         selections: selections[0],
-        nextOpponent: nextOpponent[0],
-        currentGW: update[0].currentGW,
-        StandardRatings: StandardRatings[0],
-        TeamAbbreviations: TeamAbbreviations[0],
       }}
     >
       <KeyboardAvoidingView
