@@ -1,18 +1,23 @@
 import React, { memo } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 
-import { colors } from '../constants';
-import { findRotationAngle, deviceWidth, deviceHeight, findScaledFontSize } from '../utilities';
+import {
+  colors,
+  DEVICE_WIDTH,
+  DEVICE_HEIGHT,
+  findRotationAngle,
+  findScaledFontSize,
+} from '../utilities';
 
-const textHeight = Math.round(0.8 * 0.085 * deviceHeight);
-const textWidth = Math.round(0.3875 * deviceWidth);
+const textHeight = Math.round(0.8 * 0.085 * DEVICE_HEIGHT);
+const textWidth = Math.round(0.3875 * DEVICE_WIDTH);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 550);
 
 const PlayerItem = ({
-  team,
   command,
   enabled,
+  teamName,
   shirtImage,
   playerName,
   playerIndex,
@@ -29,7 +34,7 @@ const PlayerItem = ({
       style={{
         ...styles.mainView,
         ...extraStyles,
-        backgroundColor: enabled ? colors.white : colors.grey,
+        backgroundColor: enabled ? colors.white : colors.alto,
       }}
     >
       <View style={styles.imageView}>
@@ -65,10 +70,10 @@ const PlayerItem = ({
         allowFontScaling={false}
         style={{
           ...styles.textView,
-          fontSize: findScaledFontSize(team, maxTextLength, 11, 0.085),
+          fontSize: findScaledFontSize(teamName, maxTextLength, 11, 0.085),
         }}
       >
-        {team}
+        {teamName}
       </Text>
     </TouchableOpacity>
   );
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    height: deviceHeight * 0.085,
+    height: DEVICE_HEIGHT * 0.085,
     backgroundColor: colors.white,
   },
   arrowStyles: { width: '50%', height: '50%', resizeMode: 'contain' },

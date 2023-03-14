@@ -1,53 +1,38 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
-import { colors } from '../constants';
 import {
-  deviceWidth,
+  colors,
   findFontSize,
-  deviceHeight,
+  DEVICE_WIDTH,
+  DEVICE_HEIGHT,
   findScaledFontSize,
-  findAverageOfOpponentIndex,
 } from '../utilities';
 
-const textHeight = Math.round(0.92 * 0.95 * 0.7 * 0.2 * 0.66 * deviceHeight);
-const textWidth = Math.round(0.95 * 0.3 * deviceWidth);
+const textHeight = Math.round(0.92 * 0.95 * 0.7 * 0.2 * 0.66 * DEVICE_HEIGHT);
+const textWidth = Math.round(0.95 * 0.3 * DEVICE_WIDTH);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 470);
 
-const InfoView = props => {
-  const { infoName, StandardRatings, type } = props;
-  const { teamIndex } = StandardRatings;
-
-  const infoValue1 = props.infoValue1 || '';
-  const infoValue2 = props.infoValue2 || '';
-  const playerContent1 = props.playerContent1 || '';
-  const playerContent2 = props.playerContent2 || '';
-
+const InfoView = ({ type, infoName, opponent1, opponent2, infoValue1, infoValue2 }) => {
   const findColor = index => {
-    const value1 =
-      infoName === 'Better Fixture'
-        ? findAverageOfOpponentIndex(infoValue1, teamIndex)
-        : parseFloat(infoValue1);
-    const value2 =
-      infoName === 'Better Fixture'
-        ? findAverageOfOpponentIndex(infoValue2, teamIndex)
-        : parseFloat(infoValue2);
+    const value1 = parseFloat(infoValue1);
+    const value2 = parseFloat(infoValue2);
 
-    if (value1 === value2) return colors.secondary;
+    if (value1 === value2) return colors.stratos;
     else if (index === 1) {
-      if (value1 > value2) return type === 'forward' ? colors.emerald : colors.secondary;
-      return type === 'forward' ? colors.secondary : colors.emerald;
+      if (value1 > value2) return type === 'forward' ? colors.emerald : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emerald;
     } else {
-      if (value1 < value2) return type === 'forward' ? colors.emerald : colors.secondary;
-      return type === 'forward' ? colors.secondary : colors.emerald;
+      if (value1 < value2) return type === 'forward' ? colors.emerald : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emerald;
     }
   };
 
   const findText = index => {
-    if (infoName === 'Better Fixture') return index === 1 ? playerContent1 : playerContent2;
+    if (infoName === 'Better Fixture') return index === 1 ? opponent1 : opponent2;
     else if (infoName === 'Chances of Starting') return `${index === 1 ? infoValue1 : infoValue2}%`;
-    return index === 1 ? infoValue1 : infoValue2;
+    return (index === 1 ? infoValue1 : infoValue2).toString();
   };
 
   return (
@@ -93,7 +78,7 @@ const styles = StyleSheet.create({
     width: '40%',
     height: '100%',
     textAlign: 'center',
-    color: colors.secondary,
+    color: colors.stratos,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(12),
     textAlignVertical: 'center',
@@ -102,7 +87,7 @@ const styles = StyleSheet.create({
     width: '30%',
     height: '100%',
     textAlign: 'center',
-    color: colors.secondary,
+    color: colors.stratos,
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },

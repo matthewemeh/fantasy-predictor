@@ -1,13 +1,12 @@
 import React, { memo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 
-import { colors } from '../constants';
-import { findFontSize, findAbbreviation } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
-const Scoreboard = ({ score1, score2, teamName1, teamName2, TeamAbbreviations }) => (
+const Scoreboard = ({ score1, score2, shortTeamName1, shortTeamName2 }) => (
   <View style={styles.scoreBoardView}>
     <Text allowFontScaling={false} style={styles.teamTextStyle}>
-      {findAbbreviation(teamName1, TeamAbbreviations)}
+      {shortTeamName1.toUpperCase()}
     </Text>
 
     <View style={styles.mainView}>
@@ -23,7 +22,7 @@ const Scoreboard = ({ score1, score2, teamName1, teamName2, TeamAbbreviations })
     </View>
 
     <Text allowFontScaling={false} style={styles.teamTextStyle}>
-      {findAbbreviation(teamName2, TeamAbbreviations)}
+      {shortTeamName2.toUpperCase()}
     </Text>
   </View>
 );

@@ -9,18 +9,17 @@ import InfoCircle from '../components/InfoCircle';
 import PlayerFrame from '../components/PlayerFrame';
 import PlayerSelectModal from '../components/PlayerSelectModal';
 
-import { colors, fieldConstants } from '../constants';
 import {
   player,
-  predict,
+  colors,
   findData,
   unknownImage,
   findFontSize,
   randomSelect,
-  deviceHeight,
+  DEVICE_HEIGHT,
+  fieldConstants,
   findPlayerInfo,
-  defaultAdHeight,
-  findGameweekNumber,
+  DEFAULT_AD_HEIGHT,
   findOpponentAbbreviation,
 } from '../utilities';
 
@@ -29,7 +28,7 @@ import { AppContext } from '../App';
 const PlayerScreen = ({ type, visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const {
-    teams,
+    teamsData,
     playerKit,
     goalieKit,
     currentGW,
@@ -37,18 +36,19 @@ const PlayerScreen = ({ type, visible }) => {
     playerData,
     fieldImage,
     nextOpponent,
+    positionData,
+    currentGWType,
     setAlertVisible,
-    StandardRatings,
-    TeamAbbreviations,
+    gameweekFinished,
     setAlertComponents,
   } = useContext(AppContext);
 
   // componentDidMount
   useEffect(initializeId, []);
+  const teams = teamsData.map(({ name }) => name).sort();
 
   const { formations } = fieldConstants;
   const [clicks, setClicks] = useState(1);
-  const gameweek = findGameweekNumber(currentGW);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chosenFormation, setChosenFormation] = useState(
     type === 'fantasy' ? '4-4-2' : selections?.formation
@@ -99,25 +99,26 @@ const PlayerScreen = ({ type, visible }) => {
       const newPlayerInfo = playerInfo;
       const { captainIndex } = selections;
 
-      newPlayerInfo[captainIndex].captain = true;
+      newPlayerInfo[captainIndex].isCaptain = true;
       setPlayerInfo([...newPlayerInfo]);
     }
   }, [currentScoutIndex]);
 
   const fillPlayers = () => {
-    if (revealButtonClicked && currentScoutIndex < selections.players.length) {
-      const tempData = playerData.find(({ key }) => key === selections.players[currentScoutIndex]);
+    if (revealButtonClicked && currentScoutIndex < selections.playerIDs.length) {
+      const tempData = playerData.find(({ id }) => id === selections.playerIDs[currentScoutIndex]);
 
       if (tempData) {
-        const { playerName, key, team } = tempData;
+        const { web_name, id, team } = tempData;
+        const { id: teamID, name: teamName } = teamsData.find(({ id }) => id === team) || {};
 
         playerInfo[currentScoutIndex] = {
-          playerName,
-          captain: false,
-          playerKey: key,
-          key: currentScoutIndex,
-          shirtImage: currentScoutIndex === 0 ? goalieKit[team] : playerKit[team],
-          playerContent: findOpponentAbbreviation(team, nextOpponent, TeamAbbreviations),
+          playerID: id,
+          isCaptain: false,
+          playerName: web_name,
+          index: currentScoutIndex,
+          playerContent: findOpponentAbbreviation(teamID, nextOpponent, teamsData),
+          shirtImage: currentScoutIndex === 0 ? goalieKit[teamName] : playerKit[teamName],
         };
       }
       setCurrentScoutIndex(currentScoutIndex + 1);
@@ -128,10 +129,10 @@ const PlayerScreen = ({ type, visible }) => {
     const newPlayerInfo = playerInfo;
 
     newPlayerInfo[index] = {
-      key: index,
-      playerKey: '',
-      captain: false,
+      index,
+      playerID: '',
       playerName: '',
+      isCaptain: false,
       playerContent: '',
       shirtImage: unknownImage,
     };
@@ -140,16 +141,23 @@ const PlayerScreen = ({ type, visible }) => {
   };
 
   const filterPlayers = pos => {
+    // get id for position argument passed into pos variable...
+    const positionID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === pos
+    )?.id;
+
+    const teamID = teamsData.find(({ name }) => name === chosenTeam)?.id;
+
     return chosenTeam === 'All Teams'
       ? playerData.filter(
-          ({ position, key }) =>
-            position === pos && !playerInfo.some(({ playerKey }) => playerKey === key)
+          ({ element_type, id }) =>
+            positionID === element_type && !playerInfo.some(({ playerID }) => playerID === id)
         )
       : playerData.filter(
-          ({ position, team, key }) =>
-            position === pos &&
-            team === chosenTeam &&
-            !playerInfo.some(({ playerKey }) => playerKey === key)
+          ({ element_type, team, id }) =>
+            teamID === team &&
+            positionID === element_type &&
+            !playerInfo.some(({ playerID }) => playerID === id)
         );
   };
 
@@ -160,16 +168,22 @@ const PlayerScreen = ({ type, visible }) => {
       midfielder: numberOfMidfielders,
       forward: numberOfForwards,
     };
+    const positionID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === pos
+    )?.id;
+    const teamID = teamsData.find(({ name }) => name === chosenTeam)?.id;
 
     if (chosenTeam === 'All Teams') {
-      const filteredPlayersLength = playerData.filter(({ position }) => position === pos).length;
+      const filteredPlayersLength = playerData.filter(
+        ({ element_type }) => element_type === positionID
+      ).length;
 
       return returnLength
         ? filteredPlayersLength
         : filteredPlayersLength >= requiredNoOfPlayers[pos];
     } else {
       const filteredPlayersLength = playerData.filter(
-        ({ position, team }) => position === pos && team === chosenTeam
+        ({ element_type, team }) => element_type === positionID && team === teamID
       ).length;
 
       return returnLength
@@ -183,16 +197,17 @@ const PlayerScreen = ({ type, visible }) => {
 
     if (possiblePlayers.length > 0) {
       const newPlayerInfo = playerInfo;
-      const { captain } = newPlayerInfo[index];
-      const { team, playerName, key } = randomSelect(possiblePlayers);
+      const { isCaptain } = newPlayerInfo[index];
+      const { team, web_name, id } = randomSelect(possiblePlayers);
+      const teamName = teamsData.find(({ id }) => id === team)?.name;
 
       newPlayerInfo[index] = {
-        captain,
-        playerName,
-        key: index,
-        playerKey: key,
-        shirtImage: index === 0 ? goalieKit[team] : playerKit[team],
-        playerContent: findOpponentAbbreviation(team, nextOpponent, TeamAbbreviations),
+        index,
+        isCaptain,
+        playerID: id,
+        playerName: web_name,
+        shirtImage: index === 0 ? goalieKit[teamName] : playerKit[teamName],
+        playerContent: findOpponentAbbreviation(team, nextOpponent, teamsData),
       };
       setPlayerInfo([...newPlayerInfo]);
     }
@@ -200,7 +215,9 @@ const PlayerScreen = ({ type, visible }) => {
 
   const captainHandler = index => {
     const newPlayerInfo = playerInfo;
-    newPlayerInfo.forEach(player => (player.captain = player.key === index && !player.captain));
+    newPlayerInfo.forEach(
+      player => (player.isCaptain = player.index === index && !player.isCaptain)
+    );
     setPlayerInfo([...newPlayerInfo]);
 
     if (teamPredicted) predictPoints();
@@ -211,7 +228,7 @@ const PlayerScreen = ({ type, visible }) => {
   const removeAll = () => {
     closeAlert();
     setTeamPredicted(false);
-    playerInfo.forEach((player, index) => removePlayer(index));
+    playerInfo.forEach(({ index }) => removePlayer(index));
   };
 
   const confirmRemoveAll = () => {
@@ -263,11 +280,11 @@ const PlayerScreen = ({ type, visible }) => {
     const newPlayerInfo = playerInfo;
 
     newPlayerInfo.forEach(player => {
-      const { playerKey, captain } = player;
-      const playerDetails = findData(playerKey, playerData);
-      const predictedPoint = predict(playerDetails, StandardRatings, nextOpponent, gameweek);
+      const { playerID, isCaptain } = player;
+      const { ep_next, ep_this } = findData(playerID, playerData);
+      const predictedPoint = gameweekFinished ? ep_next : ep_this;
 
-      player.playerContent = (captain ? 2 : 1) * predictedPoint;
+      player.playerContent = Math.round((isCaptain ? 2 : 1) * predictedPoint).toString();
     });
     setPlayerInfo([...newPlayerInfo]);
   };
@@ -288,7 +305,7 @@ const PlayerScreen = ({ type, visible }) => {
   };
 
   useEffect(() => {
-    if (clicks % 4 === 0) showInterstitial();
+    if (clicks % 5 === 0) showInterstitial();
   }, [clicks]);
 
   const onPredict = () => {
@@ -322,12 +339,22 @@ const PlayerScreen = ({ type, visible }) => {
   useEffect(() => changeFormationHandler(chosenFormation), [chosenFormation]);
 
   useEffect(() => {
+    const defendersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
+    )?.id;
+    const midfieldersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
+    )?.id;
+    const forwardsID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
+    )?.id;
+
     // remove non-defenders
     const defEnd = 1 + numberOfDefenders;
     for (let i = 1; i < defEnd; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'defender') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== defendersID) {
         removePlayer(i);
       }
     }
@@ -335,18 +362,18 @@ const PlayerScreen = ({ type, visible }) => {
     // remove non-midfielders
     const midEnd = defEnd + numberOfMidfielders;
     for (let i = defEnd; i < midEnd; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'midfielder') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== midfieldersID) {
         removePlayer(i);
       }
     }
 
     // remove non-forwards
     for (let i = midEnd; i < 11; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'forward') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== forwardsID) {
         removePlayer(i);
       }
     }
@@ -355,7 +382,6 @@ const PlayerScreen = ({ type, visible }) => {
   return (
     <View style={{ ...styles.main, display: visible ? 'flex' : 'none' }}>
       <PlayerSelectModal
-        teams={teams}
         key={chosenPosition}
         playerKit={playerKit}
         goalieKit={goalieKit}
@@ -370,7 +396,6 @@ const PlayerScreen = ({ type, visible }) => {
         setChosenTeam={setChosenTeam}
         chosenPosition={chosenPosition}
         setTeamPredicted={setTeamPredicted}
-        TeamAbbreviations={TeamAbbreviations}
         setChosenPosition={setChosenPosition}
         setPlayerModalVisible={setPlayerModalVisible}
       />
@@ -387,7 +412,7 @@ const PlayerScreen = ({ type, visible }) => {
       >
         {type === 'scout' && (
           <Text allowFontScaling={false} style={styles.headerText}>
-            Scout's Selection for {currentGW}
+            Scout's Selection for {currentGWType} {currentGW}
           </Text>
         )}
 
@@ -459,10 +484,10 @@ const PlayerScreen = ({ type, visible }) => {
 
         <FilterBar
           type={type}
-          teams={teams}
           pickerEnabled={true}
           chosenTeam={chosenTeam}
           setChosenTeam={setChosenTeam}
+          teams={['All Teams', ...teams]}
           confirmRemoveAll={confirmRemoveAll}
           randomizePlayers={randomizePlayers}
         />
@@ -476,7 +501,7 @@ const PlayerScreen = ({ type, visible }) => {
           height: type === 'fantasy' ? '18%' : '17%',
         }}
       >
-        {0.92 * (type === 'fantasy' ? 0.18 : 0.17) * 0.5 * deviceHeight >= defaultAdHeight ? (
+        {0.92 * (type === 'fantasy' ? 0.18 : 0.17) * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT ? (
           <AdMobBanner
             style={styles.admob}
             servePersonalizedAds={true}
@@ -503,7 +528,7 @@ const PlayerScreen = ({ type, visible }) => {
 
 const styles = StyleSheet.create({
   main: { width: '100%', height: '92%', backgroundColor: colors.white },
-  header: { width: '100%', alignItems: 'center', backgroundColor: colors.secondary },
+  header: { width: '100%', alignItems: 'center', backgroundColor: colors.stratos },
   headerText: {
     top: '6%',
     width: '100%',
@@ -515,7 +540,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },
-  body: { width: '100%', height: '70%', backgroundColor: colors.secondary },
+  body: { width: '100%', height: '70%', backgroundColor: colors.stratos },
   imgViewStyle: {
     width: '100%',
     height: '90%',
@@ -523,7 +548,7 @@ const styles = StyleSheet.create({
     paddingVertical: '5%',
     justifyContent: 'space-evenly',
   },
-  admob: { width: '100%', height: '50%', backgroundColor: colors.grey },
+  admob: { width: '100%', height: '50%', backgroundColor: colors.alto },
   imageBg: {
     width: undefined,
     height: undefined,

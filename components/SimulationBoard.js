@@ -7,14 +7,12 @@ import Timer from './Timer';
 import ScoreBoard from './Scoreboard';
 import EventActivity from './EventActivity';
 
-import { colors } from '../constants';
 import {
+  colors,
   shuffle,
-  findData,
-  findReturns,
   findFontSize,
   randomSelect,
-  deviceHeight,
+  DEVICE_HEIGHT,
   getRndInteger,
 } from '../utilities';
 
@@ -22,38 +20,42 @@ const SimulationBoard = ({
   squad1,
   squad2,
   visible,
+  teamsData,
   teamName1,
   teamName2,
-  playerData,
-  StandardRatings,
+  positionData,
+  shortTeamName1,
+  shortTeamName2,
   setBoardVisible,
-  TeamAbbreviations,
 }) => {
-  const minLength = 10;
-  const { teamIndex } = StandardRatings;
-  const [events, setEvents] = useState([]);
+  const MIN_LENGTH = 15;
+  const MAX_STRENGTH = 5;
   const [score1, setScore1] = useState(0);
   const [score2, setScore2] = useState(0);
-  const [goals1, setGoals1] = useState([]);
-  const [goals2, setGoals2] = useState([]);
-  const [saves1, setSaves1] = useState([]);
-  const [saves2, setSaves2] = useState([]);
-  const [assists1, setAssists1] = useState([]);
-  const [assists2, setAssists2] = useState([]);
+  const [events, setEvents] = useState([]);
   const [indexPool, setIndexPool] = useState([]);
   const [timeInSeconds, setTimeInSeconds] = useState(0);
+
+  const [savers1, setSavers1] = useState([]);
+  const [savers2, setSavers2] = useState([]);
+  const [goalScorers1, setGoalScorers1] = useState([]);
+  const [goalScorers2, setGoalScorers2] = useState([]);
+  const [assistProviders1, setAssistProviders1] = useState([]);
+  const [assistProviders2, setAssistProviders2] = useState([]);
+  const { strength: strengthHome } = teamsData.find(({ name }) => name === teamName1) || {};
+  const { strength: strengthAway } = teamsData.find(({ name }) => name === teamName2) || {};
 
   const reset = () => {
     setTimeInSeconds(0);
     setScore1(0);
     setScore2(0);
     setEvents([]);
-    setGoals1([]);
-    setGoals2([]);
-    setSaves1([]);
-    setSaves2([]);
-    setAssists1([]);
-    setAssists2([]);
+    setSavers1([]);
+    setSavers2([]);
+    setGoalScorers1([]);
+    setGoalScorers2([]);
+    setAssistProviders1([]);
+    setAssistProviders2([]);
   };
 
   useEffect(() => {
@@ -61,11 +63,11 @@ const SimulationBoard = ({
 
     if (visible) {
       const newIndexPool = [];
-      const data1Length = Math.round(minLength + 10 * teamIndex[teamName1]);
-      const data2Length = Math.round(minLength + 10 * teamIndex[teamName2]);
+      const dataLength1 = Math.round(MIN_LENGTH + 10 * strengthHome);
+      const dataLength2 = Math.round(MIN_LENGTH + 10 * strengthAway);
 
-      for (let i = 0; i < data1Length; i++) newIndexPool.push(0);
-      for (let i = 0; i < data2Length; i++) newIndexPool.push(1);
+      for (let i = 0; i < dataLength1; i++) newIndexPool.push(0);
+      for (let i = 0; i < dataLength2; i++) newIndexPool.push(1);
 
       shuffle(newIndexPool);
       setIndexPool(newIndexPool);
@@ -80,81 +82,64 @@ const SimulationBoard = ({
   }, [timeInSeconds, visible]);
 
   useEffect(() => {
-    const index = randomSelect(indexPool);
-    const eventHappen = getRndInteger(0, 4) === 1;
+    const matchStarted = timeInSeconds !== 0;
+    const eventIndex = randomSelect(indexPool); // first choose which team has registered a match event...
+    const eventHappens = getRndInteger(0, 3) === 1; // ...then randomly decide if event happens or not
+    const newEvent = {
+      saver1: '',
+      saver2: '',
+      eventType: '',
+      onTarget1: '',
+      onTarget2: '',
+      goalScorer1: '',
+      goalScorer2: '',
+      assistProvider1: '',
+      assistProvider2: '',
+      timeStamp: timeInSeconds,
+    };
 
-    if (eventHappen && visible && timeInSeconds !== 0) {
-      if (index === 0) {
-        const eventIndex = getRndInteger(0, goals1.length);
-        if (goals1[eventIndex]) {
-          if (saves2[eventIndex]) {
-            events.push({
-              eventType: 'onTarget',
-              goalScorer1: '',
-              assistProvider1: '',
-              onTarget1: goals1[eventIndex],
-              saver1: '',
-              goalScorer2: '',
-              assistProvider2: '',
-              onTarget2: '',
-              saver2: saves2[eventIndex] || '',
-              timeStamp: timeInSeconds,
-            });
+    if (visible && matchStarted && eventHappens) {
+      if (eventIndex === 0) {
+        const eventPlayerIndex = getRndInteger(0, goalScorers1.length); // choose which player made that match event
+        const newSaver = savers2[eventPlayerIndex];
+        const newGoalScorer = goalScorers1[eventPlayerIndex];
+        const newAssistProvider = assistProviders1[eventPlayerIndex];
+
+        if (newGoalScorer) {
+          if (newSaver) {
+            newEvent.saver2 = newSaver;
+            newEvent.eventType = 'onTarget';
+            newEvent.onTarget1 = newGoalScorer;
           } else {
-            events.push({
-              eventType: 'goal',
-              goalScorer1: goals1[eventIndex],
-              assistProvider1:
-                assists1[eventIndex] && assists1[eventIndex] !== goals1[eventIndex]
-                  ? assists1[eventIndex]
-                  : 'None',
-              onTarget1: '',
-              saver1: '',
-              goalScorer2: '',
-              assistProvider2: '',
-              onTarget2: '',
-              saver2: '',
-              timeStamp: timeInSeconds,
-            });
+            newEvent.eventType = 'goal';
+            newEvent.goalScorer1 = newGoalScorer;
+            newEvent.assistProvider1 =
+              newAssistProvider && newAssistProvider !== newGoalScorer ? newAssistProvider : 'None';
             setScore1(score1 + 1);
           }
         }
       } else {
-        const eventIndex = getRndInteger(0, goals2.length);
-        if (goals2[eventIndex]) {
-          if (saves1[eventIndex]) {
-            events.push({
-              eventType: 'onTarget',
-              goalScorer1: '',
-              assistProvider1: '',
-              onTarget1: '',
-              saver1: saves1[eventIndex] || '',
-              goalScorer2: '',
-              assistProvider2: '',
-              onTarget2: goals2[eventIndex],
-              saver2: '',
-              timeStamp: timeInSeconds,
-            });
+        const eventPlayerIndex = getRndInteger(0, goalScorers2.length); // choose which player made that match event
+        const newSaver = savers1[eventPlayerIndex];
+        const newGoalScorer = goalScorers2[eventPlayerIndex];
+        const newAssistProvider = assistProviders2[eventPlayerIndex];
+
+        if (newGoalScorer) {
+          if (newSaver) {
+            newEvent.saver1 = newSaver;
+            newEvent.eventType = 'onTarget';
+            newEvent.onTarget2 = newGoalScorer;
           } else {
-            events.push({
-              eventType: 'goal',
-              goalScorer1: '',
-              assistProvider1: '',
-              onTarget1: '',
-              saver1: '',
-              goalScorer2: goals2[eventIndex],
-              assistProvider2:
-                assists2[eventIndex] && assists2[eventIndex] !== goals2[eventIndex]
-                  ? assists2[eventIndex]
-                  : 'None',
-              onTarget2: '',
-              saver2: '',
-              timeStamp: timeInSeconds,
-            });
+            newEvent.eventType = 'goal';
+            newEvent.goalScorer2 = newGoalScorer;
+            newEvent.assistProvider2 =
+              newAssistProvider && newAssistProvider !== newGoalScorer ? newAssistProvider : 'None';
             setScore2(score2 + 1);
           }
         }
       }
+
+      events.push(newEvent);
     }
   }, [timeInSeconds]);
 
@@ -168,82 +153,81 @@ const SimulationBoard = ({
   };
 
   const initDataArrays = () => {
-    const data1Length = Math.round(minLength + 10 * (3 - teamIndex[teamName1]));
-    const data2Length = Math.round(minLength + 10 * (3 - teamIndex[teamName2]));
+    const dataLength1 = Math.round(MIN_LENGTH + 10 * (MAX_STRENGTH - strengthHome));
+    const dataLength2 = Math.round(MIN_LENGTH + 10 * (MAX_STRENGTH - strengthAway));
+    const defendersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
+    )?.id;
 
     // for team1
-    for (let i = 0; i < squad1.length; i++) {
-      const { playerName, key } = squad1[i];
-      const { position } = findData(key, playerData);
-      const { goals, assists, saves } = findReturns(key, StandardRatings, playerData);
-      const truthValue = (position === 'defender' && goals > 3) || position !== 'defender';
+    squad1.forEach(({ web_name, element_type, goals_scored, assists, saves }) => {
+      // make sure that for the defenders, only those with at least 4 goals can be potential goal scorers
+      const defenderGoalsAccepted =
+        (element_type === defendersID && goals_scored > 3) || element_type !== defendersID;
 
-      if (goals1.length + goals <= data1Length && truthValue) {
-        for (let i = 0; i < goals; i++) goals1.push(playerName);
+      while (savers1.length < dataLength2 && saves > 0) {
+        savers1.push(web_name);
+        saves--;
       }
-      if (assists1.length + assists <= data1Length) {
-        for (let i = 0; i < assists; i++) assists1.push(playerName);
+      while (assistProviders1.length < dataLength1 && assists > 0) {
+        assistProviders1.push(web_name);
+        assists--;
       }
-      if (saves1.length + saves <= data1Length) {
-        for (let i = 0; i < saves; i++) saves1.push(playerName);
+      while (goalScorers1.length < dataLength1 && defenderGoalsAccepted && goals_scored > 0) {
+        goalScorers1.push(web_name);
+        goals_scored--;
       }
-    }
+    });
 
-    // fill up remaining data slots until length equals required lengths
-    while (goals1.length < data1Length) goals1.push('');
-    while (saves1.length < data1Length) saves1.push('');
-    while (assists1.length < data1Length) assists1.push('');
+    // fill up remaining data slots until length equals required lengths for each team
+    while (savers1.length < dataLength2) savers1.push('');
+    while (goalScorers1.length < dataLength1) goalScorers1.push('');
+    while (assistProviders1.length < dataLength1) assistProviders1.push('');
 
-    shuffle(goals1);
-    shuffle(saves1);
-    shuffle(assists1);
-
-    setGoals1(goals1);
-    setSaves1(saves1);
-    setAssists1(assists1);
+    shuffle(savers1);
+    shuffle(goalScorers1);
+    shuffle(assistProviders1);
 
     // for team2
-    for (let i = 0; i < squad2.length; i++) {
-      const { playerName, key } = squad2[i];
-      const { position } = findData(key, playerData);
-      const { goals, assists, saves } = findReturns(key, StandardRatings, playerData);
-      const truthValue = (position === 'defender' && goals > 3) || position !== 'defender';
+    squad2.forEach(({ web_name, element_type, goals_scored, assists, saves }) => {
+      // make sure that for the defenders, only those with at least 4 goals can be potential goal scorers
+      const defenderGoalsAccepted =
+        (element_type === defendersID && goals_scored > 3) || element_type !== defendersID;
 
-      if (goals2.length + goals <= data2Length && truthValue) {
-        for (let i = 0; i < goals; i++) goals2.push(playerName);
+      while (savers2.length < dataLength1 && saves > 0) {
+        savers2.push(web_name);
+        saves--;
       }
-      if (assists2.length + assists <= data2Length) {
-        for (let i = 0; i < assists; i++) assists2.push(playerName);
+      while (assistProviders2.length < dataLength2 && assists > 0) {
+        assistProviders2.push(web_name);
+        assists--;
       }
-      if (saves2.length + saves <= data2Length) {
-        for (let i = 0; i < saves; i++) saves2.push(playerName);
+      while (goalScorers2.length < dataLength2 && defenderGoalsAccepted && goals_scored > 0) {
+        goalScorers2.push(web_name);
+        goals_scored--;
       }
-    }
+    });
 
-    // fill up remaining data slots until length equals required lengths
-    while (goals2.length < data2Length) goals2.push('');
-    while (saves2.length < data2Length) saves2.push('');
-    while (assists2.length < data2Length) assists2.push('');
+    // fill up remaining data slots until length equals required lengths for each team
+    while (savers2.length < dataLength1) savers2.push('');
+    while (goalScorers2.length < dataLength2) goalScorers2.push('');
+    while (assistProviders2.length < dataLength2) assistProviders2.push('');
 
-    shuffle(goals2);
-    shuffle(saves2);
-    shuffle(assists2);
-
-    setGoals2(goals2);
-    setSaves2(saves2);
-    setAssists2(assists2);
+    shuffle(savers2);
+    shuffle(goalScorers2);
+    shuffle(assistProviders2);
   };
 
   const onRequestClose = () => setBoardVisible(false);
 
   const refresh = () => {
-    setTimeInSeconds(0);
-    setEvents([]);
     setScore1(0);
     setScore2(0);
+    setEvents([]);
+    setTimeInSeconds(0);
   };
 
-  const PLAYER_ITEM_HEIGHT = deviceHeight * 0.085;
+  const PLAYER_ITEM_HEIGHT = DEVICE_HEIGHT * 0.085;
 
   const separator = () => <View style={styles.separator} />;
 
@@ -264,13 +248,12 @@ const SimulationBoard = ({
           <ScoreBoard
             score1={score1}
             score2={score2}
-            teamName1={teamName1}
-            teamName2={teamName2}
-            TeamAbbreviations={TeamAbbreviations}
+            shortTeamName1={shortTeamName1}
+            shortTeamName2={shortTeamName2}
           />
         </View>
 
-        <LinearGradient colors={['#000000a0', colors.grey]} style={styles.gradientView} />
+        <LinearGradient colors={[colors.athens, colors.alto]} style={styles.gradientView} />
 
         <FlatList
           data={events}
@@ -280,7 +263,7 @@ const SimulationBoard = ({
           ItemSeparatorComponent={separator}
         />
 
-        <LinearGradient colors={[colors.grey, '#000000a0']} style={styles.gradientView} />
+        <LinearGradient colors={[colors.alto, colors.athens]} style={styles.gradientView} />
 
         <View style={styles.bottom}>
           <Icon
@@ -307,7 +290,7 @@ const styles = StyleSheet.create({
   main: { width: '100%', height: '100%' },
   gradientView: { height: '0.5%', width: '100%' },
   header: { width: '100%', height: '20%' },
-  body: { width: '100%', height: '69%', backgroundColor: colors.grey },
+  body: { width: '100%', height: '69%', backgroundColor: colors.alto },
   bottom: {
     width: '100%',
     height: '10%',
@@ -315,7 +298,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
-  separator: { width: '100%', height: deviceHeight * 0.005 },
+  separator: { width: '100%', height: DEVICE_HEIGHT * 0.005 },
 });
 
 export default memo(SimulationBoard);

@@ -2,19 +2,23 @@ import React, { memo } from 'react';
 import { Text as AnimatableText } from 'react-native-animatable';
 import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 
-import { colors } from '../constants';
-import { findFontSize, deviceHeight, deviceWidth, findScaledFontSize } from '../utilities';
+import {
+  colors,
+  findFontSize,
+  DEVICE_WIDTH,
+  DEVICE_HEIGHT,
+  findScaledFontSize,
+} from '../utilities';
 
-const textHeight = Math.round(0.92 * 0.7 * 0.9 * 0.25 * 0.165 * deviceHeight);
-const textWidth = Math.round(0.185 * deviceWidth);
+const textHeight = Math.round(0.92 * 0.7 * 0.9 * 0.25 * 0.165 * DEVICE_HEIGHT);
+const textWidth = Math.round(0.185 * DEVICE_WIDTH);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 90);
 
 const PlayerView = ({
   imgVal,
-  captain,
   command,
-  available,
+  isCaptain,
   playerName,
   longCommand,
   extraStyles,
@@ -23,12 +27,9 @@ const PlayerView = ({
   extraTextStyles1,
   extraTextStyles2,
   extraShirtStyles,
+  chanceOfPlayingNextRound,
 }) => {
   const animations = {
-    playerUnavailable: {
-      from: { backgroundColor: colors.contentViewColor },
-      to: { backgroundColor: colors.red },
-    },
     captain: { from: { opacity: 0 }, to: { opacity: 1 } },
     unCaptain: { from: { opacity: 0 }, to: { opacity: 0 } },
   };
@@ -39,7 +40,7 @@ const PlayerView = ({
         duration={400}
         allowFontScaling={false}
         style={styles.captainBadgeText}
-        animation={captain && playerName ? animations.captain : animations.unCaptain}
+        animation={isCaptain && playerName ? animations.captain : animations.unCaptain}
       >
         C
       </AnimatableText>
@@ -64,19 +65,17 @@ const PlayerView = ({
         {playerName}
       </Text>
 
-      <AnimatableText
-        duration={200}
+      <Text
         allowFontScaling={false}
-        animation={available ? null : animations.playerUnavailable}
         style={{
           ...styles.contentView,
-          backgroundColor: available ? colors.contentViewColor : colors.red,
+          backgroundColor: colors[`playingChance${chanceOfPlayingNextRound}%`],
           fontSize: findScaledFontSize(playerContent, maxTextLength, 8, 0.085),
           ...extraTextStyles2,
         }}
       >
         {playerContent}
-      </AnimatableText>
+      </Text>
     </View>
   );
 };
@@ -121,10 +120,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(10),
-    width: deviceHeight * 0.023,
-    height: deviceHeight * 0.023,
+    width: DEVICE_HEIGHT * 0.023,
+    height: DEVICE_HEIGHT * 0.023,
     backgroundColor: colors.black,
-    borderRadius: deviceHeight * 0.0115,
+    borderRadius: DEVICE_HEIGHT * 0.0115,
   },
 });
 

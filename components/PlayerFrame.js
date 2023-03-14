@@ -1,9 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import PlayerView from './PlayerView';
 
 import { findPlayerInfo } from '../utilities';
+
+import { AppContext } from '../App';
 
 const PlayerFrame = ({
   type,
@@ -14,25 +16,35 @@ const PlayerFrame = ({
   positionGroup,
   playerViewCommand,
   playerViewLongCommand,
-}) => (
-  <View style={styles.playerFrame}>
-    {playerInfo
-      .slice(startIndex, endIndex)
-      .map(({ key, shirtImage, playerContent, playerKey, playerName, captain }) => (
-        <PlayerView
-          key={key}
-          captain={captain}
-          imgVal={shirtImage}
-          playerName={playerName}
-          playerContent={playerContent}
-          activeOpacity={type === 'scout' ? 1 : 0.6}
-          command={() => playerViewCommand(positionGroup, key)}
-          longCommand={() => playerViewLongCommand(playerName, key)}
-          available={!playerKey || findPlayerInfo(playerKey, 'available', playerData)}
-        />
-      ))}
-  </View>
-);
+}) => {
+  const { gameweekFinished } = useContext(AppContext);
+
+  return (
+    <View style={styles.playerFrame}>
+      {playerInfo
+        .slice(startIndex, endIndex)
+        .map(({ index, shirtImage, playerContent, playerID, playerName, isCaptain }) => (
+          <PlayerView
+            key={index}
+            imgVal={shirtImage}
+            isCaptain={isCaptain}
+            playerName={playerName}
+            playerContent={playerContent}
+            activeOpacity={type === 'scout' ? 1 : 0.6}
+            command={() => playerViewCommand(positionGroup, index)}
+            longCommand={() => playerViewLongCommand(playerName, index)}
+            chanceOfPlayingNextRound={
+              findPlayerInfo(
+                playerID,
+                gameweekFinished ? 'chance_of_playing_next_round' : 'chance_of_playing_this_round',
+                playerData
+              ) || 100
+            }
+          />
+        ))}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   playerFrame: {

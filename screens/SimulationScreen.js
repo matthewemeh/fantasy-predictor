@@ -17,16 +17,17 @@ import PlayerFrame from '../components/PlayerFrame';
 import SimulationBoard from '../components/SimulationBoard';
 import PlayerSelectModal from '../components/PlayerSelectModal';
 
-import { colors, fieldConstants } from '../constants';
 import {
   player,
+  colors,
   findData,
   findFontSize,
   unknownImage,
-  deviceHeight,
+  DEVICE_HEIGHT,
   randomSelect,
+  fieldConstants,
   findPlayerInfo,
-  defaultAdHeight,
+  DEFAULT_AD_HEIGHT,
   descendingPointsOrder,
   findOpponentAbbreviation,
 } from '../utilities';
@@ -36,13 +37,13 @@ import { AppContext } from '../App';
 const SimulationScreen = ({ visible }) => {
   const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const {
-    teams,
     playerKit,
     goalieKit,
+    teamsData,
     playerData,
     fieldImage,
     nextOpponent,
-    StandardRatings,
+    positionData,
     setAlertVisible,
     TeamAbbreviations,
     setAlertComponents,
@@ -50,6 +51,7 @@ const SimulationScreen = ({ visible }) => {
 
   // componentDidMount
   useEffect(initializeId, []);
+  const teams = teamsData.map(({ name }) => name).sort();
 
   const type = 'simulate';
   const { formations } = fieldConstants;
@@ -57,6 +59,7 @@ const SimulationScreen = ({ visible }) => {
   const [squad1, setSquad1] = useState([]);
   const [squad2, setSquad2] = useState([]);
   const [boardVisible, setBoardVisible] = useState(false);
+  const [chosenTeam, setChosenTeam] = useState(chosenTeam1);
   const [chosenTeam1, setChosenTeam1] = useState('All Teams');
   const [chosenTeam2, setChosenTeam2] = useState('All Teams');
   const [playerSelectVisible, setPlayerSelectVisible] = useState(false);
@@ -69,7 +72,6 @@ const SimulationScreen = ({ visible }) => {
   const [playerModalVisible2, setPlayerModalVisible2] = useState(false);
 
   const numberOfGoalkeepers = 1;
-  const [chosenTeam, setChosenTeam] = useState(chosenTeam1);
   const [numberOfDefenders, setNumberOfDefenders] = useState(4);
   const [numberOfMidfielders, setNumberOfMidfielders] = useState(4);
   const [numberOfForwards, setNumberOfForwards] = useState(2);
@@ -97,9 +99,9 @@ const SimulationScreen = ({ visible }) => {
     const newPlayerInfo = playerInfo;
 
     newPlayerInfo[index] = {
-      key: index,
-      playerKey: '',
-      captain: false,
+      index,
+      playerID: '',
+      isCaptain: false,
       playerName: '',
       playerContent: '',
       shirtImage: unknownImage,
@@ -109,16 +111,23 @@ const SimulationScreen = ({ visible }) => {
   };
 
   const filterPlayers = pos => {
+    // get id for position argument passed into pos variable...
+    const positionID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === pos
+    )?.id;
+
+    const teamID = teamsData.find(({ name }) => name === chosenTeam)?.id;
+
     return chosenTeam === 'All Teams'
       ? playerData.filter(
-          ({ position, key }) =>
-            position === pos && !playerInfo.some(({ playerKey }) => playerKey === key)
+          ({ element_type, id }) =>
+            positionID === element_type && !playerInfo.some(({ playerID }) => playerID === id)
         )
       : playerData.filter(
-          ({ position, team, key }) =>
-            position === pos &&
-            team === chosenTeam &&
-            !playerInfo.some(({ playerKey }) => playerKey === key)
+          ({ element_type, team, id }) =>
+            teamID === team &&
+            positionID === element_type &&
+            !playerInfo.some(({ playerID }) => playerID === id)
         );
   };
 
@@ -129,16 +138,27 @@ const SimulationScreen = ({ visible }) => {
       midfielder: numberOfMidfielders,
       forward: numberOfForwards,
     };
+    const positionID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === pos
+    )?.id;
+    const teamID = teamsData.find(({ name }) => name === chosenTeam)?.id;
 
     if (chosenTeam === 'All Teams') {
+      const filteredPlayersLength = playerData.filter(
+        ({ element_type }) => element_type === positionID
+      ).length;
+
       return returnLength
-        ? playerData.filter(({ position }) => position === pos).length
-        : playerData.filter(({ position }) => position === pos).length >= requiredNoOfPlayers[pos];
+        ? filteredPlayersLength
+        : filteredPlayersLength >= requiredNoOfPlayers[pos];
     } else {
+      const filteredPlayersLength = playerData.filter(
+        ({ element_type, team }) => element_type === positionID && team === teamID
+      ).length;
+
       return returnLength
-        ? playerData.filter(({ position, team }) => position === pos && team === chosenTeam).length
-        : playerData.filter(({ position, team }) => position === pos && team === chosenTeam)
-            .length >= requiredNoOfPlayers[pos];
+        ? filteredPlayersLength
+        : filteredPlayersLength >= requiredNoOfPlayers[pos];
     }
   };
 
@@ -147,16 +167,17 @@ const SimulationScreen = ({ visible }) => {
 
     if (possiblePlayers.length > 0) {
       const newPlayerInfo = playerInfo;
-      const { captain } = newPlayerInfo[index];
-      const { team, playerName, key } = randomSelect(possiblePlayers);
+      const { isCaptain } = newPlayerInfo[index];
+      const { team, web_name, id } = randomSelect(possiblePlayers);
+      const teamName = teamsData.find(({ id }) => id === team)?.name;
 
       newPlayerInfo[index] = {
-        captain,
-        playerName,
-        key: index,
-        playerKey: key,
-        shirtImage: index === 0 ? goalieKit[team] : playerKit[team],
-        playerContent: findOpponentAbbreviation(team, nextOpponent, TeamAbbreviations),
+        index,
+        isCaptain,
+        playerID: id,
+        playerName: web_name,
+        shirtImage: index === 0 ? goalieKit[teamName] : playerKit[teamName],
+        playerContent: findOpponentAbbreviation(team, nextOpponent, teamsData),
       };
       setPlayerInfo([...newPlayerInfo]);
     }
@@ -184,7 +205,7 @@ const SimulationScreen = ({ visible }) => {
 
   const removeAll = () => {
     closeAlert();
-    playerInfo.forEach((player, index) => removePlayer(index));
+    playerInfo.forEach(({ index }) => removePlayer(index));
   };
 
   const confirmRemoveAll = () => {
@@ -243,41 +264,57 @@ const SimulationScreen = ({ visible }) => {
     }
   };
 
-  const findPlayerDetails = () =>
-    playerInfo.map(({ playerKey }) => findData(playerKey, playerData));
+  const findPlayerDetails = () => playerInfo.map(({ playerID }) => findData(playerID, playerData));
 
   const save = () => {
     if (chosenTeam === chosenTeam1) {
       setSquad1(findPlayerDetails());
       ToastAndroid.show(`${chosenTeam}'s team saved`, 2000);
-      playerInfo.forEach((player, index) => removePlayer(index));
+      playerInfo.forEach(({ index }) => removePlayer(index));
       setChosenTeam(chosenTeam2);
     } else if (chosenTeam === chosenTeam2) {
       setSquad2(findPlayerDetails());
       ToastAndroid.show(`${chosenTeam}'s team saved`, 2000);
-      playerInfo.forEach((player, index) => removePlayer(index));
+      playerInfo.forEach(({ index }) => removePlayer(index));
       setPlayerSelectVisible(false);
     }
   };
 
-  const teamEnough = teamName => {
+  const teamEnough = team => {
+    const goalkeepersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'goalkeeper'
+    )?.id;
+    const defendersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
+    )?.id;
+    const midfieldersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
+    )?.id;
+    const forwardsID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
+    )?.id;
+
+    const teamID = teamsData.find(({ name }) => name === team)?.id;
+
     if (
-      playerData.filter(({ team, position }) => team === teamName && position === 'goalkeeper')
-        .length < 1
+      playerData.filter(
+        ({ team, element_type }) => team === teamID && element_type === goalkeepersID
+      ).length < 1
     ) {
       return false;
     } else if (
-      playerData.filter(({ team, position }) => team === teamName && position === 'defender')
+      playerData.filter(({ team, element_type }) => team === teamID && element_type === defendersID)
         .length < 4
     ) {
       return false;
     } else if (
-      playerData.filter(({ team, position }) => team === teamName && position === 'midfielder')
-        .length < 5
+      playerData.filter(
+        ({ team, element_type }) => team === teamID && element_type === midfieldersID
+      ).length < 5
     ) {
       return false;
     } else if (
-      playerData.filter(({ team, position }) => team === teamName && position === 'forward')
+      playerData.filter(({ team, element_type }) => team === teamID && element_type === forwardsID)
         .length < 1
     ) {
       return false;
@@ -311,46 +348,67 @@ const SimulationScreen = ({ visible }) => {
     else setSimulateButtonEnabled(false);
   }, [squad1, squad2]);
 
-  const findBestFormation = teamName => {
-    return playerData.filter(({ team, position }) => team === teamName && position === 'forward')
-      .length >= 2
+  const findBestFormation = team => {
+    const forwardsID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
+    )?.id;
+    const teamID = teamsData.find(({ name }) => name === team)?.id;
+
+    return playerData.filter(
+      ({ team, element_type }) => team === teamID && element_type === forwardsID
+    ).length >= 2
       ? '4-4-2'
       : '4-5-1';
   };
 
-  const getTeam = teamName => {
+  const getTeam = team => {
     let squad = [];
-    const formation = findBestFormation(teamName);
+    const formation = findBestFormation(team);
+    const teamID = teamsData.find(({ name }) => name === team)?.id;
+    const goalkeepersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'goalkeeper'
+    )?.id;
+    const defendersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
+    )?.id;
+    const midfieldersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
+    )?.id;
+    const forwardsID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
+    )?.id;
 
-    const bestGoalies = playerData
-      .filter(({ team, position }) => team === teamName && position === 'goalkeeper')
+    const goalies = playerData
+      .filter(({ team, element_type }) => team === teamID && element_type === goalkeepersID)
       .sort(descendingPointsOrder);
-    const bestDefenders = playerData
-      .filter(({ team, position }) => team === teamName && position === 'defender')
+    const defenders = playerData
+      .filter(({ team, element_type }) => team === teamID && element_type === defendersID)
       .sort(descendingPointsOrder);
-    const bestMidfielders = playerData
-      .filter(({ team, position }) => team === teamName && position === 'midfielder')
+    const midfielders = playerData
+      .filter(({ team, element_type }) => team === teamID && element_type === midfieldersID)
       .sort(descendingPointsOrder);
-    const bestForwards = playerData
-      .filter(({ team, position }) => team === teamName && position === 'forward')
+    const forwards = playerData
+      .filter(({ team, element_type }) => team === teamID && element_type === forwardsID)
       .sort(descendingPointsOrder);
 
-    squad.push(bestGoalies[0]);
-    squad.push(...bestDefenders.slice(0, parseInt(formation.charAt(0))));
-    squad.push(...bestMidfielders.slice(0, parseInt(formation.charAt(2))));
-    squad.push(...bestForwards.slice(0, parseInt(formation.charAt(4))));
+    const bestGoalie = goalies[0];
+    const bestDefenders = defenders.slice(0, parseInt(formation.charAt(0)));
+    const bestMidfielders = midfielders.slice(0, parseInt(formation.charAt(2)));
+    const bestForwards = forwards.slice(0, parseInt(formation.charAt(4)));
+
+    squad = [bestGoalie, ...bestDefenders, ...bestMidfielders, ...bestForwards];
 
     return squad;
   };
 
   const onSelectModalClose = () => {
     setPlayerSelectVisible(false);
-    playerInfo.forEach((player, index) => removePlayer(index));
+    playerInfo.forEach(({ index }) => removePlayer(index));
     setChosenTeam(chosenTeam1);
   };
 
   useEffect(() => {
-    if (clicks % 4 === 0 && !boardVisible) showInterstitial();
+    if (clicks % 5 === 0 && !boardVisible) showInterstitial();
   }, [clicks, boardVisible]);
 
   const openBoard = () => {
@@ -358,16 +416,16 @@ const SimulationScreen = ({ visible }) => {
     setClicks(clicks + 1);
   };
 
-  const onSelectPlayer = playerKey => {
+  const onSelectPlayer = playerID => {
     let newSquad;
 
     if (chosenTeam === chosenTeam1) {
       newSquad = squad1;
-      newSquad[currentIndex] = findData(playerKey, playerData);
+      newSquad[currentIndex] = findData(playerID, playerData);
       setSquad1([...newSquad]);
     } else if (chosenTeam === chosenTeam2) {
       newSquad = squad2;
-      newSquad[currentIndex] = findData(playerKey, playerData);
+      newSquad[currentIndex] = findData(playerID, playerData);
       setSquad2([...newSquad]);
     }
   };
@@ -377,11 +435,13 @@ const SimulationScreen = ({ visible }) => {
     setPlayerSelectVisible(true);
   };
 
-  const playerCommand = (team, playerKey, index) => {
-    const { position } = findData(playerKey, playerData);
-    setChosenTeam(team);
+  const playerCommand = (teamName, playerID, index) => {
+    const { element_type } = findData(playerID, playerData);
+    const { plural_name } = positionData.find(({ id }) => id === element_type);
+
+    setChosenTeam(teamName);
     setCurrentIndex(index);
-    setChosenPosition(`${position}s`);
+    setChosenPosition(plural_name.toLowerCase());
     setPlayerModalVisible2(true);
   };
 
@@ -394,12 +454,22 @@ const SimulationScreen = ({ visible }) => {
   useEffect(() => changeFormationHandler(chosenFormation), [chosenFormation]);
 
   useEffect(() => {
+    const defendersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
+    )?.id;
+    const midfieldersID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
+    )?.id;
+    const forwardsID = positionData.find(
+      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
+    )?.id;
+
     // remove non-defenders
     const defEnd = 1 + numberOfDefenders;
     for (let i = 1; i < defEnd; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'defender') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== defendersID) {
         removePlayer(i);
       }
     }
@@ -407,18 +477,18 @@ const SimulationScreen = ({ visible }) => {
     // remove non-midfielders
     const midEnd = defEnd + numberOfMidfielders;
     for (let i = defEnd; i < midEnd; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'midfielder') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== midfieldersID) {
         removePlayer(i);
       }
     }
 
     // remove non-forwards
     for (let i = midEnd; i < 11; i++) {
-      const { playerKey } = playerInfo[i];
+      const { playerID } = playerInfo[i];
 
-      if (playerKey && findPlayerInfo(playerKey, 'position', playerData) !== 'forward') {
+      if (playerID && findPlayerInfo(playerID, 'element_type', playerData) !== forwardsID) {
         removePlayer(i);
       }
     }
@@ -429,7 +499,6 @@ const SimulationScreen = ({ visible }) => {
       <Modal visible={playerSelectVisible} onRequestClose={onSelectModalClose} transparent={true}>
         <View style={styles.mainSelect}>
           <PlayerSelectModal
-            teams={teams}
             playerKit={playerKit}
             goalieKit={goalieKit}
             playerData={playerData}
@@ -442,7 +511,6 @@ const SimulationScreen = ({ visible }) => {
             visible={playerModalVisible1}
             setChosenTeam={setChosenTeam}
             chosenPosition={chosenPosition}
-            TeamAbbreviations={TeamAbbreviations}
             setChosenPosition={setChosenPosition}
             key={chosenPosition.concat(chosenTeam)}
             setPlayerModalVisible={setPlayerModalVisible1}
@@ -512,17 +580,17 @@ const SimulationScreen = ({ visible }) => {
 
             <FilterBar
               type={type}
-              teams={teams}
               pickerEnabled={false}
               chosenTeam={chosenTeam}
               setChosenTeam={setChosenTeam}
+              teams={['All Teams', ...teams]}
               confirmRemoveAll={confirmRemoveAll}
               randomizePlayers={randomizePlayers}
             />
           </View>
 
           <View style={styles.admobContainer}>
-            {0.23 * 0.5 * deviceHeight >= defaultAdHeight ? (
+            {0.23 * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT ? (
               <AdMobBanner
                 style={styles.admobView}
                 servePersonalizedAds={true}
@@ -548,7 +616,6 @@ const SimulationScreen = ({ visible }) => {
       </Modal>
 
       <PlayerSelectModal
-        teams={teams}
         playerKit={playerKit}
         goalieKit={goalieKit}
         playerData={playerData}
@@ -561,7 +628,6 @@ const SimulationScreen = ({ visible }) => {
         setChosenTeam={setChosenTeam}
         chosenPosition={chosenPosition}
         onSelectPlayer={onSelectPlayer}
-        TeamAbbreviations={TeamAbbreviations}
         setChosenPosition={setChosenPosition}
         key={chosenPosition.concat(chosenTeam)}
         setPlayerModalVisible={setPlayerModalVisible2}
@@ -571,20 +637,21 @@ const SimulationScreen = ({ visible }) => {
       <SimulationBoard
         squad1={squad1}
         squad2={squad2}
+        teamsData={teamsData}
         visible={boardVisible}
-        playerData={playerData}
         teamName1={chosenTeam1}
         teamName2={chosenTeam2}
+        positionData={positionData}
         setBoardVisible={setBoardVisible}
-        StandardRatings={StandardRatings}
-        TeamAbbreviations={TeamAbbreviations}
+        shortTeamName1={TeamAbbreviations[chosenTeam1]}
+        shortTeamName2={TeamAbbreviations[chosenTeam2]}
       />
 
       <View style={styles.header}>
         <PickerBox
           enabled={true}
-          list={teams.sort()}
           selectedValue={chosenTeam1}
+          list={['All Teams', ...teams]}
           extraStyles={{ width: '45%' }}
           selectedItemHandler={setChosenTeam1}
           extraListStyles={{ top: '1%', left: '3%', width: '42.5%', marginBottom: '35%' }}
@@ -596,8 +663,8 @@ const SimulationScreen = ({ visible }) => {
 
         <PickerBox
           enabled={true}
-          list={teams.sort()}
           selectedValue={chosenTeam2}
+          list={['All Teams', ...teams]}
           extraStyles={{ width: '45%' }}
           selectedItemHandler={setChosenTeam2}
           extraListStyles={{ top: '1%', left: '54.6%', width: '42.5%', marginBottom: '35%' }}
@@ -609,7 +676,7 @@ const SimulationScreen = ({ visible }) => {
           <Button
             command={chooseSquad}
             buttonText='Choose Squads'
-            buttonColor={colors.secondary}
+            buttonColor={colors.stratos}
             buttonTextColor={colors.white}
             extraStyles={{ width: '95%' }}
             enabled={simulateButtonEnabled}
@@ -619,30 +686,30 @@ const SimulationScreen = ({ visible }) => {
 
         <View style={styles.squadView}>
           <View style={{ ...styles.listStyle, paddingRight: '0.5%' }}>
-            {squad1.map(({ key }, index) => (
+            {squad1.map(({ id, web_name }, index) => (
               <TouchableOpacity
-                key={key}
+                key={id}
                 activeOpacity={0.6}
-                onPress={() => playerCommand(chosenTeam1, key, index)}
+                onPress={() => playerCommand(chosenTeam1, id, index)}
                 style={{ ...styles.touchView, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
               >
                 <Text allowFontScaling={false} style={styles.textStyle2}>
-                  {key}
+                  {web_name}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
           <View style={{ ...styles.listStyle, paddingLeft: '0.5%' }}>
-            {squad2.map(({ key }, index) => (
+            {squad2.map(({ id, web_name }, index) => (
               <TouchableOpacity
-                key={key}
+                key={id}
                 activeOpacity={0.6}
-                onPress={() => playerCommand(chosenTeam2, key, index)}
+                onPress={() => playerCommand(chosenTeam2, id, index)}
                 style={{ ...styles.touchView, borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
               >
                 <Text allowFontScaling={false} style={styles.textStyle2}>
-                  {key}
+                  {web_name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -654,7 +721,7 @@ const SimulationScreen = ({ visible }) => {
         <Button
           command={openBoard}
           buttonText='SIMULATE'
-          buttonColor={colors.secondary}
+          buttonColor={colors.stratos}
           buttonTextColor={colors.white}
           extraStyles={{ width: '40%' }}
           enabled={simulateButtonEnabled}
@@ -713,13 +780,13 @@ const styles = StyleSheet.create({
     marginVertical: '1%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.skyBlue,
+    backgroundColor: colors.pattensBlue,
   },
   textStyle2: {
     width: '100%',
     height: '100%',
     textAlign: 'center',
-    color: colors.darkBlue,
+    color: colors.blueRibbon,
     fontSize: findFontSize(12),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
@@ -732,9 +799,9 @@ const styles = StyleSheet.create({
     height: '12%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.stratos,
   },
-  bodySelect: { width: '100%', height: '65%', backgroundColor: colors.secondary },
+  bodySelect: { width: '100%', height: '65%', backgroundColor: colors.stratos },
   bottomView: { width: '100%', height: '50%', alignItems: 'center', justifyContent: 'center' },
   imgViewStyle: {
     width: '100%',
@@ -755,7 +822,7 @@ const styles = StyleSheet.create({
     height: '50%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.grey,
+    backgroundColor: colors.alto,
   },
   admobContainer: { width: '100%', height: '23%', alignItems: 'center', justifyContent: 'center' },
 });

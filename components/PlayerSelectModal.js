@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useContext } from 'react';
 import { Icon } from 'react-native-elements';
 import { View as AnimatableView } from 'react-native-animatable';
 import { View, StyleSheet, Modal, FlatList, TextInput, StatusBar } from 'react-native';
@@ -6,17 +6,18 @@ import { View, StyleSheet, Modal, FlatList, TextInput, StatusBar } from 'react-n
 import PickerBox from './PickerBox';
 import PlayerItem from './PlayerItem';
 
-import { colors, fieldConstants } from '../constants';
 import {
-  deviceWidth,
-  deviceHeight,
+  colors,
   findFontSize,
+  DEVICE_WIDTH,
+  DEVICE_HEIGHT,
   descendingPointsOrder,
   findOpponentAbbreviation,
 } from '../utilities';
 
+import { AppContext } from '../App';
+
 const PlayerSelectModal = ({
-  teams,
   visible,
   playerKit,
   goalieKit,
@@ -31,12 +32,14 @@ const PlayerSelectModal = ({
   setTeamPredicted,
   posPickerEnabled,
   setChosenPosition,
-  TeamAbbreviations,
   teamPickerEnabled,
   setPlayerModalVisible,
 }) => {
-  const { positions } = fieldConstants;
+  const { teamsData, positionData } = useContext(AppContext);
+
   const [searchValue, setSearchValue] = useState('');
+  const teams = teamsData.map(({ name }) => name).sort();
+  const positions = positionData.map(({ plural_name }) => ({ plural_name }));
 
   const changeTextHandler = input => {
     setSearchValue(input);
@@ -47,38 +50,41 @@ const PlayerSelectModal = ({
   const findPlayers = () => {
     let filteredPlayerList = [];
     const searchToLower = searchValue.toLowerCase();
-    const pos = chosenPosition.substring(0, chosenPosition.length - 1);
+
+    const teamID = teamsData.find(({ name }) => name === chosenTeam)?.id;
+    const positionID = positionData.find(
+      ({ plural_name }) => plural_name.toLowerCase() === chosenPosition.toLowerCase()
+    )?.id;
 
     if (searchValue) {
       if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions') {
         filteredPlayerList = playerData.filter(
-          ({ playerName, position }) =>
-            playerName.toLowerCase().includes(searchToLower) && position === pos
+          ({ web_name, element_type }) =>
+            web_name.toLowerCase().includes(searchToLower) && element_type === positionID
         );
       } else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions') {
         filteredPlayerList = playerData.filter(
-          ({ playerName, team }) =>
-            playerName.toLowerCase().includes(searchToLower) && team === chosenTeam
+          ({ web_name, team }) => web_name.toLowerCase().includes(searchToLower) && team === teamID
         );
       } else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions') {
         filteredPlayerList = playerData.filter(
-          ({ playerName, team, position }) =>
-            playerName.toLowerCase().includes(searchToLower) &&
-            team === chosenTeam &&
-            position === pos
+          ({ web_name, team, element_type }) =>
+            web_name.toLowerCase().includes(searchToLower) &&
+            team === teamID &&
+            element_type === positionID
         );
       } else {
-        filteredPlayerList = playerData.filter(({ playerName }) =>
-          playerName.toLowerCase().includes(searchToLower)
+        filteredPlayerList = playerData.filter(({ web_name }) =>
+          web_name.toLowerCase().includes(searchToLower)
         );
       }
     } else if (chosenTeam === 'All Teams' && chosenPosition !== 'All Positions') {
-      filteredPlayerList = playerData.filter(({ position }) => position === pos);
+      filteredPlayerList = playerData.filter(({ element_type }) => element_type === positionID);
     } else if (chosenTeam !== 'All Teams' && chosenPosition === 'All Positions') {
-      filteredPlayerList = playerData.filter(({ team }) => team === chosenTeam);
+      filteredPlayerList = playerData.filter(({ team }) => team === teamID);
     } else if (chosenTeam !== 'All Teams' && chosenPosition !== 'All Positions') {
       filteredPlayerList = playerData.filter(
-        ({ team, position }) => team === chosenTeam && position === pos
+        ({ team, element_type }) => team === teamID && element_type === positionID
       );
     } else filteredPlayerList = playerData;
 
@@ -91,7 +97,7 @@ const PlayerSelectModal = ({
   };
 
   const onSelectCommand = newDetails => {
-    const { playerKey } = newDetails;
+    const { playerID } = newDetails;
 
     setSearchValue('');
 
@@ -100,12 +106,12 @@ const PlayerSelectModal = ({
     setPlayerModalVisible(false);
 
     if (setTeamPredicted) setTeamPredicted(false);
-    if (onSelectPlayer) onSelectPlayer(playerKey);
+    if (onSelectPlayer) onSelectPlayer(playerID);
   };
 
   const separator = () => <View style={styles.separator} />;
 
-  const PLAYER_ITEM_HEIGHT = deviceHeight * 0.085;
+  const PLAYER_ITEM_HEIGHT = DEVICE_HEIGHT * 0.085;
 
   const getItemLayout = (data, index) => ({
     length: PLAYER_ITEM_HEIGHT,
@@ -114,24 +120,29 @@ const PlayerSelectModal = ({
   });
 
   const renderItem = ({ item }) => {
-    const { team, index, playerName, position, key } = item;
+    const { team, form, web_name, element_type, id } = item;
+    const teamName = teamsData.find(({ id }) => id === team)?.name;
+    const position = positionData
+      .find(({ id }) => id === element_type)
+      ?.singular_name.toLowerCase();
+    const notSelected = !playerInfo.find(({ playerID, id: _id }) => playerID === id || _id === id);
 
     return (
       <PlayerItem
-        team={team}
         activeOpacity={0.7}
-        playerIndex={index}
-        playerName={playerName}
-        shirtImage={position === 'goalkeeper' ? goalieKit[team] : playerKit[team]}
-        enabled={!playerInfo.find(player => player.playerKey === key || player.key === key)}
+        teamName={teamName}
+        playerName={web_name}
+        enabled={notSelected}
+        playerIndex={Number(form)}
+        shirtImage={position === 'goalkeeper' ? goalieKit[teamName] : playerKit[teamName]}
         command={() =>
           onSelectCommand({
-            playerName,
-            playerKey: key,
-            key: currentIndex,
-            captain: playerInfo[currentIndex].captain,
-            playerContent: findOpponentAbbreviation(team, nextOpponent, TeamAbbreviations),
-            shirtImage: position === 'goalkeeper' ? goalieKit[team] : playerKit[team],
+            playerID: id,
+            index: currentIndex,
+            playerName: web_name,
+            isCaptain: playerInfo[currentIndex].isCaptain,
+            playerContent: findOpponentAbbreviation(team, nextOpponent, teamsData),
+            shirtImage: position === 'goalkeeper' ? goalieKit[teamName] : playerKit[teamName],
           })
         }
       />
@@ -160,16 +171,16 @@ const PlayerSelectModal = ({
               style={styles.input}
               placeholder='Search'
               allowFontScaling={false}
-              selectionColor={colors.secondary}
-              placeholderTextColor={colors.grey}
+              selectionColor={colors.stratos}
+              placeholderTextColor={colors.alto}
               onChangeText={input => changeTextHandler(input)}
             />
           </View>
 
           <View style={styles.pickerView}>
             <PickerBox
-              list={positions}
               selectedValue={chosenPosition}
+              list={['All Positions', ...positions]}
               selectedItemHandler={setChosenPosition}
               enabled={posPickerEnabled && !searchValue}
               extraTextItemStyles={{ textTransform: 'capitalize' }}
@@ -177,8 +188,8 @@ const PlayerSelectModal = ({
               extraListStyles={{ top: '11.5%', left: '7.5%', width: '38.4%' }}
             />
             <PickerBox
-              list={teams.sort()}
               selectedValue={chosenTeam}
+              list={['All Teams', ...teams]}
               selectedItemHandler={setChosenTeam}
               enabled={teamPickerEnabled && !searchValue}
               extraTextItemStyles={{ textTransform: 'capitalize' }}
@@ -194,8 +205,8 @@ const PlayerSelectModal = ({
           style={styles.bodyModalView}
           getItemLayout={getItemLayout}
           ItemSeparatorComponent={separator}
-          initialNumToRender={Math.ceil(deviceHeight / 36)}
-          maxToRenderPerBatch={Math.ceil(deviceHeight / 18)}
+          initialNumToRender={Math.ceil(DEVICE_HEIGHT / 36)}
+          maxToRenderPerBatch={Math.ceil(DEVICE_HEIGHT / 18)}
         />
 
         <AnimatableView duration={400} style={styles.close} onTouchStart={closeCommand}>
@@ -225,7 +236,7 @@ const styles = StyleSheet.create({
     height: '65%',
     borderRadius: 4,
     paddingHorizontal: '5%',
-    color: colors.secondary,
+    color: colors.stratos,
     fontFamily: 'PoppinsRegular',
     backgroundColor: colors.white,
   },
@@ -237,16 +248,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.forward,
   },
-  bodyModalView: { width: '100%', height: '80%', backgroundColor: colors.grey },
+  bodyModalView: { width: '100%', height: '80%', backgroundColor: colors.alto },
   close: {
     elevation: 7,
     right: '8%',
     bottom: '8%',
     position: 'absolute',
-    width: 0.15 * deviceWidth,
-    height: 0.15 * deviceWidth,
+    width: 0.15 * DEVICE_WIDTH,
+    height: 0.15 * DEVICE_WIDTH,
     backgroundColor: colors.forward,
-    borderRadius: 0.075 * deviceWidth,
+    borderRadius: 0.075 * DEVICE_WIDTH,
   },
   closeIcon: {
     width: '100%',
@@ -254,7 +265,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  separator: { width: '100%', height: deviceHeight * 0.005 },
+  separator: { width: '100%', height: DEVICE_HEIGHT * 0.005 },
 });
 
 export default memo(PlayerSelectModal);
