@@ -4,8 +4,7 @@
       "version": "2023-2024_11",
       "info": [
         ["add", "Bug fixes"],
-        ["add", "Various performance optimizations"],
-        ["add", "Graphical comparison statistics added"]
+        ["add", "Various performance optimizations"]
       ]
     },
     {
