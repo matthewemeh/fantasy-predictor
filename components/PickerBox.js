@@ -2,8 +2,7 @@ import React, { useState, memo } from 'react';
 import { Text as AnimatableText } from 'react-native-animatable';
 import { View, StyleSheet, TouchableOpacity, Text, Modal, ScrollView } from 'react-native';
 
-import { colors } from '../constants';
-import { deviceHeight, findFontSize } from '../utilities';
+import { DEVICE_HEIGHT, findFontSize, colors } from '../utilities';
 
 const PickerBox = ({
   list,
@@ -31,7 +30,7 @@ const PickerBox = ({
   const animations = {
     pickerDisabled: {
       from: { backgroundColor: colors.white },
-      to: { backgroundColor: colors.grey },
+      to: { backgroundColor: colors.alto },
     },
   };
 
@@ -48,7 +47,7 @@ const PickerBox = ({
         animation={enabled ? null : animations.pickerDisabled}
         style={{
           ...styles.selectedValueStyle,
-          backgroundColor: enabled ? colors.white : colors.grey,
+          backgroundColor: enabled ? colors.white : colors.alto,
           ...extraSelectedValueStyles,
         }}
       >
@@ -66,7 +65,7 @@ const PickerBox = ({
                   onPress={item === selectedValue ? null : () => onChange(item)}
                   style={{
                     ...styles.listItem,
-                    backgroundColor: item === selectedValue ? colors.grey : colors.white,
+                    backgroundColor: item === selectedValue ? colors.alto : colors.white,
                   }}
                 >
                   <Text
@@ -93,7 +92,7 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 3,
     textAlign: 'center',
-    color: colors.secondary,
+    color: colors.stratos,
     fontSize: findFontSize(13),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
@@ -108,11 +107,11 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: colors.white,
   },
-  listItem: { width: '100%', height: deviceHeight * 0.07 },
+  listItem: { width: '100%', height: DEVICE_HEIGHT * 0.07 },
   textItem: {
     width: '100%',
     height: '100%',
-    color: colors.secondary,
+    color: colors.stratos,
     paddingHorizontal: '10%',
     fontSize: findFontSize(12),
     textAlignVertical: 'center',

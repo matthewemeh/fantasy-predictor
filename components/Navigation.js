@@ -2,13 +2,13 @@ import React, { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '../constants';
+import { colors } from '../utilities';
 
 import NavigationButton from './NavigationButton';
 
 const Navigation = ({ activeNavIndex, setActiveNavIndex }) => (
   <View style={styles.bottomView}>
-    <LinearGradient colors={[colors.grey, colors.black]} style={styles.gradientView} />
+    <LinearGradient colors={[colors.alto, colors.black]} style={styles.gradientView} />
 
     <View style={styles.navBar}>
       <NavigationButton

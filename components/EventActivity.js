@@ -3,8 +3,7 @@ import { View, StyleSheet, Text } from 'react-native';
 
 import EventBar from './EventBar';
 
-import { colors } from '../constants';
-import { deviceHeight, findFontSize } from '../utilities';
+import { DEVICE_HEIGHT, findFontSize, colors } from '../utilities';
 
 const EventActivity = ({ event }) => {
   const {
@@ -18,7 +17,7 @@ const EventActivity = ({ event }) => {
     goalScorer2,
     assistProvider1,
     assistProvider2,
-  } = event || {};
+  } = event;
 
   const teamEvent1 = {
     saver: saver1,
@@ -60,7 +59,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    height: deviceHeight * 0.085,
+    height: DEVICE_HEIGHT * 0.085,
     backgroundColor: colors.white,
   },
   eventView: { width: '40%', height: '100%' },
@@ -75,11 +74,11 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(15),
-    width: deviceHeight * 0.075,
+    width: DEVICE_HEIGHT * 0.075,
     textAlignVertical: 'center',
-    height: deviceHeight * 0.075,
+    height: DEVICE_HEIGHT * 0.075,
     backgroundColor: colors.forward,
-    borderRadius: deviceHeight * 0.075,
+    borderRadius: DEVICE_HEIGHT * 0.075,
   },
 });
 

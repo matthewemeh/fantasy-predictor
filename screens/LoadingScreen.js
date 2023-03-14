@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 
-import { colors } from '../constants';
+import { colors } from '../utilities';
 
 import ConnectionErrorScreen from './ConnectionErrorScreen';
 

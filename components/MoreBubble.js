@@ -3,8 +3,7 @@ import { Icon } from 'react-native-elements';
 import { StyleSheet, View, Text } from 'react-native';
 import { View as AnimatableView } from 'react-native-animatable';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, expandedHeight }) => {
   const bubble = useRef();
@@ -54,7 +53,7 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, exp
     textStyle: {
       flex: 1,
       marginLeft: '2%',
-      color: colors.darkBlue,
+      color: colors.blueRibbon,
       alignItems: 'flex-start',
       justifyContent: 'center',
       fontSize: findFontSize(13),
@@ -68,7 +67,7 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, exp
       alignItems: 'center',
       paddingHorizontal: '2%',
       justifyContent: 'center',
-      backgroundColor: colors.skyBlue,
+      backgroundColor: colors.pattensBlue,
       paddingVertical: expandable && expanded ? 10 : 0,
       height: expandable && expanded ? expandedHeight || 60 : 60,
     },
@@ -91,7 +90,7 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, exp
           type='font-awesome'
           style={styles.iconView}
           size={findFontSize(25)}
-          color={colors.darkBlue}
+          color={colors.blueRibbon}
         />
 
         <Text allowFontScaling={false} style={styles.textStyle}>
@@ -104,7 +103,7 @@ const MoreBubble = ({ onPress, title, iconName, expandable, expandedContent, exp
               name='caret-down'
               type='font-awesome'
               size={findFontSize(25)}
-              color={colors.darkBlue}
+              color={colors.blueRibbon}
               style={styles.dropdownIcon}
             />
           </AnimatableView>

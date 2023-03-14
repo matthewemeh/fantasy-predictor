@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Modal } from 'react-native';
 
 import Button from '../components/Button';
 
-import { colors } from '../constants';
-import { deviceHeight, findFontSize } from '../utilities';
+import { DEVICE_HEIGHT, findFontSize, colors } from '../utilities';
 
 const AlertBox = ({ title, message, buttons, visible, onRequestClose }) => (
   <Modal visible={visible} transparent={true} onRequestClose={onRequestClose}>
@@ -27,7 +26,7 @@ const AlertBox = ({ title, message, buttons, visible, onRequestClose }) => (
               buttonText={text}
               activeOpacity={1}
               buttonColor={colors.white}
-              buttonTextColor={colors.secondary}
+              buttonTextColor={colors.stratos}
               extraTextStyles={{ fontSize: findFontSize(11) }}
               extraStyles={{ width: '19%', height: '80%', marginRight: '6%' }}
             />
@@ -50,16 +49,16 @@ const styles = StyleSheet.create({
   titleView: {
     width: '100%',
     paddingLeft: '6%',
-    color: colors.secondary,
+    color: colors.stratos,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(17),
     textAlignVertical: 'center',
-    height: 0.06 * deviceHeight,
+    height: 0.06 * DEVICE_HEIGHT,
   },
   messageView: {
     width: '100%',
     paddingHorizontal: '6%',
-    color: colors.secondary,
+    color: colors.stratos,
     textAlignVertical: 'top',
     fontSize: findFontSize(13),
     fontFamily: 'PoppinsRegular',
@@ -69,7 +68,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    height: 0.06 * deviceHeight,
+    height: 0.06 * DEVICE_HEIGHT,
   },
 });
 

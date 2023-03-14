@@ -5,8 +5,7 @@ import { Icon } from 'react-native-elements';
 
 import Button from '../components/Button';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const ConnectionErrorScreen = ({ visible, command }) => {
   const viewRef = useRef();
@@ -52,8 +51,8 @@ const ConnectionErrorScreen = ({ visible, command }) => {
           enabled={true}
           command={command}
           buttonText='Retry'
-          buttonColor={colors.primary}
-          buttonTextColor={colors.secondary}
+          buttonColor={colors.springGreen}
+          buttonTextColor={colors.stratos}
           extraStyles={{ width: '20%', height: '60%' }}
           extraTextStyles={{ fontSize: findFontSize(15), fontFamily: 'PoppinsRegular' }}
         />
@@ -72,7 +71,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: '3%',
     justifyContent: 'space-between',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.stratos,
   },
   text: {
     marginTop: '3%',

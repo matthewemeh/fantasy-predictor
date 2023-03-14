@@ -2,8 +2,7 @@ import React, { memo } from 'react';
 import { Icon } from 'react-native-elements';
 import { View, StyleSheet } from 'react-native';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const InfoCircle = ({ onPress, extraStyles }) => (
   <View style={{ ...styles.infoIconStyle, ...extraStyles }}>
@@ -11,7 +10,7 @@ const InfoCircle = ({ onPress, extraStyles }) => (
       name='info-circle'
       onPress={onPress}
       type='font-awesome'
-      color={colors.primary}
+      color={colors.springGreen}
       size={findFontSize(20)}
     />
   </View>

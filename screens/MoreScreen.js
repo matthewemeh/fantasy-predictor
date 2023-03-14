@@ -6,8 +6,7 @@ import LogNote from '../components/LogNote';
 import CryptoBar from '../components/CryptoBar';
 import MoreBubble from '../components/MoreBubble';
 
-import { colors } from '../constants';
-import { numbersInString, sum, findFontSize, defaultAdHeight } from '../utilities';
+import { numbersInString, sum, findFontSize, DEFAULT_AD_HEIGHT, colors } from '../utilities';
 
 import { AppContext } from '../App';
 
@@ -160,14 +159,14 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: '20%',
     alignItems: 'center',
-    height: defaultAdHeight,
+    height: DEFAULT_AD_HEIGHT,
     justifyContent: 'flex-end',
   },
   messageTextStyle: {
     width: '100%',
     marginBottom: '3%',
     paddingLeft: '6.5%',
-    color: colors.darkBlue,
+    color: colors.blueRibbon,
     fontSize: findFontSize(11),
     textAlignVertical: 'bottom',
     fontFamily: 'PoppinsRegular',
@@ -175,7 +174,7 @@ const styles = StyleSheet.create({
   versionTextStyle: {
     width: '100%',
     paddingLeft: '6.5%',
-    color: colors.darkBlue,
+    color: colors.blueRibbon,
     fontSize: findFontSize(12),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',

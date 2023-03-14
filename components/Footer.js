@@ -4,8 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import Button from './Button';
 import NumberTab from './NumberTab';
 
-import { colors } from '../constants';
-import { findFontSize, sum, average } from '../utilities';
+import { findFontSize, sum, average, colors } from '../utilities';
 
 const Footer = ({ playerInfo, footerButtonEnabled, type, teamPredicted, onPredict, onReveal }) => {
   const points = playerInfo.map(({ playerContent }) => playerContent);
@@ -32,8 +31,8 @@ const Footer = ({ playerInfo, footerButtonEnabled, type, teamPredicted, onPredic
           extraTextStyles={{ fontSize: findFontSize(25) }}
           command={type === 'fantasy' ? onPredict : onReveal}
           buttonText={type === 'fantasy' ? 'Predict' : 'Reveal'}
-          buttonColor={type === 'fantasy' ? colors.forward : colors.secondary}
-          buttonTextColor={type === 'fantasy' ? colors.white : colors.primary}
+          buttonColor={type === 'fantasy' ? colors.forward : colors.stratos}
+          buttonTextColor={type === 'fantasy' ? colors.white : colors.springGreen}
         />
       )}
     </View>

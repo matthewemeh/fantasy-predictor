@@ -4,8 +4,7 @@ import { View, StyleSheet, Modal, Text, FlatList } from 'react-native';
 import LogDisplay from './LogDisplay';
 
 import logs from '../log.json';
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const LogNote = ({ visible, onRequestClose }) => (
   <Modal visible={visible} transparent={true} animationType='slide' onRequestClose={onRequestClose}>
@@ -30,7 +29,7 @@ const styles = StyleSheet.create({
   containerView: {
     width: '100%',
     height: '100%',
-    color: colors.grey,
+    color: colors.alto,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -51,7 +50,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(20),
     textAlignVertical: 'center',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.stratos,
   },
 });
 

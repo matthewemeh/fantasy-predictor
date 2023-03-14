@@ -4,8 +4,7 @@ import { View, StyleSheet } from 'react-native';
 
 import PickerBox from './PickerBox';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const FilterBar = ({
   type,
@@ -21,8 +20,8 @@ const FilterBar = ({
       <Icon
         name='random'
         type='font-awesome'
-        color={colors.primary}
         size={findFontSize(25)}
+        color={colors.springGreen}
         onPress={randomizePlayers}
       />
 
@@ -44,8 +43,8 @@ const FilterBar = ({
       <Icon
         name='trash'
         type='font-awesome'
-        color={colors.primary}
         size={findFontSize(25)}
+        color={colors.springGreen}
         onPress={confirmRemoveAll}
       />
     </View>
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: '5%',
     justifyContent: 'space-between',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.stratos,
   },
   iconView: { width: '15%', height: '100%', alignItems: 'center', justifyContent: 'center' },
 });

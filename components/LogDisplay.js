@@ -1,11 +1,10 @@
 import React, { memo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 
-import { colors } from '../constants';
-import { deviceHeight, findFontSize } from '../utilities';
+import { DEVICE_HEIGHT, findFontSize, colors } from '../utilities';
 
 const LogDisplay = ({ info, version }) => (
-  <View style={{ ...styles.mainView, height: deviceHeight * 0.05 * (info.length + 1) }}>
+  <View style={{ ...styles.mainView, height: DEVICE_HEIGHT * 0.05 * (info.length + 1) }}>
     <Text allowFontScaling={false} style={styles.versionText}>
       {version}
     </Text>
@@ -33,15 +32,15 @@ const styles = StyleSheet.create({
     width: '10%',
     height: '100%',
     textAlign: 'center',
-    color: colors.secondary,
+    color: colors.stratos,
     fontSize: findFontSize(15),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },
-  logView: { flexDirection: 'row', width: '100%', height: deviceHeight * 0.05 },
+  logView: { flexDirection: 'row', width: '100%', height: DEVICE_HEIGHT * 0.05 },
   textView: {
     width: '80%',
-    color: colors.secondary,
+    color: colors.stratos,
     fontSize: findFontSize(11),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
@@ -49,11 +48,11 @@ const styles = StyleSheet.create({
   versionText: {
     width: '100%',
     paddingLeft: '10%',
-    color: colors.secondary,
+    color: colors.stratos,
     fontFamily: 'PoppinsBold',
     fontSize: findFontSize(16),
     textAlignVertical: 'center',
-    height: deviceHeight * 0.05,
+    height: DEVICE_HEIGHT * 0.05,
   },
 });
 

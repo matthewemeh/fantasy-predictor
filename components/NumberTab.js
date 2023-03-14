@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 
 import NumberDisplay from './NumberDisplay';
 
-import { colors } from '../constants';
+import { colors } from '../utilities';
 
 const NumberTab = ({ title1, title2, title3, number1, number2, number3 }) => (
   <View style={styles.mainView}>
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: '5%',
     justifyContent: 'space-between',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.stratos,
   },
 });
 

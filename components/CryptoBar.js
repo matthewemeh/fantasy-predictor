@@ -2,8 +2,7 @@ import React, { memo } from 'react';
 import { Icon } from 'react-native-elements';
 import { View, StyleSheet, Text, ToastAndroid, Clipboard } from 'react-native';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const CryptoBar = ({ address, name }) => {
   const onPress = e => {
@@ -27,7 +26,7 @@ const CryptoBar = ({ address, name }) => {
           name='file-text-o'
           type='font-awesome'
           size={findFontSize(25)}
-          color={colors.darkBlue}
+          color={colors.blueRibbon}
         />
       </View>
     </View>
@@ -50,17 +49,17 @@ const styles = StyleSheet.create({
     height: '80%',
     borderRadius: 5,
     textAlign: 'center',
-    color: colors.skyBlue,
+    color: colors.pattensBlue,
     fontSize: findFontSize(13),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
-    backgroundColor: colors.darkBlue,
+    backgroundColor: colors.blueRibbon,
   },
   addressText: {
     width: '73%',
     height: '80%',
     paddingLeft: '2%',
-    color: colors.secondary,
+    color: colors.stratos,
     fontSize: findFontSize(13),
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',

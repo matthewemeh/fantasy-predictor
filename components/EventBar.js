@@ -1,11 +1,16 @@
 import React, { memo } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
 
-import { colors } from '../constants';
-import { deviceWidth, findScaledFontSize, activityImage, deviceHeight } from '../utilities';
+import {
+  colors,
+  DEVICE_WIDTH,
+  DEVICE_HEIGHT,
+  activityImage,
+  findScaledFontSize,
+} from '../utilities';
 
-const textHeight = Math.round(0.7 * 0.085 * 0.5 * deviceHeight);
-const textWidth = Math.round(0.4 * 0.7 * deviceWidth);
+const textHeight = Math.round(0.7 * 0.085 * 0.5 * DEVICE_HEIGHT);
+const textWidth = Math.round(0.4 * 0.7 * DEVICE_WIDTH);
 const area = textHeight * textWidth;
 const maxTextLength = Math.floor(area / 160);
 
@@ -119,7 +124,7 @@ const styles = StyleSheet.create({
     width: '70%',
     height: '100%',
     paddingHorizontal: '5%',
-    color: colors.secondary,
+    color: colors.stratos,
     textAlignVertical: 'center',
     fontFamily: 'PoppinsRegular',
   },

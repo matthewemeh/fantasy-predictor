@@ -2,8 +2,7 @@ import React, { memo, useEffect, useRef } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Text as AnimatableText } from 'react-native-animatable';
 
-import { colors } from '../constants';
-import { findFontSize } from '../utilities';
+import { findFontSize, colors } from '../utilities';
 
 const Button = ({
   enabled,
@@ -21,10 +20,10 @@ const Button = ({
   const animations = {
     buttonDisabled: {
       from: { backgroundColor: buttonColor, color: buttonTextColor },
-      to: { backgroundColor: colors.grey, color: '#94948da0' },
+      to: { backgroundColor: colors.alto, color: colors.lemonGrassLight },
     },
     buttonEnabled: {
-      from: { backgroundColor: colors.grey, color: '#94948da0' },
+      from: { backgroundColor: colors.alto, color: colors.lemonGrassLight },
       to: { backgroundColor: buttonColor, color: buttonTextColor },
     },
   };
@@ -51,8 +50,8 @@ const Button = ({
         allowFontScaling={false}
         style={{
           ...styles.buttonText,
-          color: enabled ? buttonTextColor : '#94948da0',
-          backgroundColor: enabled ? buttonColor : colors.grey,
+          backgroundColor: enabled ? buttonColor : colors.alto,
+          color: enabled ? buttonTextColor : colors.lemonGrassLight,
           ...extraTextStyles,
         }}
       >

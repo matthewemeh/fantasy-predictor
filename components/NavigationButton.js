@@ -1,8 +1,7 @@
 import React, { memo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text, Image } from 'react-native';
 
-import { colors } from '../constants';
-import { findNavIcon, findFontSize } from '../utilities';
+import { findNavIcon, findFontSize, colors } from '../utilities';
 
 const NavigationButton = ({ extraStyles, command, activeOpacity, active, title }) => (
   <TouchableOpacity
@@ -14,7 +13,7 @@ const NavigationButton = ({ extraStyles, command, activeOpacity, active, title }
       <View style={styles.imageView}>
         <Image
           source={findNavIcon(title)}
-          style={{ ...styles.image, tintColor: active ? colors.secondary : colors.gray }}
+          style={{ ...styles.image, tintColor: active ? colors.stratos : colors.lemonGrass }}
         />
       </View>
 
@@ -22,7 +21,7 @@ const NavigationButton = ({ extraStyles, command, activeOpacity, active, title }
         allowFontScaling={false}
         style={{
           ...styles.activeText,
-          color: active ? colors.secondary : colors.gray,
+          color: active ? colors.stratos : colors.lemonGrass,
         }}
       >
         {title}
@@ -45,7 +44,7 @@ const styles = StyleSheet.create({
     bottom: '5%',
     height: '30%',
     width: '100%',
-    color: colors.grey,
+    color: colors.alto,
     textAlign: 'center',
     position: 'relative',
     fontFamily: 'PoppinsBold',
