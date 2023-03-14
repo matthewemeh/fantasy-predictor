@@ -1,18 +1,56 @@
-import regression from 'regression';
 import { Dimensions } from 'react-native';
-import { colors, navIcon } from './constants';
 
-export const defaultAdHeight = 55;
-export const deviceWidth = Dimensions.get('window').width;
-export const deviceHeight = Dimensions.get('window').height;
+export const DEFAULT_AD_HEIGHT = 55;
+export const DEVICE_WIDTH = Dimensions.get('window').width;
+export const DEVICE_HEIGHT = Dimensions.get('window').height;
 
-const baseWidth = 376.47059527510464;
-const baseHeight = 705.0980524006648;
-const scaleWidth = deviceWidth / baseWidth;
-const scaleHeight = deviceHeight / baseHeight;
-const scale = Math.min(scaleWidth, scaleHeight);
+const BASE_WIDTH = 376.47059527510464;
+const BASE_HEIGHT = 705.0980524006648;
+const SCALE_WIDTH = DEVICE_WIDTH / BASE_WIDTH;
+const SCALE_HEIGHT = DEVICE_HEIGHT / BASE_HEIGHT;
+const SCALE = Math.min(SCALE_WIDTH, SCALE_HEIGHT);
 
-export const findFontSize = size => Math.ceil(size * scale);
+export const colors = {
+  springGreen: '#00ff91',
+  alto: '#d4d4d4',
+  stratos: '#00002d',
+  lemonGrass: '#94948d',
+  goalkeeper: '#ebff00',
+  defender: '#2afd8c',
+  midfielder: '#2bf0fd',
+  forward: '#e0115f',
+  red: '#e00',
+  white: '#fff',
+  black: '#000',
+  emerald: '#4fc978',
+  athens: '#000000a0',
+  blueRibbon: '#026fe6',
+  pattensBlue: '#d9f1ff',
+  nameViewColor: '#016a39',
+  contentViewColor: '#01532d',
+  lemonGrassLight: '#94948da0',
+  alertBackground: '#000000a0',
+  'playingChance0%': '#c0020d',
+  'playingChance25%': '#d44401',
+  'playingChance50%': '#ffab1b',
+  'playingChance75%': '#ffe65b',
+  'playingChance100%': '#01532d',
+  statusBarBackground: '#00000050',
+};
+
+export const fieldConstants = {
+  formations: ['3-5-2', '3-4-3', '4-4-2', '4-3-3', '4-5-1', '5-3-2', '5-2-3', '5-4-1'],
+};
+
+const navIcon = {
+  more: require('./assets/NavigationImages/settings.webp'),
+  predict: require('./assets/NavigationImages/shirt.webp'),
+  scout: require('./assets/NavigationImages/selection.webp'),
+  compare: require('./assets/NavigationImages/compare.webp'),
+  simulate: require('./assets/NavigationImages/simulate.webp'),
+};
+
+export const findFontSize = size => Math.ceil(size * SCALE);
 
 export const activityImage = {
   goalImage: require('./assets/Activity/goal.webp'),
@@ -26,13 +64,13 @@ export const unknownImage = require('./assets/unknown.webp');
 export const findColor = (index, value1, value2, type = 'forward') => {
   switch (index) {
     case 1:
-      if (value1 > value2) return type === 'forward' ? colors.emerald : colors.secondary;
-      return type === 'forward' ? colors.secondary : colors.emerald;
+      if (value1 > value2) return type === 'forward' ? colors.emerald : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emerald;
     case 2:
-      if (value1 < value2) return type === 'forward' ? colors.emerald : colors.secondary;
-      return type === 'forward' ? colors.secondary : colors.emerald;
+      if (value1 < value2) return type === 'forward' ? colors.emerald : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emerald;
     default:
-      return colors.secondary;
+      return colors.stratos;
   }
 };
 
@@ -48,145 +86,30 @@ export const sum = array => (array.length > 0 ? array.reduce((x, y) => x + y) : 
 
 export const average = array => (array.length > 0 ? sum(array) / array.length : 0);
 
-export const findAverageOfOpponentIndex = (fixtures, teamIndices) => {
-  const opponents = fixtures.split(',');
-  const opponentIndices = opponents.map(opponent => {
-    const bracketIndex = opponent.indexOf('(');
-    const opponentFullName = opponent.substring(0, bracketIndex);
-
-    return teamIndices[opponentFullName];
-  });
-
-  return Number(average(opponentIndices).toFixed(1));
-};
-
-const getPointsData = array => array.map((point, index) => [index + 1, point]);
-
-export const predict = (playerDetails, StandardRatings, nextOpponent, gameweek) => {
-  const { available, team, index, points } = playerDetails;
-  const opponent = nextOpponent[team];
-
-  if (!available || opponent === 'No Opponent') return 0;
-
-  const { teamIndex } = StandardRatings;
-  const teamRating = teamIndex[team];
-  const pointsRange = -gameweek;
-  const pointsData = getPointsData(points.slice(pointsRange));
-  const results = regression.linear(pointsData);
-
-  const [, pointsAverage] = results.predict(gameweek);
-  const opponentIndex = findAverageOfOpponentIndex(opponent, teamIndex);
-
-  const predictedPoint =
-    0.8 * pointsAverage - Math.E ** (0.5 * opponentIndex) + teamRating + 0.1 * index;
-
-  return predictedPoint > 0 ? Math.ceil(predictedPoint) : 0;
-};
-
 export const descendingPointsOrder = (a, b) => sum(b.points.slice(-3)) - sum(a.points.slice(-3));
 
-export const findData = (playerKey, playerData) => playerData.find(({ key }) => key === playerKey);
+export const findData = (playerID, playerData) => playerData.find(({ id }) => id === playerID);
 
-export const findPlayerInfo = (playerKey, property, playerData) => {
-  const player = findData(playerKey, playerData);
+export const findPlayerInfo = (playerID, property, playerData) => {
+  const player = findData(playerID, playerData);
   return player && player[property];
 };
 
-export const findReturns = (playerKey, StandardRatings, playerData, pointsRange = -3) => {
-  const points = findPlayerInfo(playerKey, 'points', playerData).slice(pointsRange);
-  const position = findPlayerInfo(playerKey, 'position', playerData);
-  const {
-    goalPoint,
-    assistPoint,
-    savesPerPoint,
-    minBonusPoint,
-    maxBonusPoint,
-    appearancePoint,
-    cleanSheetPoint,
-    savedPenaltyPoint,
-  } = StandardRatings;
-  let goals = 0,
-    assists = 0,
-    saves = 0,
-    bonus = 0;
+export const findOpponentAbbreviation = (teamID, nextOpponent, teamsData) => {
+  const { team, opponents } = nextOpponent.find(({ team }) => team === teamID) || {};
 
-  for (let i = 0; i < points.length; i++) {
-    let pts = points[i] - appearancePoint;
-    let tempGoals = 0,
-      tempAssists = 0,
-      tempSaves = 0,
-      tempBonus = 0;
+  if (!opponents || !team) return '-';
 
-    while (pts > 0) {
-      if (position === 'goalkeeper') {
-        if (pts >= cleanSheetPoint[position]) {
-          pts -= cleanSheetPoint[position];
-          tempSaves += 1;
-        }
-        if (pts >= savedPenaltyPoint) {
-          tempSaves += 1;
-          pts -= savedPenaltyPoint;
-        }
-        if (pts >= 1) {
-          tempSaves += savesPerPoint[position];
-          pts -= 1;
-        }
-        if (pts >= assistPoint[position]) {
-          tempAssists += 1;
-          pts -= assistPoint[position];
-        }
-        if (pts >= minBonusPoint && tempBonus < maxBonusPoint) {
-          tempBonus += minBonusPoint;
-          pts -= minBonusPoint;
-        }
-        if (pts >= goalPoint[position]) {
-          tempGoals += 1;
-          pts -= goalPoint[position];
-        }
-      } else {
-        if (pts >= cleanSheetPoint[position]) pts -= cleanSheetPoint[position];
-        if (pts >= goalPoint[position]) {
-          tempGoals += 1;
-          pts -= goalPoint[position];
-        }
-        if (pts >= assistPoint[position]) {
-          tempAssists += 1;
-          pts -= assistPoint[position];
-        }
-        if (pts >= minBonusPoint && tempBonus < maxBonusPoint) {
-          tempBonus += minBonusPoint;
-          pts -= minBonusPoint;
-        }
-      }
-    }
+  let newAbbreviation = '';
+  opponents.forEach(({ team, status }, index) => {
+    const statusSuffix = status === 'home' ? '(H)' : '(A)';
+    const separator = index < opponents.length - 1 ? ',' : '';
+    const { short_name } = teamsData.find(({ team: _id }) => _id === team);
 
-    goals += tempGoals;
-    assists += tempAssists;
-    saves += tempSaves;
-    bonus += tempBonus;
-  }
-
-  return { goals, assists, saves, bonus };
-};
-
-export const findAbbreviation = (teamName, TeamAbbreviations) => TeamAbbreviations[teamName];
-
-export const findOpponentAbbreviation = (team, nextOpponent, TeamAbbreviations) => {
-  const opponent = nextOpponent[team];
-
-  if (opponent === 'No Opponent') return '-';
-
-  const opponents = opponent.split(',');
-  const opponentAbbreviations = opponents.map(opponent => {
-    const bracketIndex = opponent.indexOf('(');
-    const teamName = opponent.substring(0, bracketIndex);
-    const teamAbbName = TeamAbbreviations[teamName];
-    const playingGround = opponent.substring(bracketIndex);
-
-    return `${teamAbbName}${playingGround}`.toUpperCase();
+    newAbbreviation += `${short_name}${statusSuffix}${separator}`;
   });
 
-  return opponentAbbreviations.join(',');
+  return newAbbreviation.toUpperCase();
 };
 
 export const getRndInteger = (min, max) => {
@@ -239,51 +162,56 @@ export const shuffle = array => {
   return array;
 };
 
-export const player = key => ({
-  key: key,
-  playerKey: '',
-  captain: false,
+export const player = index => ({
+  index,
+  playerID: '',
   playerName: '',
+  isCaptain: false,
   playerContent: '',
   shirtImage: unknownImage,
 });
 
-export const randomSelect = array => array[getRndInteger(0, array.length)];
+export const findTeamNumberOfMatches = fixturesData => {
+  let teamMatches = {};
 
-export const findGameweekNumber = string => {
-  let stringNumber = '0';
+  fixturesData.forEach(({ team_a, team_h }) => {
+    if (team_a in teamMatches) {
+      let oldCount = teamMatches[team_a];
+      teamMatches[team_a] = oldCount + 1;
+    } else {
+      teamMatches[team_a] = 1;
+    }
 
-  for (let i = 0; i < string.length; i++) {
-    if (isNumber(string[i])) stringNumber += string[i];
-  }
+    if (team_h in teamMatches) {
+      let oldCount = teamMatches[team_h];
+      teamMatches[team_h] = oldCount + 1;
+    } else {
+      teamMatches[team_h] = 1;
+    }
+  });
 
-  return parseInt(stringNumber);
+  return teamMatches;
 };
+
+export const findGameweekType = fixturesData => {
+  let numberOfGames = [];
+  let highestNumberOfGames = 0;
+  let teamMatches = findTeamNumberOfMatches(fixturesData);
+
+  numberOfGames = Object.values(teamMatches);
+  highestNumberOfGames = Math.max(...numberOfGames);
+
+  if (highestNumberOfGames === 3) return 'TGW';
+  else if (highestNumberOfGames === 2 && numberOfGames.filter(GW => GW === 2).length > 1)
+    return 'DGW';
+  else if (numberOfGames.length < 20) return 'BGW';
+  return 'GW';
+};
+
+export const randomSelect = array => array[getRndInteger(0, array.length)];
 
 export const findScaledFontSize = (text, maxTextLength, normalSize, scale) => {
   return text && text.length >= maxTextLength
     ? findFontSize(normalSize) / (scale * text.length)
     : findFontSize(normalSize);
-};
-
-export const isDocumentValid = (document, requiredKeys) => {
-  const docKeys = Object.keys(document);
-  const docValues = Object.values(document);
-
-  const docKeysLength = docKeys.length;
-  const requiredKeysLength = requiredKeys.length;
-
-  if (docKeysLength < requiredKeysLength) return false;
-
-  // check if all required keys are in document
-  for (let i = 0; i < requiredKeysLength; i++) {
-    if (!docKeys.includes(requiredKeys[i])) return false;
-  }
-
-  // check if all values in document are defined
-  for (let j = 0; j < docKeysLength; j++) {
-    if (docValues[j] === undefined) return false;
-  }
-
-  return true;
 };
