@@ -3,13 +3,13 @@
   "compilerOptions": {
     "strict": true,
     "noEmit": false,
-    "outDir": "../",
+    "outDir": "./",
     "target": "esnext",
     "noEmitOnError": true,
     "allowUnusedLabels": false,
     "allowUnreachableCode": false
   },
-  "include": ["**/*.ts", "**/*.tsx", "*.ts", "*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/*.ts", "src/*.tsx"],
   "exclude": [
     "node_modules",
     "babel.config.js",
