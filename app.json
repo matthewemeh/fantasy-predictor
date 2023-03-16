@@ -1,37 +1,29 @@
 {
-  "expo": {
-    "name": "Fantasy Predictor",
-    "slug": "FantasyPredictor",
-    "version": "2023-2024_11",
-    "orientation": "portrait",
-    "icon": "./assets/appIcon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#00002d"
+    "expo": {
+        "name": "Fantasy Predictor",
+        "slug": "FantasyPredictor",
+        "version": "2023-2024_11",
+        "orientation": "portrait",
+        "icon": "./assets/appIcon.png",
+        "userInterfaceStyle": "light",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#00002d"
+        },
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "supportsTablet": true,
+            "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" }
+        },
+        "android": {
+            "adaptiveIcon": { "foregroundImage": "./assets/appIcon.png", "backgroundColor": "#00002d" },
+            "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
+            "package": "com.gamehub.fantasypredictor",
+            "permissions": [],
+            "versionCode": 11
+        },
+        "web": { "favicon": "./assets/appIcon.png" }
     },
-    "updates": { "fallbackToCacheTimeout": 0 },
-    "assetBundlePatterns": [
-      "assets/*",
-      "assets/fonts/*",
-      "assets/Arrows/*",
-      "assets/Activity/*",
-      "assets/Goalkeepers/*",
-      "assets/OutfieldPlayers/*",
-      "assets/NavigationImages/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" }
-    },
-    "android": {
-      "adaptiveIcon": { "foregroundImage": "./assets/appIcon.png", "backgroundColor": "#00002d" },
-      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
-      "package": "com.gamehub.fantasypredictor",
-      "permissions": [],
-      "versionCode": 11
-    },
-    "web": { "favicon": "./assets/appIcon.png" }
-  },
-  "version": "11.0.0"
+    "version": "11.0.0"
 }
