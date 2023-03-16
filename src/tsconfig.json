@@ -1,0 +1,22 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": false,
+    "outDir": "../",
+    "target": "esnext",
+    "noEmitOnError": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false
+  },
+  "include": ["**/*.ts", "**/*.tsx", "*.ts", "*.tsx"],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "*.d.ts",
+    "types.ts",
+    "interfaces.ts"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "logs": [
+    {
+      "version": "2023-2024_11",
+      "info": [
+        ["add", "Bug fixes"],
+        ["add", "Various performance optimizations"]
+      ]
+    },
+    {
+      "version": "2023-2024_9",
+      "info": [
+        ["add", "Bug fixes"],
+        ["add", "Added more comparison statistics"],
+        ["add", "Various performance optimizations"],
+        ["add", "Improved point prediction algorithm"],
+        ["add", "Graphical comparison statistics coming soon"]
+      ]
+    },
+    {
+      "version": "2023-2024_4",
+      "info": [["add", "Minor bug fixes"]]
+    },
+    {
+      "version": "2023-2024_3",
+      "info": [
+        ["add", "Improved point prediction algorithm"],
+        ["add", "Minor bug fixes"]
+      ]
+    },
+    {
+      "version": "2023-2024_2",
+      "info": [
+        ["add", "Added new players"],
+        ["add", "Added new shirt images"]
+      ]
+    },
+    {
+      "version": "2023-2024",
+      "info": [
+        ["add", "Added new players"],
+        ["add", "Minor bug fixes"]
+      ]
+    },
+    {
+      "version": "2022-2023_3",
+      "info": [["add", "Fixed status bar issue"]]
+    },
+    {
+      "version": "2022-2023_2",
+      "info": [
+        ["add", "Player Captaincy"],
+        ["add", "Minor bug fixes"]
+      ]
+    },
+    {
+      "version": "2022-2023_1",
+      "info": [
+        ["add", "Improved player data analysis for predictions"],
+        ["add", "Added more players"],
+        ["add", "Support for Blank Gameweeks"],
+        ["add", "Support for Double Gameweeks"],
+        ["add", "Support for Triple Gameweeks"]
+      ]
+    },
+    {
+      "version": "2021-2022",
+      "info": [
+        ["add", "Added Fantasy page"],
+        ["add", "Added Simulation page"],
+        ["add", "Added database support for players"],
+        ["remove", "Removed player points breakdown"]
+      ]
+    }
+  ]
+}
