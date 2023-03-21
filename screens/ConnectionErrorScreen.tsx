@@ -1,7 +1,7 @@
-import React, { memo, useRef, useEffect } from 'react';
+import { Icon } from 'react-native-elements';
+import { memo, useRef, useEffect } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { View as AnimatableView } from 'react-native-animatable';
-import { Icon } from 'react-native-elements';
 
 import Button from '../components/Button';
 
@@ -16,6 +16,7 @@ const ConnectionErrorScreen: React.FC<Props> = ({ visible, command }) => {
   const initialRender = useRef(true);
 
   const animations = {
+    initialRender: { from: {}, to: {} },
     glow: { from: { opacity: 0.3 }, to: { opacity: 1 } },
     slideIn: { from: { bottom: '-10%' }, to: { bottom: '0%' } },
     slideOut: { from: { bottom: '0%' }, to: { bottom: '-10%' } },
@@ -33,7 +34,13 @@ const ConnectionErrorScreen: React.FC<Props> = ({ visible, command }) => {
       <AnimatableView
         duration={400}
         style={styles.errorBarView}
-        animation={initialRender ? {} : visible ? animations.slideIn : animations.slideOut}
+        animation={
+          initialRender
+            ? animations.initialRender
+            : visible
+            ? animations.slideIn
+            : animations.slideOut
+        }
       >
         <View style={styles.network}>
           <AnimatableView
