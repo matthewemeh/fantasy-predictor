@@ -1,5 +1,5 @@
 import { Dimensions } from 'react-native';
-import { ElementData, TeamData, FixtureData, OpponentData, PlayerInfoData } from './interfaces';
+import { Element, Team, Fixture, OpponentData, PlayerInfoData } from './interfaces';
 
 export const DEFAULT_AD_HEIGHT = 55;
 export const DEVICE_WIDTH = Dimensions.get('window').width;
@@ -10,6 +10,21 @@ const BASE_HEIGHT = 705.0980524006648;
 const SCALE_WIDTH = DEVICE_WIDTH / BASE_WIDTH;
 const SCALE_HEIGHT = DEVICE_HEIGHT / BASE_HEIGHT;
 const SCALE = Math.min(SCALE_WIDTH, SCALE_HEIGHT);
+
+const isNumber = (text: string) => {
+  const numberPattern = /^\d$/;
+
+  if (text.length > 1) {
+    for (let i = 0; i < text.length; i++) {
+      if (!numberPattern.test(text[i])) return false;
+    }
+    return true;
+  }
+
+  return numberPattern.test(text);
+};
+
+export const ADMOB_APP_ID = 'ca-app-pub-7152054343360573/9830430705';
 
 export const colors = {
   springGreen: '#00ff91',
@@ -24,6 +39,7 @@ export const colors = {
   white: '#fff',
   black: '#000',
   emerald: '#4fc978',
+  emeraldDark: '#00aa00',
   athens: '#000000a0',
   blueRibbon: '#026fe6',
   pattensBlue: '#d9f1ff',
@@ -105,16 +121,15 @@ export const sum = (array: number[]) => (array.length > 0 ? array.reduce((x, y) 
 
 export const average = (array: number[]) => (array.length > 0 ? sum(array) / array.length : 0);
 
-export const descendingPointsOrder = (a: ElementData, b: ElementData) =>
-  b.total_points - a.total_points;
+export const descendingPointsOrder = (a: Element, b: Element) => b.total_points - a.total_points;
 
-export const findData = (playerID: number, playerData: ElementData[] | undefined) =>
+export const findData = (playerID: number, playerData: Element[] | undefined) =>
   playerData?.find(({ id }) => id === playerID);
 
 export const findPlayerInfo = (
   playerID: number,
   property: string,
-  playerData: ElementData[] | undefined
+  playerData: Element[] | undefined
 ) => {
   const player = findData(playerID, playerData) as any;
 
@@ -124,7 +139,7 @@ export const findPlayerInfo = (
 export const findOpponentAbbreviation = (
   teamID: number,
   nextOpponent: OpponentData[] | undefined,
-  teamsData: TeamData[] | undefined
+  teamsData: Team[] | undefined
 ) => {
   const { team, opponents } = nextOpponent?.find(({ team }) => team === teamID) || {};
 
@@ -148,19 +163,6 @@ export const getRndInteger = (min: number, max: number) => {
 };
 
 export const findNavIcon = (type: string) => navIcon[type];
-
-export const isNumber = (text: string) => {
-  const numberPattern = /^\d$/;
-
-  if (text.length > 1) {
-    for (let i = 0; i < text.length; i++) {
-      if (!numberPattern.test(text[i])) return false;
-    }
-    return true;
-  }
-
-  return numberPattern.test(text);
-};
 
 export const numbersInString = (text: string) => {
   const sepChar = ',';
@@ -201,7 +203,7 @@ export const player = (index: number): PlayerInfoData => ({
   shirtImage: unknownImage,
 });
 
-export const findTeamNumberOfMatches = (fixturesData: FixtureData[]) => {
+export const findTeamNumberOfMatches = (fixturesData: Fixture[]) => {
   let teamMatches: { [key: string]: number } = {};
 
   fixturesData.forEach(({ team_a, team_h }) => {
@@ -223,7 +225,7 @@ export const findTeamNumberOfMatches = (fixturesData: FixtureData[]) => {
   return teamMatches;
 };
 
-export const findGameweekType = (fixturesData: FixtureData[]) => {
+export const findGameweekType = (fixturesData: Fixture[]) => {
   let numberOfGames: number[] = [];
   let highestNumberOfGames = 0;
   let teamMatches = findTeamNumberOfMatches(fixturesData);

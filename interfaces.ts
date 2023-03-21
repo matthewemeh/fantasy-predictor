@@ -1,31 +1,43 @@
-import { GameweekType, FormationType } from './types';
+import {
+  ChipName,
+  GameweekType,
+  FormationType,
+  ElementStatus,
+  EventDataType,
+  StatIdentifier,
+} from './types';
 
-interface ChipPlay {
-  chip_name: string;
+interface EventChipPlay {
+  chip_name: ChipName;
   num_played: number;
 }
 
-interface StatInfo {
+interface FixtureStatMap {
   value: number;
   element: number;
 }
 
-interface Statistics {
-  identifier: string;
-  a: StatInfo[];
-  h: StatInfo[];
+interface FixtureStat {
+  identifier: StatIdentifier;
+  a: FixtureStatMap[];
+  h: FixtureStatMap[];
 }
 
-interface ElementStatsData {
+interface ElementStats {
   label: string;
   name: string;
 }
 
-interface PhaseData {
+interface Phase {
   id: number;
   name: string;
   start_event: number;
   stop_event: number;
+}
+
+interface TopElementInfo {
+  id: number;
+  points: number;
 }
 
 interface GameSettings {
@@ -59,7 +71,28 @@ interface GameSettings {
   timezone: string;
 }
 
-export interface ElementData {
+export interface EventData {
+  saver1: string;
+  saver2: string;
+  eventType: EventDataType;
+  onTarget1: string;
+  onTarget2: string;
+  goalScorer1: string;
+  goalScorer2: string;
+  assistProvider1: string;
+  assistProvider2: string;
+  timeStamp: number;
+}
+
+export interface TeamEvent {
+  saver: string;
+  onTarget: string;
+  eventType: EventDataType;
+  goalScorer: string;
+  assistProvider: string;
+}
+
+export interface Element {
   chance_of_playing_next_round: number | null;
   chance_of_playing_this_round: number | null;
   code: number;
@@ -69,8 +102,8 @@ export interface ElementData {
   cost_change_start_fall: number;
   dreamteam_count: number;
   element_type: number;
-  ep_next: string;
-  ep_this: string;
+  ep_next: string | null;
+  ep_this: string | null;
   event_points: number;
   first_name: string;
   form: string;
@@ -85,7 +118,7 @@ export interface ElementData {
   selected_by_percent: string;
   special: boolean;
   squad_number: number | null;
-  status: string;
+  status: ElementStatus;
   team: number;
   team_code: number;
   total_points: number;
@@ -118,14 +151,14 @@ export interface ElementData {
   expected_assists: string;
   expected_goal_involvements: string;
   expected_goals_conceded: string;
-  influence_rank: number;
-  influence_rank_type: number;
-  creativity_rank: number;
-  creativity_rank_type: number;
-  threat_rank: number;
-  threat_rank_type: number;
-  ict_index_rank: number;
-  ict_index_rank_type: number;
+  influence_rank: number | null;
+  influence_rank_type: number | null;
+  creativity_rank: number | null;
+  creativity_rank_type: number | null;
+  threat_rank: number | null;
+  threat_rank_type: number | null;
+  ict_index_rank: number | null;
+  ict_index_rank_type: number | null;
   corners_and_indirect_freekicks_order: number | null;
   corners_and_indirect_freekicks_text: string;
   direct_freekicks_order: number | null;
@@ -150,10 +183,10 @@ export interface ElementData {
   clean_sheets_per_90: number;
 }
 
-export interface TeamData {
+export interface Team {
   code: number;
   draw: number;
-  form: any;
+  form: string | null;
   id: number;
   loss: number;
   name: string;
@@ -174,7 +207,7 @@ export interface TeamData {
   pulse_id: number;
 }
 
-export interface PositionData {
+export interface ElementType {
   id: number;
   plural_name: string;
   plural_name_short: string;
@@ -199,7 +232,7 @@ export interface OpponentData {
   opponents: Opponent[];
 }
 
-export interface FixtureData {
+export interface Fixture {
   code: number;
   event: number;
   finished: boolean;
@@ -210,16 +243,16 @@ export interface FixtureData {
   provisional_start_time: boolean;
   started: boolean;
   team_a: number;
-  team_a_score: number;
+  team_a_score: number | null;
   team_h: number;
-  team_h_score: number;
-  stats: Statistics[];
+  team_h_score: number | null;
+  stats: FixtureStat[];
   team_h_difficulty: number;
   team_a_difficulty: number;
   pulse_id: number;
 }
 
-export interface EventData {
+export interface Event {
   id: number;
   name: string;
   deadline_time: string;
@@ -229,23 +262,20 @@ export interface EventData {
   highest_scoring_entry: number;
   deadline_time_epoch: number;
   deadline_time_game_offset: number;
-  highest_score: number;
+  highest_score: number | null;
   is_previous: boolean;
   is_current: boolean;
   is_next: boolean;
   cup_leagues_created: boolean;
   h2h_ko_matches_created: boolean;
-  chip_plays: ChipPlay[];
-  most_selected: number;
-  most_transferred_in: number;
-  top_element: number;
-  top_element_info: {
-    id: number;
-    points: number;
-  };
+  chip_plays: EventChipPlay[];
+  most_selected: number | null;
+  most_transferred_in: number | null;
+  top_element: number | null;
+  top_element_info: TopElementInfo | null;
   transfers_made: number;
-  most_captained: number;
-  most_vice_captained: number;
+  most_captained: number | null;
+  most_vice_captained: number | null;
 }
 
 export interface PlayerInfoData {
@@ -275,14 +305,14 @@ export interface logData {
 }
 
 export interface GeneralInfo {
-  events?: EventData[];
+  events?: Event[];
   game_settings?: GameSettings;
-  phases?: PhaseData[];
-  teams?: TeamData[];
+  phases?: Phase[];
+  teams?: Team[];
   total_players?: number;
-  elements?: ElementData[];
-  element_stats?: ElementStatsData[];
-  element_types?: PositionData[];
+  elements?: Element[];
+  element_stats?: ElementStats[];
+  element_types?: ElementType[];
 }
 
 export interface SelectionData {
@@ -311,21 +341,20 @@ export interface UpdateData {
 
 export interface AppContextData {
   teams?: string[];
-  teamsData?: TeamData[];
-  currentGW?: number;
-  playerData?: ElementData[];
   fieldImage?: any;
+  teamsData?: Team[];
+  currentGW?: number;
   appVersion?: string;
-  fixturesData?: FixtureData[];
-  positionData?: PositionData[];
-  nextOpponent?: OpponentData[];
-  alertVisible?: boolean;
-  currentGWType?: GameweekType;
-  setAlertVisible?: React.Dispatch<React.SetStateAction<boolean>>;
-  gameweekFinished?: boolean;
   update?: UpdateData;
-  setAlertComponents?: React.Dispatch<React.SetStateAction<AlertData>>;
   playerKit?: KitData;
   goalieKit?: KitData;
+  playerData?: Element[];
+  alertVisible?: boolean;
+  fixturesData?: Fixture[];
   selections?: SelectionData;
+  positionData?: ElementType[];
+  currentGWType?: GameweekType;
+  nextOpponent?: OpponentData[];
+  setAlertVisible?: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlertComponents?: React.Dispatch<React.SetStateAction<AlertData>>;
 }
