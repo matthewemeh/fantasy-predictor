@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import { useFonts } from 'expo-font';
 import {
   LogBox,
@@ -26,14 +26,14 @@ import { fetchData } from './server/firebase-db';
 import { fetchFixtures, fetchGeneralInfo } from './server/fpl-db';
 
 import {
-  TeamData,
+  Team,
   KitData,
+  Element,
+  Fixture,
   AlertData,
   UpdateData,
-  ElementData,
-  FixtureData,
   GeneralInfo,
-  PositionData,
+  ElementType,
   OpponentData,
   SelectionData,
   AppContextData,
@@ -50,13 +50,14 @@ export default function App() {
     PoppinsBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsRegular: require('./assets/fonts/Poppins-Regular.ttf'),
   });
+  const TIMEOUT = 10000;
   const appVersion = appDetails.expo.version;
   const fieldImage = require('./assets/field.png');
   const [alertVisible, setAlertVisible] = useState(false);
   const [activeNavIndex, setActiveNavIndex] = useState(0);
   const [fpl_db_loaded, set_fpl_db_loaded] = useState(false);
   const [firebaseDBLoaded, setFirebaseDBLoaded] = useState(false);
-  const [connectionErrorState, setConnectionErrorState] = useState(false);
+  const [connectionErrorOccured, setConnectionErrorOccured] = useState(false);
   const [alertComponents, setAlertComponents] = useState<AlertData>({
     title: '',
     message: '',
@@ -72,50 +73,63 @@ export default function App() {
   // data to be obtained from FPL API data
   const [teams, setTeams] = useState<string[]>([]);
   const [currentGW, setCurrentGW] = useState(-1);
-  const [teamsData, setTeamsData] = useState<TeamData[]>([]);
-  const [playerData, setPlayerData] = useState<ElementData[]>([]);
+  const [teamsData, setTeamsData] = useState<Team[]>([]);
+  const [playerData, setPlayerData] = useState<Element[]>([]);
   const [generalInfo, setGeneralInfo] = useState<GeneralInfo>({});
-  const [fixturesData, setFixturesData] = useState<FixtureData[]>([]);
+  const [fixturesData, setFixturesData] = useState<Fixture[]>([]);
   const [nextOpponent, setNextOpponent] = useState<OpponentData[]>([]);
-  const [positionData, setPositionData] = useState<PositionData[]>([]);
+  const [positionData, setPositionData] = useState<ElementType[]>([]);
   const [currentGWType, setCurrentGWType] = useState<GameweekType>('GW');
-  const [gameweekFinished, setGameweekFinished] = useState(false);
 
   const expectedDataFromFPL = [generalInfo, fixturesData];
   const expectedDataFromFirebase = [update, selections, shirtLinks];
 
-  const checkForUpdate = () => {
-    if (update.length > 0) {
-      const { info, currentVersion, updateLink } = update[0];
+  const closeAlert = () => setAlertVisible(false);
 
-      if (info && firebaseDBLoaded) {
-        setAlertComponents({
-          title: 'Info',
-          message: info,
-          onCloseAlert: closeAlert,
-          buttons: [{ text: 'OK', onPress: closeAlert }],
-        });
-        setAlertVisible(true);
-      }
-
-      if (sum(numbersInString(currentVersion)) > sum(numbersInString(appVersion))) {
-        setAlertComponents({
-          onCloseAlert: () => {},
-          title: 'Update Available',
-          buttons: [{ text: 'UPDATE', onPress: () => Linking.openURL(updateLink) }],
-          message:
-            'There is an update available for this app. Please kindly update to enjoy the latest features.',
-        });
-        setAlertVisible(true);
-      }
+  const checkForInfoMessage = (info: string) => {
+    if (info) {
+      setAlertComponents({
+        title: 'Info',
+        message: info,
+        onCloseAlert: closeAlert,
+        buttons: [{ text: 'OK', onPress: closeAlert }],
+      });
+      setAlertVisible(true);
     }
   };
 
-  const onError = () => setConnectionErrorState(true);
+  const checkForUpdate = (
+    currentVersion: string,
+    updateLink: string,
+    forceCurrentVersion: boolean
+  ) => {
+    if (sum(numbersInString(currentVersion)) > sum(numbersInString(appVersion))) {
+      setAlertComponents({
+        title: 'Update Available',
+        onCloseAlert: forceCurrentVersion ? () => {} : closeAlert,
+        buttons: [{ text: 'UPDATE', onPress: () => Linking.openURL(updateLink) }],
+        message:
+          'There is an update available for this app. Please kindly update to enjoy the latest features.',
+      });
+      setAlertVisible(true);
+    }
+  };
 
-  const closeAlert = () => setAlertVisible(false);
+  const onError = () => setConnectionErrorOccured(true);
 
-  useEffect(checkForUpdate, [update, firebaseDBLoaded]);
+  const retry = () => {
+    setConnectionErrorOccured(false);
+    if (!fpl_db_loaded) fetchGeneralInfo(setGeneralInfo, onError);
+  };
+
+  useEffect(() => {
+    if (update.length > 0) {
+      const { currentVersion, updateLink, forceCurrentVersion, info } = update[0];
+
+      checkForInfoMessage(info); // check for any messages to be shown to clients
+      checkForUpdate(currentVersion, updateLink, forceCurrentVersion);
+    }
+  }, [update]);
 
   useEffect(() => {
     // check if all data expected from firebase database has been fetched
@@ -157,7 +171,7 @@ export default function App() {
     if (selections.length === 0) fetchData('selection', setSelections);
     if (shirtLinks.length === 0) fetchData('teamImageUrls', setShirtLinks);
 
-    fetchGeneralInfo(setGeneralInfo);
+    fetchGeneralInfo(setGeneralInfo, onError);
   }, []);
 
   useEffect(() => {
@@ -167,11 +181,10 @@ export default function App() {
 
       if (events) {
         // set current gameweek
-        const currentGWData = events.find(({ is_current }) => is_current);
-        if (currentGWData) {
-          setCurrentGW(currentGWData?.id || -1);
-          setGameweekFinished(currentGWData?.finished);
-        }
+        const currentGWData = events.find(
+          ({ is_current, is_next, finished }) => (is_current && !finished) || is_next
+        );
+        if (currentGWData) setCurrentGW(currentGWData?.id || -1);
       }
 
       if (teams) {
@@ -198,45 +211,43 @@ export default function App() {
       setCurrentGWType(findGameweekType(fixturesData));
 
       // set opponents for current gameweek
+      let newNextOpponent: OpponentData[] = [];
+
       teamsData.forEach(({ id }) => {
-        let newOpponent: OpponentData = { team: 0, opponents: [] };
+        let opponent: OpponentData = { team: 0, opponents: [] };
         let fixtures = fixturesData.filter(({ team_a, team_h }) => team_a === id || team_h === id);
 
-        newOpponent.team === id;
+        opponent.team = id;
         fixtures.forEach(({ team_a, team_h, team_h_difficulty, team_a_difficulty }) => {
-          let oldOpponents = newOpponent.opponents;
+          let oldOpponents = opponent.opponents;
 
           if (team_a === id) {
-            newOpponent.opponents = [
+            opponent.opponents = [
               ...oldOpponents,
               { team: team_h, status: 'away', difficulty: team_a_difficulty },
             ];
           } else if (team_h === id) {
-            newOpponent.opponents = [
+            opponent.opponents = [
               ...oldOpponents,
               { team: team_a, status: 'home', difficulty: team_h_difficulty },
             ];
           }
         });
-
-        setNextOpponent([...nextOpponent, newOpponent]);
+        newNextOpponent.push(opponent);
       });
+      setNextOpponent([...newNextOpponent]);
     }
   }, [fixturesData, teamsData]);
 
   useEffect(() => {
-    if (!(firebaseDBLoaded || fpl_db_loaded) && !connectionErrorState) {
-      const timer = setTimeout(() => setConnectionErrorState(false), 20000);
+    if (!firebaseDBLoaded || !fpl_db_loaded) {
+      const timer = setTimeout(() => setConnectionErrorOccured(true), TIMEOUT);
       return () => clearTimeout(timer);
-    }
-  }, [firebaseDBLoaded, fpl_db_loaded, connectionErrorState]);
-
-  useEffect(() => {
-    if (firebaseDBLoaded && fpl_db_loaded && fontLoaded) {
-      setConnectionErrorState(false);
+    } else if (firebaseDBLoaded && fpl_db_loaded && fontLoaded) {
+      setConnectionErrorOccured(false);
       setActiveNavIndex(3);
     }
-  }, [firebaseDBLoaded, fpl_db_loaded, fontLoaded]);
+  }, [firebaseDBLoaded, fpl_db_loaded, fontLoaded, connectionErrorOccured]);
 
   return firebaseDBLoaded && fpl_db_loaded && fontLoaded ? (
     <AppContext.Provider
@@ -253,7 +264,6 @@ export default function App() {
         alertVisible,
         currentGWType,
         setAlertVisible,
-        gameweekFinished,
         update: update[0],
         setAlertComponents,
         playerKit: shirtLinks[0],
@@ -292,11 +302,13 @@ export default function App() {
     </AppContext.Provider>
   ) : (
     <LoadingScreen
-      connectionErrorState={connectionErrorState}
-      command={() => setConnectionErrorState(false)}
+      command={retry}
+      fontLoaded={fontLoaded}
+      connectionErrorOccured={connectionErrorOccured}
     />
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
