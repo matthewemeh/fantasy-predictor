@@ -1,6 +1,6 @@
 import { Icon } from 'react-native-elements';
+import { useState, memo, useRef } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { useState, memo, useRef, useEffect } from 'react';
 import { View as AnimatableView } from 'react-native-animatable';
 
 import { findFontSize, colors } from '../utilities';
@@ -24,13 +24,7 @@ const MoreBubble: React.FC<Props> = ({
 }) => {
   const bubbleRef = useRef<View>(null);
   const dropdownIconRef = useRef<View>(null);
-  const initialRender = useRef(true);
   const [expanded, setExpanded] = useState(false);
-
-  // componentDidMount
-  useEffect(() => {
-    if (initialRender) initialRender.current = false;
-  }, []);
 
   const animations = {
     none: { from: {}, to: {} },
