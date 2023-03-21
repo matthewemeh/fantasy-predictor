@@ -1,6 +1,6 @@
-import React, { useState, useEffect, memo, useContext } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View, ScrollView } from 'react-native';
+import { useState, useEffect, memo, useContext } from 'react';
 
 import InfoView from '../components/InfoView';
 import PlayerView from '../components/PlayerView';
@@ -31,8 +31,7 @@ interface Props {
 }
 
 const ComparismScreen: React.FC<Props> = ({ visible }) => {
-  const { playerKit, goalieKit, playerData, nextOpponent, fixturesData, gameweekFinished } =
-    useContext(AppContext);
+  const { playerKit, goalieKit, playerData, nextOpponent, fixturesData } = useContext(AppContext);
 
   const MAX_DIFFICULTY = 5;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -87,7 +86,6 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
         expected_goals_per_90,
         expected_assists_per_90,
         chance_of_playing_next_round,
-        chance_of_playing_this_round,
       } = findData(playerID, playerData) || {};
       const teamMatches = findTeamNumberOfMatches(fixturesData || []);
 
@@ -98,10 +96,9 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
         expectedSaves: Number(saves_per_90) || 0.0,
         expectedGoals: Number(expected_goals) || 0.0,
         expectedAssists: Number(expected_assists) || 0.0,
+        chancesOfStarting: chance_of_playing_next_round ?? 100,
         expectedGoalsPerMatch: Number(expected_goals_per_90) || 0.0,
         expectedAssistsPerMatch: Number(expected_assists_per_90) || 0.0,
-        chancesOfStarting:
-          (gameweekFinished ? chance_of_playing_next_round : chance_of_playing_this_round) || 100,
       };
     });
 
@@ -166,13 +163,7 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
                     : findFontSize(9),
               }}
               chanceOfPlayingNextRound={
-                findPlayerInfo(
-                  playerID,
-                  gameweekFinished
-                    ? 'chance_of_playing_next_round'
-                    : 'chance_of_playing_this_round',
-                  playerData
-                ) || 100
+                findPlayerInfo(playerID, 'chance_of_playing_next_round', playerData) ?? 100
               }
             />
           ))}
