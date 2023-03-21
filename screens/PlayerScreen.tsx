@@ -1,6 +1,12 @@
-import React, { useEffect, useState, memo, useContext } from 'react';
+import { useEffect, useState, memo, useContext } from 'react';
 import { View, StyleSheet, Text, ImageBackground } from 'react-native';
-import { AdMobBanner, setTestDeviceIDAsync, AdMobInterstitial } from 'expo-ads-admob';
+// import {
+//   BannerAd,
+//   TestIds,
+//   AdEventType,
+//   BannerAdSize,
+//   InterstitialAd,
+// } from 'react-native-google-mobile-ads';
 
 import Footer from '../components/Footer';
 import FilterBar from '../components/FilterBar';
@@ -16,14 +22,18 @@ import {
   unknownImage,
   findFontSize,
   randomSelect,
-  DEVICE_HEIGHT,
   fieldConstants,
   findPlayerInfo,
-  DEFAULT_AD_HEIGHT,
   findOpponentAbbreviation,
 } from '../utilities';
 
 import { AppContext } from '../App';
+
+// const adUnitID = __DEV__ ? TestIds.BANNER : ADMOB_APP_ID;
+
+// const interstitial = InterstitialAd.createForAdRequest(adUnitID, {
+//   requestNonPersonalizedAdsOnly: false,
+// });
 
 interface Props {
   type: string;
@@ -31,7 +41,6 @@ interface Props {
 }
 
 const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
-  const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const {
     teamsData,
     playerKit,
@@ -44,19 +53,28 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     positionData,
     currentGWType,
     setAlertVisible,
-    gameweekFinished,
     setAlertComponents,
   } = useContext(AppContext);
 
+  // const [adLoaded, setAdLoaded] = useState(false);
+
   // componentDidMount
-  useEffect(() => {
-    initializeId();
-  }, []);
+  // useEffect(() => {
+  //   const unsubscribe = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+  //     setAdLoaded(true);
+  //   });
+
+  //   // unsubscribe from events on unmount
+  //   return unsubscribe;
+  // }, []);
+
   const teams = teamsData?.map(({ name }) => name).sort() || [];
+  // const adFitsContainer =
+  //   0.92 * (type === 'fantasy' ? 0.18 : 0.17) * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT;
 
   const MAX_NUMBER_OF_PLAYERS = 11;
   const { formations } = fieldConstants;
-  const [clicks, setClicks] = useState(1);
+  // const [clicks, setClicks] = useState(1);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chosenFormation, setChosenFormation] = useState<string>(
     type === 'fantasy' ? '4-4-2' : selections ? selections.formation : '4-5-1'
@@ -89,6 +107,7 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
   ]);
 
   useEffect(() => {
+    // check if all players have been picked before enabling footer button
     const allSelected = playerInfo.every(({ playerName }) => playerName);
     setFooterButtonEnabled(allSelected);
   }, [playerModalVisible, footerButtonEnabled, playerInfo]);
@@ -115,13 +134,13 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   const fillPlayers = () => {
     if (revealButtonClicked && currentScoutIndex < MAX_NUMBER_OF_PLAYERS) {
-      const currentPlayerID = selections?.playerIDs[currentScoutIndex] || -1;
+      const currentPlayerID = selections?.playerIDs[currentScoutIndex] ?? -1;
       const tempData = playerData?.find(({ id }) => id === currentPlayerID);
 
       if (tempData) {
         const { web_name, id, team } = tempData;
         const teamData = teamsData?.find(({ id }) => id === team);
-        const teamID = teamData?.id || -1;
+        const teamID = teamData?.id ?? -1;
         const teamName = teamData?.name || '';
 
         playerInfo[currentScoutIndex] = {
@@ -161,11 +180,10 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   const filterPlayers = (pos: string) => {
     // get id for position argument passed into pos variable...
-    const positionID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === pos
-    )?.id;
+    const positionID =
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === pos)?.id ?? -1;
 
-    const teamID = teamsData?.find(({ name }) => name === chosenTeam)?.id;
+    const teamID = teamsData?.find(({ name }) => name === chosenTeam)?.id ?? -1;
 
     return chosenTeam === 'All Teams'
       ? playerData?.filter(
@@ -188,12 +206,12 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
       forward: numberOfForwards,
     };
     const positionID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === pos)?.id || -1;
-    const teamID = teamsData?.find(({ name }) => name === chosenTeam)?.id || -1;
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === pos)?.id ?? -1;
+    const teamID = teamsData?.find(({ name }) => name === chosenTeam)?.id ?? -1;
 
     if (chosenTeam === 'All Teams') {
       const filteredPlayersLength =
-        playerData?.filter(({ element_type }) => element_type === positionID).length || 0;
+        playerData?.filter(({ element_type }) => element_type === positionID).length ?? 0;
 
       return returnLength
         ? filteredPlayersLength
@@ -202,7 +220,7 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
       const filteredPlayersLength =
         playerData?.filter(
           ({ element_type, team }) => element_type === positionID && team === teamID
-        ).length || 0;
+        ).length ?? 0;
 
       return returnLength
         ? filteredPlayersLength
@@ -311,11 +329,9 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     newPlayerInfo.forEach(player => {
       const { playerID, isCaptain } = player;
       const data = findData(playerID, playerData);
-      const expectedPointsNextGW = data?.ep_next || '0';
-      const expectedPointsThisGW = data?.ep_this || '0';
-      const predictedPoint = gameweekFinished ? expectedPointsNextGW : expectedPointsThisGW;
+      const predictedPoint = data?.ep_next || '0';
 
-      player.playerContent = Math.floor((isCaptain ? 2 : 1) * Number(predictedPoint)).toString();
+      player.playerContent = ((isCaptain ? 2 : 1) * Math.round(Number(predictedPoint))).toString();
     });
     setPlayerInfo([...newPlayerInfo]);
   };
@@ -335,13 +351,13 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     }
   };
 
-  useEffect(() => {
-    if (clicks % 5 === 0) showInterstitial();
-  }, [clicks]);
+  // useEffect(() => {
+  //   if (clicks % 5 === 0 && adLoaded) interstitial.show();
+  // }, [clicks, adLoaded]);
 
   const onPredict = () => {
     predictPoints();
-    setClicks(clicks + 1);
+    // setClicks(clicks + 1);
     setTeamPredicted(true);
   };
 
@@ -363,23 +379,17 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     }
   };
 
-  const showInterstitial = async () => {
-    await AdMobInterstitial.setAdUnitID('ca-app-pub-7152054343360573/2734540598');
-    await AdMobInterstitial.requestAdAsync({ servePersonalizedAds: true }).catch(null);
-    await AdMobInterstitial.showAdAsync().catch(null);
-  };
-
   useEffect(() => changeFormationHandler(chosenFormation), [chosenFormation]);
 
   useEffect(() => {
     const defendersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'defender')?.id ||
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'defender')?.id ??
       -1;
     const midfieldersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'midfielder')?.id ||
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'midfielder')?.id ??
       -1;
     const forwardsID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'forward')?.id ||
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'forward')?.id ??
       -1;
 
     // remove non-defenders
@@ -526,25 +536,17 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
         />
       </View>
 
-      <View
-        style={{
-          width: '100%',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          height: type === 'fantasy' ? '18%' : '17%',
-        }}
-      >
-        {0.92 * (type === 'fantasy' ? 0.18 : 0.17) * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT ? (
-          <AdMobBanner
-            style={styles.admob}
-            servePersonalizedAds={true}
-            bannerSize='smartBannerLandscape'
-            onDidFailToReceiveAdWithError={() => {}}
-            adUnitID='ca-app-pub-7152054343360573/9830430705'
+      <View style={{ ...styles.footer, height: type === 'fantasy' ? '18%' : '17%' }}>
+        {/* {adFitsContainer ? (
+          <BannerAd
+            unitId={adUnitID}
+            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+            requestOptions={{ requestNonPersonalizedAdsOnly: false }}
           />
         ) : (
           <View style={styles.admob} />
-        )}
+          )} */}
+        <View style={styles.admob} />
 
         <Footer
           type={type}
@@ -588,6 +590,11 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  footer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
 });
 
