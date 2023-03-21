@@ -1,27 +1,24 @@
-import React, { useState, useEffect, memo, useContext } from 'react';
-import { AdMobBanner, setTestDeviceIDAsync } from 'expo-ads-admob';
+import { useState, memo, useContext } from 'react';
+// import { BannerAd, TestIds, BannerAdSize } from 'react-native-google-mobile-ads';
 import { View, Text, Share, Linking, StyleSheet, ToastAndroid, ScrollView } from 'react-native';
 
 import LogNote from '../components/LogNote';
 import CryptoBar from '../components/CryptoBar';
 import MoreBubble from '../components/MoreBubble';
 
-import { numbersInString, sum, findFontSize, DEFAULT_AD_HEIGHT, colors } from '../utilities';
+import { sum, colors, findFontSize, numbersInString, DEFAULT_AD_HEIGHT } from '../utilities';
 
 import { AppContext } from '../App';
+import { MoreScreenButton } from '../types';
+
+// const adUnitID = __DEV__ ? TestIds.BANNER : ADMOB_APP_ID;
 
 interface Props {
   visible: boolean;
 }
 
 const MoreScreen: React.FC<Props> = ({ visible }) => {
-  // componentDidMount
-  const initializeId = async () => await setTestDeviceIDAsync('EMULATOR');
   const { update, appVersion } = useContext(AppContext);
-
-  useEffect(() => {
-    initializeId();
-  }, []);
 
   const message = `Predict your FPL points now by downloading the FanatasyPredictor app for free on Google Playstore | ${
     update?.rateUsUrl || ''
@@ -51,7 +48,7 @@ const MoreScreen: React.FC<Props> = ({ visible }) => {
 
   const checkForUpdate = () => {
     if (update && appVersion) {
-      if (sum(numbersInString(update?.currentVersion)) > sum(numbersInString(appVersion))) {
+      if (sum(numbersInString(update.currentVersion)) > sum(numbersInString(appVersion))) {
         if (update?.updateLink) Linking.openURL(update.updateLink);
         else ToastAndroid.show('An error has occured', 2000);
       } else ToastAndroid.show('App is up to date', 1000);
@@ -67,7 +64,7 @@ const MoreScreen: React.FC<Props> = ({ visible }) => {
 
   const closeLogs = () => setLogModalVisible(false);
 
-  const buttons = [
+  const buttons: MoreScreenButton[] = [
     {
       title: 'Check for update',
       iconName: 'refresh',
@@ -145,13 +142,11 @@ const MoreScreen: React.FC<Props> = ({ visible }) => {
         />
       ))}
 
-      <AdMobBanner
-        style={styles.bottomView}
-        servePersonalizedAds={true}
-        bannerSize='smartBannerLandscape'
-        onDidFailToReceiveAdWithError={() => {}}
-        adUnitID='ca-app-pub-7152054343360573/9830430705'
-      />
+      {/* <BannerAd
+        unitId={adUnitID}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{ requestNonPersonalizedAdsOnly: false }}
+      /> */}
 
       <LogNote visible={logModalVisible} onRequestClose={closeLogs} />
     </ScrollView>

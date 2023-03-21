@@ -1,6 +1,6 @@
-import { useState, memo } from 'react';
 import { Icon } from 'react-native-elements';
 import { StyleSheet, View, Text } from 'react-native';
+import { useState, memo, useRef, useEffect } from 'react';
 import { View as AnimatableView } from 'react-native-animatable';
 
 import { findFontSize, colors } from '../utilities';
@@ -22,9 +22,18 @@ const MoreBubble: React.FC<Props> = ({
   expandedHeight,
   expandedContent,
 }) => {
+  const bubbleRef = useRef<View>(null);
+  const dropdownIconRef = useRef<View>(null);
+  const initialRender = useRef(true);
   const [expanded, setExpanded] = useState(false);
 
+  // componentDidMount
+  useEffect(() => {
+    if (initialRender) initialRender.current = false;
+  }, []);
+
   const animations = {
+    none: { from: {}, to: {} },
     expand: {
       from: { paddingVertical: 0, height: 60 },
       to: { paddingVertical: 10, height: expandedHeight || 60 },
@@ -44,7 +53,17 @@ const MoreBubble: React.FC<Props> = ({
   };
 
   const handlePress = () => {
-    if (expandable) setExpanded(!expanded);
+    if (expandable) {
+      if (expanded) {
+        dropdownIconRef.current?.animate(animations.rotate0);
+        bubbleRef.current?.animate(animations.collapse);
+      } else {
+        dropdownIconRef.current?.animate(animations.rotate180);
+        bubbleRef.current?.animate(animations.expand);
+      }
+
+      setExpanded(!expanded);
+    }
     if (onPress) onPress();
   };
 
@@ -81,10 +100,10 @@ const MoreBubble: React.FC<Props> = ({
 
   return (
     <AnimatableView
+      ref={bubbleRef}
       duration={400}
       style={styles.viewStyle}
       onTouchStart={handlePress}
-      animation={expanded ? animations.collapse : animations.expand}
     >
       <View style={styles.touchableHeaderView}>
         <Icon
@@ -100,10 +119,7 @@ const MoreBubble: React.FC<Props> = ({
         </Text>
 
         {expandable && (
-          <AnimatableView
-            duration={400}
-            animation={expanded ? animations.rotate0 : animations.rotate180}
-          >
+          <AnimatableView duration={400} ref={dropdownIconRef}>
             <Icon
               name='caret-down'
               type='font-awesome'
