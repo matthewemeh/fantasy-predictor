@@ -34,11 +34,11 @@ const InfoView: React.FC<Props> = ({
   const findColor = (index: number) => {
     if (infoValue1 === infoValue2) return colors.stratos;
     else if (index === 1) {
-      if (infoValue1 > infoValue2) return type === 'forward' ? colors.emerald : colors.stratos;
-      return type === 'forward' ? colors.stratos : colors.emerald;
+      if (infoValue1 > infoValue2) return type === 'forward' ? colors.emeraldDark : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emeraldDark;
     } else {
-      if (infoValue1 < infoValue2) return type === 'forward' ? colors.emerald : colors.stratos;
-      return type === 'forward' ? colors.stratos : colors.emerald;
+      if (infoValue1 < infoValue2) return type === 'forward' ? colors.emeraldDark : colors.stratos;
+      return type === 'forward' ? colors.stratos : colors.emeraldDark;
     }
   };
 
