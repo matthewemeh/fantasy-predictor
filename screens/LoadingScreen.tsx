@@ -3,17 +3,18 @@ import { View, StyleSheet, Image } from 'react-native';
 
 import { colors } from '../utilities';
 
-import ConnectionErrorScreen from './ConnectionErrorScreen';
+import ConnectionError from '../components/ConnectionError';
 
 interface Props {
-  connectionErrorState: boolean;
+  fontLoaded: boolean;
   command: () => void;
+  connectionErrorOccured: boolean;
 }
 
-const LoadingScreen: React.FC<Props> = ({ connectionErrorState, command }) => (
+const LoadingScreen: React.FC<Props> = ({ connectionErrorOccured, command, fontLoaded }) => (
   <View style={styles.mainView}>
     <Image source={require('../assets/loading.gif')} />
-    <ConnectionErrorScreen visible={connectionErrorState} command={command} />
+    <ConnectionError command={command} fontLoaded={fontLoaded} visible={connectionErrorOccured} />
   </View>
 );
 
