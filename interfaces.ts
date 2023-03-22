@@ -337,6 +337,7 @@ export interface UpdateData {
   rateUsUrl: string;
   updateLink: string;
   currentVersion: string;
+  forceCurrentVersion: boolean;
 }
 
 export interface AppContextData {

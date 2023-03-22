@@ -34,3 +34,14 @@ export type StatIdentifier =
   | 'bps';
 
 export type SquadDataType = Element | undefined;
+
+export type MoreScreenButton = {
+  title: string;
+  iconName: string;
+  onPress: () => void;
+  expandable: boolean;
+  expandedHeight?: number;
+  expandedContent: JSX.Element | null;
+};
+
+export type EventIndex = 0 | 1;
