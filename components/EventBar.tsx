@@ -51,7 +51,13 @@ const EventBar: React.FC<Props> = ({ event, extraStyles, extraTextStyles }) => {
             </Text>
           </View>
 
-          <View style={{ ...styles.activityView, ...extraStyles }}>
+          <View
+            style={{
+              ...styles.activityView,
+              ...extraStyles,
+              display: assistProvider ? 'flex' : 'none',
+            }}
+          >
             <View style={styles.imageView}>
               <Image style={styles.image} source={assistImage} />
             </View>
