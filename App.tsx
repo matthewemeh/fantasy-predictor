@@ -50,7 +50,7 @@ export default function App() {
     PoppinsBold: require('./assets/fonts/Poppins-SemiBold.ttf'),
     PoppinsRegular: require('./assets/fonts/Poppins-Regular.ttf'),
   });
-  const TIMEOUT = 10000;
+  const TIMEOUT = 15000;
   const appVersion = appDetails.expo.version;
   const fieldImage = require('./assets/field.png');
   const [alertVisible, setAlertVisible] = useState(false);
