@@ -11,27 +11,22 @@
       "backgroundColor": "#00002d"
     },
     "updates": { "fallbackToCacheTimeout": 0 },
-    "assetBundlePatterns": [
-      "assets/*",
-      "assets/fonts/*",
-      "assets/Arrows/*",
-      "assets/Activity/*",
-      "assets/Goalkeepers/*",
-      "assets/OutfieldPlayers/*",
-      "assets/NavigationImages/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" }
+      "bundleIdentifier": "com.gamehub.fantasypredictor"
     },
     "android": {
       "adaptiveIcon": { "foregroundImage": "./assets/appIcon.png", "backgroundColor": "#00002d" },
-      "config": { "googleMobileAdsAppId": "ca-app-pub-7152054343360573~7395839057" },
       "package": "com.gamehub.fantasypredictor",
       "permissions": [],
       "versionCode": 11
     },
     "web": { "favicon": "./assets/appIcon.png" }
   },
-  "version": "11.0.0"
+  "version": "11.0.0",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-7152054343360573~7395839057",
+    "ios_app_id": "ca-app-pub-7152054343360573~7395839057"
+  }
 }
