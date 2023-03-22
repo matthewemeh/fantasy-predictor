@@ -38,6 +38,7 @@ export const colors = {
   red: '#e00',
   white: '#fff',
   black: '#000',
+  gray: '#949494',
   emerald: '#4fc978',
   emeraldDark: '#00aa00',
   athens: '#000000a0',
@@ -123,8 +124,9 @@ export const average = (array: number[]) => (array.length > 0 ? sum(array) / arr
 
 export const descendingPointsOrder = (a: Element, b: Element) => b.total_points - a.total_points;
 
-export const findData = (playerID: number, playerData: Element[] | undefined) =>
-  playerData?.find(({ id }) => id === playerID);
+export const findData = (playerID: number, playerData: Element[] | undefined) => {
+  return playerData?.find(({ id }) => id === playerID);
+};
 
 export const findPlayerInfo = (
   playerID: number,
@@ -143,7 +145,7 @@ export const findOpponentAbbreviation = (
 ) => {
   const { team, opponents } = nextOpponent?.find(({ team }) => team === teamID) || {};
 
-  if (!opponents || !team) return '-';
+  if (!opponents || opponents.length === 0 || !team) return '-';
 
   let newAbbreviation = '';
   opponents.forEach(({ team, status }, index) => {
