@@ -72,8 +72,9 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
     setPlayerModalVisible(true);
   };
 
-  const addDifficulties = (total: number, currentValue: Opponent) =>
-    total + currentValue.difficulty;
+  const addDifficulties = (total: number, currentValue: Opponent) => {
+    return total + currentValue.difficulty;
+  };
 
   useEffect(() => {
     const newCompareDetails = playerInfo.map(({ playerID }) => {
@@ -92,9 +93,9 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
       return {
         teamID: team || -1,
         playerForm: Number(form) || 0.0,
-        gamesToPlay: team ? teamMatches[team] : 0,
         expectedSaves: Number(saves_per_90) || 0.0,
         expectedGoals: Number(expected_goals) || 0.0,
+        gamesToPlay: team ? teamMatches[team] ?? 0 : 0,
         expectedAssists: Number(expected_assists) || 0.0,
         chancesOfStarting: chance_of_playing_next_round ?? 100,
         expectedGoalsPerMatch: Number(expected_goals_per_90) || 0.0,

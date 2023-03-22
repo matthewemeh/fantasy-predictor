@@ -92,19 +92,9 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
   const [numberOfForwards, setNumberOfForwards] = useState(2);
   const [numberOfDefenders, setNumberOfDefenders] = useState(4);
   const [numberOfMidfielders, setNumberOfMidfielders] = useState(4);
-  const [playerInfo, setPlayerInfo] = useState([
-    player(0),
-    player(1),
-    player(2),
-    player(3),
-    player(4),
-    player(5),
-    player(6),
-    player(7),
-    player(8),
-    player(9),
-    player(10),
-  ]);
+  const [playerInfo, setPlayerInfo] = useState(
+    Array.from({ length: MAX_NUMBER_OF_PLAYERS }, (elm, index) => player(index))
+  );
 
   useEffect(() => {
     // check if all players have been picked before enabling footer button

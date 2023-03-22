@@ -40,10 +40,7 @@ const Button: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
+    if (initialRender.current) initialRender.current = false;
   }, [enabled]);
 
   return (

@@ -18,7 +18,7 @@ export const fetchGeneralInfo = (
     .catch(error => {
       if (__DEV__) {
         axios.isAxiosError(error)
-          ? console.error('Failed to fetch general info data', error.message)
+          ? console.error('Failed to fetch general info data due to', error.message)
           : console.error('Unexpected Error: ', error);
       }
 
@@ -37,7 +37,7 @@ export const fetchFixtures = (
     .catch(error => {
       if (__DEV__) {
         axios.isAxiosError(error)
-          ? console.error('Failed to fetch general info data', error.message)
+          ? console.error('Failed to fetch general info data due to', error.message)
           : console.error('Unexpected Error: ', error);
       }
 

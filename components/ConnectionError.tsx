@@ -1,5 +1,5 @@
+import { memo } from 'react';
 import { Icon } from 'react-native-elements';
-import { memo, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { View as AnimatableView } from 'react-native-animatable';
 
@@ -14,18 +14,12 @@ interface Props {
 }
 
 const ConnectionError: React.FC<Props> = ({ visible, command, fontLoaded }) => {
-  const initialRender = useRef(true);
-
   const animations = {
     none: { from: {}, to: {} },
     glow: { from: { opacity: 0.3 }, to: { opacity: 1 } },
     slideIn: { from: { bottom: '-10%' }, to: { bottom: '0%' } },
     slideOut: { from: { bottom: '-10%' }, to: { bottom: '-10%' } },
   };
-
-  useEffect(() => {
-    if (initialRender.current) initialRender.current = false;
-  }, []);
 
   return fontLoaded ? (
     <AnimatableView
