@@ -1,7 +1,7 @@
 import { Icon } from 'react-native-elements';
 import { useState, memo, useContext } from 'react';
 import { View as AnimatableView } from 'react-native-animatable';
-import { View, StyleSheet, Modal, FlatList, TextInput, StatusBar } from 'react-native';
+import { View, StyleSheet, Modal, FlatList, TextInput, StatusBar, Text } from 'react-native';
 
 import PickerBox from './PickerBox';
 import PlayerItem from './PlayerItem';
@@ -135,6 +135,13 @@ const PlayerSelectModal: React.FC<Props> = ({
 
   const separator = () => <View style={styles.separator} />;
 
+  const listEmptyComponent = () => (
+    <View style={styles.listEmptyComponentView}>
+      <Icon name='search' type='font-awesome' color={colors.gray} size={findFontSize(45)} />
+      <Text style={styles.listEmptyComponentText}>Your search returned no players</Text>
+    </View>
+  );
+
   const PLAYER_ITEM_HEIGHT = DEVICE_HEIGHT * 0.085;
 
   const getItemLayout = (data: any, index: number) => ({
@@ -234,6 +241,7 @@ const PlayerSelectModal: React.FC<Props> = ({
           style={styles.bodyModalView}
           getItemLayout={getItemLayout}
           ItemSeparatorComponent={separator}
+          ListEmptyComponent={listEmptyComponent}
           initialNumToRender={Math.ceil(DEVICE_HEIGHT / 36)}
           maxToRenderPerBatch={Math.ceil(DEVICE_HEIGHT / 18)}
         />
@@ -295,6 +303,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   separator: { width: '100%', height: DEVICE_HEIGHT * 0.005 },
+  listEmptyComponentView: {
+    rowGap: 10,
+    height: '100%',
+    display: 'flex',
+    paddingTop: '50%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: '16%',
+  },
+  listEmptyComponentText: {
+    fontSize: 14.5,
+    color: colors.gray,
+    textAlign: 'center',
+    fontFamily: 'PoppinsBold',
+  },
 });
 
 export default memo(PlayerSelectModal);
