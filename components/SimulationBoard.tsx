@@ -1,7 +1,7 @@
 import { Icon } from 'react-native-elements';
 import { useEffect, useState, memo } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { View, Modal, StyleSheet, FlatList } from 'react-native';
+import { View, Modal, StyleSheet, FlatList, Text } from 'react-native';
 
 import Timer from './Timer';
 import ScoreBoard from './Scoreboard';
@@ -16,8 +16,8 @@ import {
   getRndInteger,
 } from '../utilities';
 
-import { SquadDataType } from '../types';
-import { Team, ElementType, EventData } from '../interfaces';
+import { Team, EventData } from '../interfaces';
+import { EventIndex, SquadDataType } from '../types';
 
 interface Props {
   visible: boolean;
@@ -28,7 +28,6 @@ interface Props {
   shortTeamName2: string;
   squad2: SquadDataType[];
   squad1: SquadDataType[];
-  positionData: ElementType[];
   setBoardVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -39,18 +38,20 @@ const SimulationBoard: React.FC<Props> = ({
   teamsData,
   teamName1,
   teamName2,
-  positionData,
   shortTeamName1,
   shortTeamName2,
   setBoardVisible,
 }) => {
-  const MIN_LENGTH = 15;
-  const MAX_STRENGTH = 5;
+  const MAX_GAMEWEEKS = 3;
+  const MIN_DATA_LENGTH = 15;
+  const MAX_TEAM_STRENGTH = 5;
+  const MATCH_DURATION = 90 * 60;
+
   const [score1, setScore1] = useState(0);
   const [score2, setScore2] = useState(0);
   const [events, setEvents] = useState<EventData[]>([]);
   const [timeInSeconds, setTimeInSeconds] = useState(0);
-  const [indexPool, setIndexPool] = useState<number[]>([]);
+  const [indexPool, setIndexPool] = useState<EventIndex[]>([]);
 
   const [savers1, setSavers1] = useState<string[]>([]);
   const [savers2, setSavers2] = useState<string[]>([]);
@@ -58,8 +59,8 @@ const SimulationBoard: React.FC<Props> = ({
   const [goalScorers2, setGoalScorers2] = useState<string[]>([]);
   const [assistProviders1, setAssistProviders1] = useState<string[]>([]);
   const [assistProviders2, setAssistProviders2] = useState<string[]>([]);
-  const strengthHome = teamsData.find(({ name }) => name === teamName1)?.strength || 0;
-  const strengthAway = teamsData.find(({ name }) => name === teamName2)?.strength || 0;
+  const strengthHome = teamsData.find(({ name }) => name === teamName1)?.strength ?? 0;
+  const strengthAway = teamsData.find(({ name }) => name === teamName2)?.strength ?? 0;
 
   const reset = () => {
     setTimeInSeconds(0);
@@ -78,9 +79,9 @@ const SimulationBoard: React.FC<Props> = ({
     reset();
 
     if (visible) {
-      const newIndexPool: number[] = [];
-      const dataLength1 = Math.round(MIN_LENGTH + 10 * strengthHome);
-      const dataLength2 = Math.round(MIN_LENGTH + 10 * strengthAway);
+      const newIndexPool: EventIndex[] = [];
+      const dataLength1 = Math.round(MIN_DATA_LENGTH + MAX_TEAM_STRENGTH * strengthHome);
+      const dataLength2 = Math.round(MIN_DATA_LENGTH + MAX_TEAM_STRENGTH * strengthAway);
 
       for (let i = 0; i < dataLength1; i++) newIndexPool.push(0);
       for (let i = 0; i < dataLength2; i++) newIndexPool.push(1);
@@ -98,9 +99,10 @@ const SimulationBoard: React.FC<Props> = ({
   }, [timeInSeconds, visible]);
 
   useEffect(() => {
+    // update events as match time passes
     const matchStarted = timeInSeconds > 0;
-    const eventIndex = randomSelect(indexPool); // first choose which team has registered a match event...
-    const eventHappens = getRndInteger(0, 3) === 1; // ...then randomly decide if event happens or not
+    const eventHappens = getRndInteger(0, 3) === 1; // randomly decide if event happens or not
+    const eventIndex: EventIndex = randomSelect(indexPool); // ...then choose which team has registered a match event
     const newEvent: EventData = {
       saver1: '',
       saver2: '',
@@ -129,10 +131,10 @@ const SimulationBoard: React.FC<Props> = ({
           } else {
             newEvent.eventType = 'goal';
             newEvent.goalScorer1 = newGoalScorer;
-            newEvent.assistProvider1 =
-              newAssistProvider && newAssistProvider !== newGoalScorer ? newAssistProvider : 'None';
+            newEvent.assistProvider1 = newAssistProvider !== newGoalScorer ? newAssistProvider : '';
             setScore1(score1 + 1);
           }
+          events.push(newEvent);
         }
       } else {
         const eventPlayerIndex = getRndInteger(0, goalScorers2.length); // choose which player made that match event
@@ -148,14 +150,12 @@ const SimulationBoard: React.FC<Props> = ({
           } else {
             newEvent.eventType = 'goal';
             newEvent.goalScorer2 = newGoalScorer;
-            newEvent.assistProvider2 =
-              newAssistProvider && newAssistProvider !== newGoalScorer ? newAssistProvider : 'None';
+            newEvent.assistProvider2 = newAssistProvider !== newGoalScorer ? newAssistProvider : '';
             setScore2(score2 + 1);
           }
+          events.push(newEvent);
         }
       }
-
-      events.push(newEvent);
     }
   }, [timeInSeconds]);
 
@@ -163,81 +163,95 @@ const SimulationBoard: React.FC<Props> = ({
     const increment = getRndInteger(50, 100);
 
     if (visible) {
-      if (timeInSeconds + increment < 5400) setTimeInSeconds(timeInSeconds + increment);
-      else setTimeInSeconds(5400);
+      if (timeInSeconds + increment < MATCH_DURATION) setTimeInSeconds(timeInSeconds + increment);
+      else setTimeInSeconds(MATCH_DURATION);
     }
   };
 
   const initDataArrays = () => {
-    const dataLength1 = Math.round(MIN_LENGTH + 10 * (MAX_STRENGTH - strengthHome));
-    const dataLength2 = Math.round(MIN_LENGTH + 10 * (MAX_STRENGTH - strengthAway));
-    const defendersID = positionData.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
-    )?.id;
+    const dataLength1 = Math.round(MIN_DATA_LENGTH + 10 * (MAX_TEAM_STRENGTH - strengthHome));
+    const dataLength2 = Math.round(MIN_DATA_LENGTH + 10 * (MAX_TEAM_STRENGTH - strengthAway));
+
+    const newSavers1: string[] = [];
+    const newSavers2: string[] = [];
+    const newGoalScorers1: string[] = [];
+    const newGoalScorers2: string[] = [];
+    const newAssistProviders1: string[] = [];
+    const newAssistProviders2: string[] = [];
 
     // for team1
     squad1.forEach(player => {
       if (player) {
-        let { web_name, element_type, goals_scored, assists, saves } = player;
-        // make sure that for the defenders, only those with at least 4 goals can be potential goal scorers
-        const defenderGoalsAccepted =
-          (element_type === defendersID && goals_scored > 3) || element_type !== defendersID;
+        const { web_name, saves_per_90, expected_goals_per_90, expected_assists_per_90 } = player;
 
-        while (savers1.length < dataLength2 && saves > 0) {
-          savers1.push(web_name);
+        let saves = Math.round(MAX_GAMEWEEKS * saves_per_90);
+        let assists = Math.round(MAX_GAMEWEEKS * expected_assists_per_90);
+        let goals_scored = Math.round(MAX_GAMEWEEKS * expected_goals_per_90);
+
+        while (newSavers1.length < dataLength1 && saves > 0) {
+          newSavers1.push(web_name);
           saves--;
         }
-        while (assistProviders1.length < dataLength1 && assists > 0) {
-          assistProviders1.push(web_name);
+        while (newAssistProviders1.length < dataLength1 && assists > 0) {
+          newAssistProviders1.push(web_name);
           assists--;
         }
-        while (goalScorers1.length < dataLength1 && defenderGoalsAccepted && goals_scored > 0) {
-          goalScorers1.push(web_name);
+        while (newGoalScorers1.length < dataLength1 && goals_scored > 0) {
+          newGoalScorers1.push(web_name);
           goals_scored--;
         }
       }
     });
 
     // fill up remaining data slots until length equals required lengths for each team
-    while (savers1.length < dataLength2) savers1.push('');
-    while (goalScorers1.length < dataLength1) goalScorers1.push('');
-    while (assistProviders1.length < dataLength1) assistProviders1.push('');
+    while (newSavers1.length < dataLength1) newSavers1.push('');
+    while (newGoalScorers1.length < dataLength1) newGoalScorers1.push('');
+    while (newAssistProviders1.length < dataLength1) newAssistProviders1.push('');
 
-    shuffle(savers1);
-    shuffle(goalScorers1);
-    shuffle(assistProviders1);
+    shuffle(newSavers1);
+    shuffle(newGoalScorers1);
+    shuffle(newAssistProviders1);
+
+    setSavers1(newSavers1);
+    setGoalScorers1(newGoalScorers1);
+    setAssistProviders1(newAssistProviders1);
 
     // for team2
     squad2.forEach(player => {
       if (player) {
-        let { web_name, element_type, goals_scored, assists, saves } = player;
-        // make sure that for the defenders, only those with at least 4 goals can be potential goal scorers
-        const defenderGoalsAccepted =
-          (element_type === defendersID && goals_scored > 3) || element_type !== defendersID;
+        const { web_name, saves_per_90, expected_goals_per_90, expected_assists_per_90 } = player;
 
-        while (savers2.length < dataLength1 && saves > 0) {
-          savers2.push(web_name);
+        let saves = Math.round(MAX_GAMEWEEKS * saves_per_90);
+        let assists = Math.round(MAX_GAMEWEEKS * expected_assists_per_90);
+        let goals_scored = Math.round(MAX_GAMEWEEKS * expected_goals_per_90);
+
+        while (newSavers2.length < dataLength2 && saves > 0) {
+          newSavers2.push(web_name);
           saves--;
         }
-        while (assistProviders2.length < dataLength2 && assists > 0) {
-          assistProviders2.push(web_name);
+        while (newAssistProviders2.length < dataLength2 && assists > 0) {
+          newAssistProviders2.push(web_name);
           assists--;
         }
-        while (goalScorers2.length < dataLength2 && defenderGoalsAccepted && goals_scored > 0) {
-          goalScorers2.push(web_name);
+        while (newGoalScorers2.length < dataLength2 && goals_scored > 0) {
+          newGoalScorers2.push(web_name);
           goals_scored--;
         }
       }
     });
 
     // fill up remaining data slots until length equals required lengths for each team
-    while (savers2.length < dataLength1) savers2.push('');
-    while (goalScorers2.length < dataLength2) goalScorers2.push('');
-    while (assistProviders2.length < dataLength2) assistProviders2.push('');
+    while (newSavers2.length < dataLength2) newSavers2.push('');
+    while (newGoalScorers2.length < dataLength2) newGoalScorers2.push('');
+    while (newAssistProviders2.length < dataLength2) newAssistProviders2.push('');
 
-    shuffle(savers2);
-    shuffle(goalScorers2);
-    shuffle(assistProviders2);
+    shuffle(newSavers2);
+    shuffle(newGoalScorers2);
+    shuffle(newAssistProviders2);
+
+    setSavers2(newSavers2);
+    setGoalScorers2(newGoalScorers2);
+    setAssistProviders2(newAssistProviders2);
   };
 
   const onRequestClose = () => setBoardVisible(false);
@@ -252,6 +266,15 @@ const SimulationBoard: React.FC<Props> = ({
   const PLAYER_ITEM_HEIGHT = DEVICE_HEIGHT * 0.085;
 
   const separator = () => <View style={styles.separator} />;
+
+  const listEmptyComponent = () => (
+    <View style={styles.listEmptyComponentView}>
+      <Icon name='futbol-o' type='font-awesome' color={colors.gray} size={findFontSize(45)} />
+      <Text style={styles.listEmptyComponentText}>
+        Match events will be displayed here once they are available
+      </Text>
+    </View>
+  );
 
   const getItemLayout = (data: any, index: number) => ({
     length: PLAYER_ITEM_HEIGHT,
@@ -283,6 +306,7 @@ const SimulationBoard: React.FC<Props> = ({
           renderItem={renderItem}
           getItemLayout={getItemLayout}
           ItemSeparatorComponent={separator}
+          ListEmptyComponent={listEmptyComponent}
         />
 
         <LinearGradient colors={[colors.alto, colors.athens]} style={styles.gradientView} />
@@ -321,6 +345,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
   },
   separator: { width: '100%', height: DEVICE_HEIGHT * 0.005 },
+  listEmptyComponentView: {
+    rowGap: 10,
+    height: '100%',
+    display: 'flex',
+    paddingTop: '40%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: '16%',
+  },
+  listEmptyComponentText: {
+    fontSize: 14.5,
+    color: colors.gray,
+    textAlign: 'center',
+    fontFamily: 'PoppinsBold',
+  },
 });
 
 export default memo(SimulationBoard);
