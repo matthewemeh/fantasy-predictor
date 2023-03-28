@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, useMemo } from 'react';
 import { useFonts } from 'expo-font';
 import {
   LogBox,
@@ -80,6 +80,18 @@ export default function App() {
   const [nextOpponent, setNextOpponent] = useState<OpponentData[]>([]);
   const [positionData, setPositionData] = useState<ElementType[]>([]);
   const [currentGWType, setCurrentGWType] = useState<GameweekType>('GW');
+
+  const setPositionID = (singularName: 'goalkeeper' | 'defender' | 'midfielder' | 'forward') => {
+    return (
+      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === singularName)?.id ??
+      -1
+    );
+  };
+
+  const goalkeepersID = useMemo(() => setPositionID('goalkeeper'), [positionData]);
+  const defendersID = useMemo(() => setPositionID('defender'), [positionData]);
+  const midfieldersID = useMemo(() => setPositionID('midfielder'), [positionData]);
+  const forwardsID = useMemo(() => setPositionID('forward'), [positionData]);
 
   const expectedDataFromFPL = [generalInfo, fixturesData];
   const expectedDataFromFirebase = [update, selections, shirtLinks];
@@ -259,10 +271,14 @@ export default function App() {
         playerData,
         fieldImage,
         appVersion,
+        forwardsID,
+        defendersID,
         fixturesData,
         positionData,
         nextOpponent,
         alertVisible,
+        goalkeepersID,
+        midfieldersID,
         currentGWType,
         setAlertVisible,
         update: update[0],

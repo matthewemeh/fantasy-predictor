@@ -56,8 +56,12 @@ const SimulationScreen: React.FC<Props> = ({ visible }) => {
     teamsData,
     playerData,
     fieldImage,
+    forwardsID,
+    defendersID,
     nextOpponent,
     positionData,
+    goalkeepersID,
+    midfieldersID,
     setAlertVisible,
     setAlertComponents,
   } = useContext(AppContext);
@@ -308,19 +312,6 @@ const SimulationScreen: React.FC<Props> = ({ visible }) => {
   };
 
   const teamEnough = (teamName: string) => {
-    const goalkeepersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'goalkeeper'
-    )?.id;
-    const defendersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
-    )?.id;
-    const midfieldersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
-    )?.id;
-    const forwardsID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
-    )?.id;
-
     const teamID = teamsData?.find(({ name }) => name === teamName)?.id;
 
     if (
@@ -400,18 +391,6 @@ const SimulationScreen: React.FC<Props> = ({ visible }) => {
     let squad = [];
     const formation = findBestFormation(teamName);
     const teamID = teamsData?.find(({ name }) => name === teamName)?.id;
-    const goalkeepersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'goalkeeper'
-    )?.id;
-    const defendersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'defender'
-    )?.id;
-    const midfieldersID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'midfielder'
-    )?.id;
-    const forwardsID = positionData?.find(
-      ({ singular_name }) => singular_name.toLowerCase() === 'forward'
-    )?.id;
 
     const goalies = playerData
       ?.filter(({ team, element_type }) => team === teamID && element_type === goalkeepersID)
@@ -470,16 +449,6 @@ const SimulationScreen: React.FC<Props> = ({ visible }) => {
   useEffect(() => changeFormationHandler(chosenFormation), [chosenFormation]);
 
   useEffect(() => {
-    const defendersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'defender')?.id ||
-      -1;
-    const midfieldersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'midfielder')?.id ||
-      -1;
-    const forwardsID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'forward')?.id ||
-      -1;
-
     // remove non-defenders
     const defEnd = 1 + numberOfDefenders;
     for (let i = 1; i < defEnd; i++) {

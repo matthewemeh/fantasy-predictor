@@ -49,8 +49,11 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     selections,
     playerData,
     fieldImage,
+    forwardsID,
+    defendersID,
     nextOpponent,
     positionData,
+    midfieldersID,
     currentGWType,
     setAlertVisible,
     setAlertComponents,
@@ -319,8 +322,9 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
       const { playerID, isCaptain } = player;
       const data = findData(playerID, playerData);
       const predictedPoint = data?.ep_next || '0';
+      const multiplier = isCaptain ? 2 : 1;
 
-      player.playerContent = ((isCaptain ? 2 : 1) * Math.round(Number(predictedPoint))).toString();
+      player.playerContent = (multiplier * Math.round(Number(predictedPoint))).toString();
     });
     setPlayerInfo([...newPlayerInfo]);
   };
@@ -371,16 +375,6 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
   useEffect(() => changeFormationHandler(chosenFormation), [chosenFormation]);
 
   useEffect(() => {
-    const defendersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'defender')?.id ??
-      -1;
-    const midfieldersID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'midfielder')?.id ??
-      -1;
-    const forwardsID =
-      positionData?.find(({ singular_name }) => singular_name.toLowerCase() === 'forward')?.id ??
-      -1;
-
     // remove non-defenders
     const defEnd = 1 + numberOfDefenders;
     for (let i = 1; i < defEnd; i++) {

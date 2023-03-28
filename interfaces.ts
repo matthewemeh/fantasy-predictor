@@ -354,6 +354,10 @@ export interface AppContextData {
   alertVisible?: boolean;
   fixturesData?: Fixture[];
   selections?: SelectionData;
+  goalkeepersID?: number;
+  forwardsID?: number;
+  defendersID?: number;
+  midfieldersID?: number;
   positionData?: ElementType[];
   currentGWType?: GameweekType;
   nextOpponent?: OpponentData[];
