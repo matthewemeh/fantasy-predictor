@@ -89,6 +89,7 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
         chance_of_playing_next_round,
       } = findData(playerID, playerData) || {};
       const teamMatches = findTeamNumberOfMatches(fixturesData || []);
+      const playerSelected = playerID >= 0;
 
       return {
         teamID: team || -1,
@@ -97,9 +98,9 @@ const ComparismScreen: React.FC<Props> = ({ visible }) => {
         expectedGoals: Number(expected_goals) || 0.0,
         gamesToPlay: team ? teamMatches[team] ?? 0 : 0,
         expectedAssists: Number(expected_assists) || 0.0,
-        chancesOfStarting: chance_of_playing_next_round ?? 100,
         expectedGoalsPerMatch: Number(expected_goals_per_90) || 0.0,
         expectedAssistsPerMatch: Number(expected_assists_per_90) || 0.0,
+        chancesOfStarting: playerSelected ? chance_of_playing_next_round ?? 100 : 0,
       };
     });
 

@@ -8,6 +8,7 @@ import {
   DEVICE_HEIGHT,
   findScaledFontSize,
 } from '../utilities';
+import { InfoViewType } from '../types';
 
 const textHeight = Math.round(0.92 * 0.95 * 0.7 * 0.2 * 0.66 * DEVICE_HEIGHT);
 const textWidth = Math.round(0.95 * 0.3 * DEVICE_WIDTH);
@@ -16,11 +17,11 @@ const maxTextLength = Math.floor(area / 470);
 
 interface Props {
   type: string;
-  infoName: string;
   infoText1?: string;
   infoText2?: string;
   infoValue1: number;
   infoValue2: number;
+  infoName: InfoViewType;
 }
 
 const InfoView: React.FC<Props> = ({
@@ -43,9 +44,13 @@ const InfoView: React.FC<Props> = ({
   };
 
   const findText = (index: number) => {
-    if (infoText1 !== undefined && infoText2 !== undefined)
+    if (infoText1 !== undefined && infoText2 !== undefined) {
       return index === 1 ? infoText1 : infoText2;
-    else if (infoName === 'Chances of Starting') return `${index === 1 ? infoValue1 : infoValue2}%`;
+    } else if (infoName === 'Player Form') {
+      return index === 1 ? infoValue1.toFixed(1) : infoValue2.toFixed(1);
+    } else if (infoName === 'Chances of Starting') {
+      return `${index === 1 ? infoValue1 : infoValue2}%`;
+    }
     return (index === 1 ? infoValue1 : infoValue2).toString();
   };
 
