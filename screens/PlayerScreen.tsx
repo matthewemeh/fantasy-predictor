@@ -73,7 +73,7 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   const teams = teamsData?.map(({ name }) => name).sort() || [];
   // const adFitsContainer =
-  //   0.92 * (type === 'fantasy' ? 0.18 : 0.17) * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT;
+  //   0.92 * 0.17 * 0.5 * DEVICE_HEIGHT >= DEFAULT_AD_HEIGHT;
 
   const MAX_NUMBER_OF_PLAYERS = 11;
   const { formations } = fieldConstants;
@@ -83,6 +83,9 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
     type === 'fantasy' ? '4-4-2' : selections ? selections.formation : '4-5-1'
   );
 
+  const headerText = `${
+    type === 'fantasy' ? 'Choose your team' : "Scout's Selection"
+  } for ${currentGWType} ${currentGW}`;
   const [teamPredicted, setTeamPredicted] = useState(false);
   const [chosenTeam, setChosenTeam] = useState('All Teams');
   const [currentScoutIndex, setCurrentScoutIndex] = useState(-1);
@@ -428,30 +431,22 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
       {type === 'fantasy' && <InfoCircle onPress={showInfo} />}
 
-      <View
-        style={{
-          ...styles.header,
-          height: type === 'fantasy' ? '12%' : '13%',
-          paddingBottom: type === 'fantasy' ? 0 : '1%',
-          justifyContent: type === 'fantasy' ? 'center' : 'space-between',
-        }}
-      >
-        {type === 'scout' && (
-          <Text allowFontScaling={false} style={styles.headerText}>
-            Scout's Selection for {currentGWType} {currentGW}
-          </Text>
-        )}
+      <View style={styles.header}>
+        <Text allowFontScaling={false} style={styles.headerText}>
+          {headerText}
+        </Text>
 
         <PickerBox
           list={formations}
           enabled={type === 'fantasy'}
+          extraListStyles={{ top: '5%' }}
           selectedValue={chosenFormation}
           selectedItemHandler={setChosenFormation}
           extraStyles={{
+            bottom: '7%',
             width: '30%',
             height: '50%',
             position: 'relative',
-            bottom: type === 'fantasy' ? 0 : '7%',
           }}
         />
       </View>
@@ -519,7 +514,7 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
         />
       </View>
 
-      <View style={{ ...styles.footer, height: type === 'fantasy' ? '18%' : '17%' }}>
+      <View style={styles.footer}>
         {/* {adFitsContainer ? (
           <BannerAd
             unitId={adUnitID}
@@ -546,7 +541,14 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
 const styles = StyleSheet.create({
   main: { width: '100%', height: '92%', backgroundColor: colors.white },
-  header: { width: '100%', alignItems: 'center', backgroundColor: colors.stratos },
+  header: {
+    width: '100%',
+    height: '13%',
+    paddingBottom: '1%',
+    alignItems: 'center',
+    backgroundColor: colors.stratos,
+    justifyContent: 'space-between',
+  },
   headerText: {
     top: '6%',
     width: '100%',
@@ -576,6 +578,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     width: '100%',
+    height: '17%',
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
