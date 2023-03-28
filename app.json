@@ -10,19 +10,31 @@
       "resizeMode": "contain",
       "backgroundColor": "#00002d"
     },
-    "updates": { "fallbackToCacheTimeout": 0 },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gamehub.fantasypredictor"
     },
     "android": {
-      "adaptiveIcon": { "foregroundImage": "./assets/appIcon.png", "backgroundColor": "#00002d" },
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/appIcon.png",
+        "backgroundColor": "#00002d"
+      },
       "package": "com.gamehub.fantasypredictor",
       "permissions": [],
       "versionCode": 11
     },
-    "web": { "favicon": "./assets/appIcon.png" }
+    "web": {
+      "favicon": "./assets/appIcon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8ebec70f-ab26-4cdc-ae7e-58070c86cd2a"
+      }
+    }
   },
   "version": "11.0.0",
   "react-native-google-mobile-ads": {
