@@ -6,7 +6,8 @@
         ["add", "Bug fixes"],
         ["add", "Added more comparison statistics"],
         ["add", "Various performance optimizations"],
-        ["add", "Improved point prediction algorithm"]
+        ["add", "Improved point prediction algorithm"],
+        ["add", "Improved match simulation"]
       ]
     },
     {
