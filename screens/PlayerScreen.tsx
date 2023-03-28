@@ -36,8 +36,8 @@ import { AppContext } from '../App';
 // });
 
 interface Props {
-  type: string;
   visible: boolean;
+  type: 'fantasy' | 'scout';
 }
 
 const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
@@ -82,10 +82,9 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   const [teamPredicted, setTeamPredicted] = useState(false);
   const [chosenTeam, setChosenTeam] = useState('All Teams');
-  const [currentScoutIndex, setCurrentScoutIndex] = useState(0);
+  const [currentScoutIndex, setCurrentScoutIndex] = useState(-1);
   const [playerModalVisible, setPlayerModalVisible] = useState(false);
   const [chosenPosition, setChosenPosition] = useState('All Positions');
-  const [revealButtonClicked, setRevealButtonClicked] = useState(false);
   const [footerButtonEnabled, setFooterButtonEnabled] = useState(false);
 
   const numberOfGoalkeepers = 1;
@@ -98,8 +97,8 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   useEffect(() => {
     // check if all players have been picked before enabling footer button
-    const allSelected = playerInfo.every(({ playerName }) => playerName);
-    setFooterButtonEnabled(allSelected);
+    const allPlayersSelected = playerInfo.every(({ playerName }) => playerName);
+    setFooterButtonEnabled(allPlayersSelected);
   }, [playerModalVisible, footerButtonEnabled, playerInfo]);
 
   useEffect(() => {
@@ -107,23 +106,23 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
   }, [type]);
 
   useEffect(() => {
-    const timer = setTimeout(fillPlayers, 500);
+    if (currentScoutIndex < 0) return;
+
+    const funcToRun = currentScoutIndex === MAX_NUMBER_OF_PLAYERS ? appointCaptain : fillPlayers;
+    const timer = setTimeout(funcToRun, 500);
     return () => clearTimeout(timer);
-  }, [revealButtonClicked, currentScoutIndex]);
-
-  useEffect(() => {
-    // appoint captain
-    if (currentScoutIndex === MAX_NUMBER_OF_PLAYERS) {
-      const newPlayerInfo = playerInfo;
-      let captainIndex = selections ? selections?.captainIndex : 0;
-
-      newPlayerInfo[captainIndex].isCaptain = true;
-      setPlayerInfo([...newPlayerInfo]);
-    }
   }, [currentScoutIndex]);
 
+  const appointCaptain = () => {
+    const newPlayerInfo = playerInfo;
+    let captainIndex = selections?.captainIndex ?? 0;
+
+    newPlayerInfo[captainIndex].isCaptain = true;
+    setPlayerInfo([...newPlayerInfo]);
+  };
+
   const fillPlayers = () => {
-    if (revealButtonClicked && currentScoutIndex < MAX_NUMBER_OF_PLAYERS) {
+    if (currentScoutIndex < MAX_NUMBER_OF_PLAYERS) {
       const currentPlayerID = selections?.playerIDs[currentScoutIndex] ?? -1;
       const tempData = playerData?.find(({ id }) => id === currentPlayerID);
 
@@ -353,7 +352,7 @@ const PlayerScreen: React.FC<Props> = ({ type, visible }) => {
 
   const onReveal = () => {
     fillPlayers();
-    setRevealButtonClicked(true);
+    setCurrentScoutIndex(0);
   };
 
   const showInfo = () => {
