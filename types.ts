@@ -45,3 +45,14 @@ export type MoreScreenButton = {
 };
 
 export type EventIndex = 0 | 1;
+
+export type InfoViewType =
+  | 'Better Fixture'
+  | 'Player Form'
+  | 'Games To Play'
+  | 'Expected Goals(xG)'
+  | 'Expected Assists(xA)'
+  | 'Chances of Starting'
+  | 'Expected Goals(xG) per match'
+  | 'Expected Assists(xA) per match'
+  | 'Expected Saves per match';
