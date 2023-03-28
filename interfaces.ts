@@ -337,6 +337,7 @@ export interface UpdateData {
   rateUsUrl: string;
   updateLink: string;
   currentVersion: string;
+  socials: { facebook: string };
   forceCurrentVersion: boolean;
 }
 

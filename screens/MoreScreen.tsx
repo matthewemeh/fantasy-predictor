@@ -46,7 +46,13 @@ const MoreScreen: React.FC<Props> = ({ visible }) => {
     }
   };
 
+  const onFollow = () => {
+    if (update?.socials?.facebook) Linking.openURL(update.socials.facebook);
+    else ToastAndroid.show('An error has occured', 2000);
+  };
+
   const checkForUpdate = () => {
+    // to check for non-forced(optional) updates
     if (update && appVersion) {
       if (sum(numbersInString(update.currentVersion)) > sum(numbersInString(appVersion))) {
         if (update?.updateLink) Linking.openURL(update.updateLink);
@@ -102,6 +108,13 @@ const MoreScreen: React.FC<Props> = ({ visible }) => {
         </View>
       ),
       onPress: () => {},
+    },
+    {
+      title: 'Follow us',
+      iconName: 'facebook-square',
+      expandable: false,
+      expandedContent: null,
+      onPress: onFollow,
     },
     {
       title: 'Logs',

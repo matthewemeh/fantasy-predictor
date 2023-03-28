@@ -103,6 +103,7 @@ export default function App() {
     updateLink: string,
     forceCurrentVersion: boolean
   ) => {
+    // to check for forced(compulsory) updates
     if (sum(numbersInString(currentVersion)) > sum(numbersInString(appVersion))) {
       setAlertComponents({
         title: 'Update Available',
