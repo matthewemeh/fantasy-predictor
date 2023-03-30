@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fantasy Predictor",
     "slug": "FantasyPredictor",
-    "version": "2023-2024_11",
+    "version": "2023-2024_15",
     "orientation": "portrait",
     "icon": "./assets/appIcon.png",
     "splash": {
@@ -25,7 +25,7 @@
       },
       "package": "com.gamehub.fantasypredictor",
       "permissions": [],
-      "versionCode": 11
+      "versionCode": 15
     },
     "web": {
       "favicon": "./assets/appIcon.png"
@@ -36,7 +36,7 @@
       }
     }
   },
-  "version": "11.0.0",
+  "version": "15.0.0",
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-7152054343360573~7395839057",
     "ios_app_id": "ca-app-pub-7152054343360573~7395839057"
